@@ -1,0 +1,45 @@
+# Harmonisation configuration
+
+# =======================
+# Desired genome assembly *use value from table below*
+# e.g. '38' if desired assembly is 'GRCh38'
+#
+# value | UCSC  | GRC
+# ========================
+# '28'  |'hg10' | 'NCBI28'
+# '29'  |'hg11' | 'NCBI29'
+# '30'  |'hg13' | 'NCBI30'
+# '31'  |'hg14' | 'NCBI31'
+# '33'  |'hg15' | 'NCBI33'
+# '34'  |'hg16' | 'NCBI34'
+# '35'  |'hg17' | 'NCBI35'
+# '36'  |'hg18' | 'NCBI36'
+# '37'  |'hg19' | 'GRCh37'
+# '38'  |'hg38' | 'GRCh38'
+
+desired_build: '38'
+
+# ========================
+
+chromosomes: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']
+remote_vcf_location: 'ftp://ftp.ensembl.org/pub/current_variation/vcf/homo_sapiens/'
+vcf_local_path: vcf_refs/
+
+
+# ========================
+# Percentage of variants that need to conform to 
+# a particular direction, in order to have strand
+# consensus. 
+
+threshold: 0.99
+
+# =======================
+# Set local_synonyms: True if you want to build a
+# local table of rsID synonyms to use for the qc.
+# If you set local_synonyms: False synonyms will be
+# checked against the Ensembl REST API, which is
+# rate limited adn far slower. The local table 
+# requires 52GB storage (Ensembl 100) but expect 
+# it to require more space.
+
+local_synonyms: True
