@@ -23,7 +23,7 @@ desired_build: '38'
 
 chromosomes: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']
 remote_vcf_location: 'ftp://ftp.ensembl.org/pub/current_variation/vcf/homo_sapiens/'
-vcf_local_path: vcf_refs/
+local_resources: resources/
 
 
 # ========================

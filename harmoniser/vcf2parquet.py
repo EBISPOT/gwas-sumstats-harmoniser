@@ -1,12 +1,14 @@
 import pandas as pd
 import argparse
+import pathlib
 import os
 
 def process_file(file):
     vcf_df = pd.read_csv(file, sep="\t", comment="#", usecols=[0,1,2], names=["CHR", "POS", "ID"])
     vcf_df.set_index(["ID"])
-    outfile = file.split("/")[-1].split(".")[0]
-    vcf_df.to_parquet('{}.parquet'.format(outfile), index=True)
+    extensions = "".join(pathlib.Path(file).suffixes)
+    outfile = file.replace(extensions, ".parquet")
+    vcf_df.to_parquet(outfile, index=True)
 
 def main():
     argparser = argparse.ArgumentParser()
