@@ -2,11 +2,9 @@
 # if variant_id is rsid and ID != variant_id or not synonym --> drop and create discrep df
 
 
-import dask.dataframe as dd
 import pandas as pd
-import formatting_tools.liftover as lft
+import liftover as lft
 from common_constants import *
-from dask.distributed import Client, LocalCluster
 import os
 import glob
 import argparse
@@ -15,25 +13,30 @@ CHROMOSOMES = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '1
 
 def merge_ss_vcf(ss, vcf, from_build, to_build):
     vcfs = glob.glob(vcf)
-    ssdf = pd.read_csv(ss, sep='\t')
+    ssdf = pd.read_csv(ss, sep='\t', dtype=str)
+    rsid_mask = ssdf[SNP_DSET].str.startswith("rs").fillna(False)
+    ssdf_with_rsid = ssdf[rsid_mask]
+    ssdf_without_rsid = ssdf[~rsid_mask]
     header = list(ssdf.columns.values)
     dirname = os.path.splitext(ss)[0]
     if not os.path.exists(dirname):
         os.mkdir(dirname)
-    for vcf in vcfs:
-        vcf_df = pd.read_parquet(vcf)
-        chrom = vcf_df.CHR[0]
-        mergedf = ssdf.merge(vcf_df, left_on="variant_id", right_on="ID", how="left")
-        mapped = mergedf.dropna(subset=["ID"]).drop([CHR_DSET, BP_DSET], axis=1)
-        mapped[CHR_DSET] = mapped["CHR"].astype("str").str.replace("\..*$","")
-        mapped[BP_DSET] = mapped["POS"].astype("str").str.replace("\..*$","")
-        mapped = mapped[header]
-        outfile = os.path.join(dirname, "{}.merged".format(chrom))
-        mapped.to_csv(outfile, sep="\t", index=False, na_rep="NA")
+    while not ssdf_with_rsid.empty:
+        for vcf in vcfs:
+            vcf_df = pd.read_parquet(vcf)
+            chrom = vcf_df.CHR[0]
+            mergedf = ssdf_with_rsid.merge(vcf_df, left_on=SNP_DSET, right_on="ID", how="left")
+            mapped = mergedf.dropna(subset=["ID"]).drop([CHR_DSET, BP_DSET], axis=1)
+            mapped[CHR_DSET] = mapped["CHR"].astype("str").str.replace("\..*$","")
+            mapped[BP_DSET] = mapped["POS"].astype("str").str.replace("\..*$","")
+            mapped = mapped[header]
+            outfile = os.path.join(dirname, "{}.merged".format(chrom))
+            mapped.to_csv(outfile, sep="\t", index=False, na_rep="NA")
 
-        ssdf = mergedf[mergedf["ID"].isnull()]
-        ssdf = ssdf[header]
+            ssdf_with_rsid = mergedf[mergedf["ID"].isnull()]
+            ssdf_with_rsid = ssdf_with_rsid[header]
     
+    ssdf = pd.concat([ssdf_with_rsid, ssdf_without_rsid])
     build_map = lft.LiftOver(lft.ucsc_release.get(from_build), lft.ucsc_release.get(to_build)) if from_build != to_build else None
     if build_map:
         ssdf[BP_DSET] = [lft.map_bp_to_build_via_liftover(chromosome=x, bp=y, build_map=build_map) for x, y in zip(ssdf[CHR_DSET], ssdf[BP_DSET])]

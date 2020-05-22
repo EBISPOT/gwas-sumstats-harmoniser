@@ -1,0 +1,5 @@
+__default__:
+  - "-g /sumstatsharmoniser"
+  - "-oo snakemake.out"
+  - "-eo snakemake.err"
+
