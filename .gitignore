@@ -4,3 +4,4 @@ lsf.yaml
 *.err
 logs
 .venv
+__pycache__
