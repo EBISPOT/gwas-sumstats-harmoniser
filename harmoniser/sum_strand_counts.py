@@ -2,6 +2,7 @@ import csv
 import sys
 import glob
 import argparse
+import os
 
 from utils import *
 
@@ -20,22 +21,9 @@ def aggregate_counts(in_dir, out_dir, threshold):
     """
     if forward > reverse and (reverse/forward) >= threshold
     """
-    #fwd = variant_type_dict["Forward strand variant"]
-    #rev = variant_type_dict["Reverse strand variant"]
-    #tot = fwd + rev
+    all_files = glob.glob(os.path.join(in_dir, "*.sc"))
 
-    #test_dict = {
-    #    #"forward": variant_type_dict["Forward strand variant"] > 0 and variant_type_dict["Reverse strand variant"] == 0,
-    #    #"reverse": variant_type_dict["Reverse strand variant"] > 0 and variant_type_dict["Forward strand variant"] == 0,
-    #    #"mixed": variant_type_dict["Forward strand variant"] > 0 and variant_type_dict["Reverse strand variant"] > 0,
-    #    #"no_consensus": variant_type_dict["Forward strand variant"] == 0 and variant_type_dict["Reverse strand variant"] == 0
-    #    "forward": fwd / tot >= threshold,
-    #    "reverse": rev / tot >= threshold,
-    #    "drop": rev / tot < threshold and fwd / tot < threshold
-    #}
-    all_files = glob.glob(in_dir + "*.sc")
-
-    with open(out_dir + "total_strand_count.tsv", 'w') as tsvout:
+    with open(os.path.join(out_dir, "total_strand_count.tsv"), 'w') as tsvout:
         for f in all_files:
             with open(f,'r') as tsvin:
                 tsvin = csv.reader(tsvin, delimiter='\t')
