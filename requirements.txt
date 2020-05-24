@@ -17,6 +17,7 @@ nbformat==5.0.6
 numpy==1.18.4
 pandas==1.0.3
 psutil==5.7.0
+pyarrow==0.17.1
 pyliftover==0.4
 pyrsistent==0.16.0
 python-dateutil==2.8.1
