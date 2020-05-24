@@ -55,28 +55,37 @@ class sqlClient():
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-f', help='The name of synonyms file to be processed', required=False)
+    argparser.add_argument('-id_col', help='column number of id column (zero-based)', required=False)
+    argparser.add_argument('-name_col', help='column number of name column (zero-based)', required=False)
+    argparser.add_argument('-index', help='index the database (do this after loading all the data)', action='store_true', default='store_false', required=False)
     argparser.add_argument('-db', help='The name of the database to load to', required=True)
     args = argparser.parse_args()
     db = args.db
+    id_col = int(args.id_col) if args.id_col else None
+    name_col = int(args.name_col) if args.name_col else None
+
     if args.f:
-        #syns = args.f 
-        #synsdf = pd.read_csv(syns, sep='\t', 
-        #                    header=None, 
-        #                    dtype={1: int, 4: str},
-        #                    usecols=[1,4],
-        #                    chunksize=1000000
-        #                    )
-        #    
+        syns = args.f 
+        synsdf = pd.read_csv(syns, sep='\t', 
+                            header=None, 
+                            dtype={id_col: int, name_col: str},
+                            usecols=[id_col, name_col],
+                            chunksize=1000000
+                            )
+            
         sql = sqlClient(db)
         sql.drop_indices()
-        #sql.cur.execute('BEGIN TRANSACTION')
-        #count = 1
-        #for chunk in synsdf:
-        #    print(count)
-        #    list_of_tuples = list(chunk.itertuples(index=False, name=None))
-        #    sql.cur.executemany("insert into variation_synonym (variation_id, name) values (?, ?)", list_of_tuples)
-        #    count += 1
-        #sql.cur.execute('COMMIT')
+        sql.cur.execute('BEGIN TRANSACTION')
+        count = 1
+        for chunk in synsdf:
+            print(count)
+            list_of_tuples = list(chunk.itertuples(index=False, name=None))
+            sql.cur.executemany("insert into variation_synonym (variation_id, name) values (?, ?)", list_of_tuples)
+            count += 1
+        sql.cur.execute('COMMIT')
+    if args.index:
+        sql = sqlClient(db)
+        sql.drop_indices()
         sql.create_indices()
     else:
         print("nothing to do")

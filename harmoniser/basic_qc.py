@@ -4,10 +4,7 @@ import argparse
 import logging
 import sqlite3
 
-from formatting_tools.sumstats_formatting import *
-from formatting_tools.ensembl_rest_client import EnsemblRestClient
-sys_paths = ['SumStats/sumstats/','../SumStats/sumstats/','../../SumStats/sumstats/']
-sys.path.extend(sys_paths)
+from ensembl_rest_client import EnsemblRestClient
 from common_constants import *
 
 csv.field_size_limit(sys.maxsize)
@@ -152,7 +149,6 @@ def resolve_invalid_rsids(row, header, ensembl_client=None, sql_client=None):
         if row[snp_idx].startswith('rs') and row[snp_idx] != row[hm_rsid_idx]:
             synonyms = []
             if ensembl_client:
-                print("ens")
                 rs_info = ensembl_client.get_rsid(row[snp_idx])
                 if rs_info != "NA":
                     try:
@@ -161,7 +157,6 @@ def resolve_invalid_rsids(row, header, ensembl_client=None, sql_client=None):
                     except TypeError:
                         row[snp_idx] = 'NA'
             elif sql_client:
-                print("sql")
                 synonyms = sql_client.get_synonyms(row[snp_idx])
             print(synonyms)
             if row[hm_rsid_idx] in synonyms:
@@ -174,6 +169,16 @@ def resolve_invalid_rsids(row, header, ensembl_client=None, sql_client=None):
     if not row[snp_idx].startswith('rs'):
         row[snp_idx] = 'NA'
     return row
+
+
+def get_csv_reader(csv_file):
+    dialect = csv.Sniffer().sniff(csv_file.readline())
+    csv_file.seek(0)
+    return csv.reader(csv_file, dialect)
+
+
+def get_filename(file):
+    return file.split("/")[-1].split(".")[0]
 
 
 def main():

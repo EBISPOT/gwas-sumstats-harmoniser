@@ -111,6 +111,10 @@ class EnsemblRestClient(object):
             )
         return self.retrieve_location(variation_request)
 
+    def get_rsid(self, rsid):
+        variant_info = self.perform_rest_action('/variation/human/{}?'.format(rsid))
+        return variant_info
+
     @staticmethod
     def retrieve_location(variation_request):
         if "mappings" in variation_request:
