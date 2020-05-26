@@ -54,6 +54,7 @@ Edit the [config.yaml](config.yaml) if you want to change from any of the defaul
 ### 5. QC
 - Update any missing variant IDs.
 - If given variant ID is different from the one inferred, check if it is a synonym - if not, drop it.
+  - The first time this runs, if you have specified to use a local synonyms table in the config, it will need to build that table. 
 - Drop any records with missing mandatory fields.
 
 
