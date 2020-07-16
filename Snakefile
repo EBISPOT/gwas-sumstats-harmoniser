@@ -36,10 +36,10 @@ rule make_parquet_refs:
 
 rule map_to_build:
     input:
-        expand("{local}homo_sapiens-chr{{chromosome}}.parquet", local=config["local_resources"]),
+        expand("{local}homo_sapiens-chr{chromosome}.parquet", chromosome=config["chromosomes"], local=config["local_resources"]),
         in_ss="{ss_file}.tsv"
     output:
-        "{ss_file}/{chromosome}.merged"
+        expand("{{ss_file}}/{chromosome}.merged", chromosome=config["chromosomes"])
     params:
         local_resources=config["local_resources"],
         to_build=config["desired_build"]
