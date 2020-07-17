@@ -36,10 +36,10 @@ rule make_parquet_refs:
 
 rule map_to_build:
     input:
-        expand("{local}homo_sapiens-chr{{chromosome}}.parquet", local=config["local_resources"]),
+        expand("{local}homo_sapiens-chr{chromosome}.parquet", chromosome=config["chromosomes"], local=config["local_resources"]),
         in_ss="{ss_file}.tsv"
     output:
-        "{ss_file}/{chromosome}.merged"
+        expand("{{ss_file}}/{chromosome}.merged", chromosome=config["chromosomes"])
     params:
         local_resources=config["local_resources"],
         to_build=config["desired_build"]
@@ -81,7 +81,7 @@ rule summarise_strand_counts:
     output:
         "{ss_file}/total_strand_count.tsv"
     shell:
-        "python harmoniser/sum_strand_counts.py -i {wildcards.ss_file} -o {wildcards.ss_file} -config config.yaml" 
+        "python harmoniser/sum_strand_counts.py -i {wildcards.ss_file} -o {wildcards.ss_file} -config config.yaml"
 
 
 rule harmonisation:
@@ -150,7 +150,7 @@ rule make_local_synonyms_table:
         "python harmoniser/make_synonym_table.py -f {params.local_resources}variation.txt.gz -id_col 0 -name_col 2 -db {params.local_resources}rsID.sql; "
         "python harmoniser/make_synonym_table.py -f {params.local_resources}variation_synonym.txt.gz -id_col 1 -name_col 4 -db {params.local_resources}rsID.sql; "
         "python harmoniser/make_synonym_table.py -index -db {params.local_resources}/rsID.sql"
-        
+
 
 rule qc:
     input:
