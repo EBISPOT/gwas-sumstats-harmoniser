@@ -28,6 +28,7 @@ remote_ensembl_variation: 'ftp://ftp.ensembl.org/pub/current_mysql/homo_sapiens_
 # Make sure you have a trailing slash ('/') on the path below
 local_resources: resources/
 
+repo_path: ./
 
 # ========================
 # Percentage of variants that need to conform to 
