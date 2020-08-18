@@ -159,7 +159,7 @@ rule make_local_synonyms_table:
         "python {params.repo_path}/harmoniser/make_synonym_table.py -f {params.local_resources}variation.txt.gz -id_col 0 -name_col 2 -db {params.local_resources}rsID.sql; "
         "python {params.repo_path}/harmoniser/make_synonym_table.py -f {params.local_resources}variation_synonym.txt.gz -id_col 1 -name_col 4 -db {params.local_resources}rsID.sql; "
         "python {params.repo_path}/harmoniser/make_synonym_table.py -index -db {params.local_resources}/rsID.sql"
-        
+
 
 rule qc:
     input:
