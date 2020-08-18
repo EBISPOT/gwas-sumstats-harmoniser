@@ -1,6 +1,6 @@
 # Configure --------------------------------------------------------------------
 
-configfile: "config.yaml"
+#configfile: "config.yaml"
 
 rule get_vcf_files:
     output:
@@ -29,9 +29,10 @@ rule make_parquet_refs:
     output:
         expand("{local}homo_sapiens-chr{{chromosome}}.parquet", local=config["local_resources"])
     params:
-        local_resources=config["local_resources"]
+        local_resources=config["local_resources"],
+        repo_path=config["repo_path"]
     shell:
-        "python harmoniser/vcf2parquet.py -f {params.local_resources}/homo_sapiens-chr{wildcards.chromosome}.vcf.gz"
+        "python {params.repo_path}/harmoniser/vcf2parquet.py -f {params.local_resources}/homo_sapiens-chr{wildcards.chromosome}.vcf.gz"
 
 
 rule map_to_build:
@@ -42,14 +43,15 @@ rule map_to_build:
         expand("{{ss_file}}/{chromosome}.merged", chromosome=config["chromosomes"])
     params:
         local_resources=config["local_resources"],
-        to_build=config["desired_build"]
+        to_build=config["desired_build"],
+        repo_path=config["repo_path"]
     resources:
         mem_mb = lambda wildcards, attempt: attempt * 28000
     shell:
         "filename={wildcards.ss_file}; "
         "from_build=$(echo -n $filename | tail -c 2); "
         "mkdir -p {wildcards.ss_file}; "
-        "python harmoniser/map_to_build.py -f {input.in_ss} "
+        "python {params.repo_path}/harmoniser/map_to_build.py -f {input.in_ss} "
         "-from_build $from_build "
         "-to_build {params.to_build} "
         "-vcf '{params.local_resources}/homo_sapiens-chr*.parquet'"
@@ -63,9 +65,10 @@ rule generate_strand_counts:
     output:
         "{ss_file}/{chromosome}.merged.sc"
     params:
-        local_resources=config["local_resources"]
+        local_resources=config["local_resources"],
+        repo_path=config["repo_path"]
     shell:
-        "./harmoniser/genetics-sumstat-harmoniser/bin/sumstat_harmoniser --sumstats {input.in_ss} "
+        ".{params.repo_path}/harmoniser/genetics-sumstat-harmoniser/bin/sumstat_harmoniser --sumstats {input.in_ss} "
         "--vcf {params.local_resources}homo_sapiens-chr{wildcards.chromosome}.vcf.gz "
         "--chrom_col chromosome "
         "--pos_col base_pair_location "
@@ -80,8 +83,10 @@ rule summarise_strand_counts:
         expand("{{ss_file}}/{chromosome}.merged.sc", chromosome=config["chromosomes"])
     output:
         "{ss_file}/total_strand_count.tsv"
+    params:
+        repo_path=config["repo_path"]
     shell:
-        "python harmoniser/sum_strand_counts.py -i {wildcards.ss_file} -o {wildcards.ss_file} -config config.yaml" 
+        "python {params.repo_path}/harmoniser/sum_strand_counts.py -i {wildcards.ss_file} -o {wildcards.ss_file} -config config.yaml" 
 
 
 rule harmonisation:
@@ -93,10 +98,11 @@ rule harmonisation:
     output:
         "{ss_file}/{chromosome}.merged.hm"
     params:
-        local_resources=config["local_resources"]
+        local_resources=config["local_resources"],
+        repo_path=config["repo_path"]
     shell:
         "palin_mode=$(grep palin_mode {input.sc_sum} | cut -f2 );"
-        "./harmoniser/genetics-sumstat-harmoniser/bin/sumstat_harmoniser --sumstats {input.in_ss} "
+        ".{params.repo_path}/harmoniser/genetics-sumstat-harmoniser/bin/sumstat_harmoniser --sumstats {input.in_ss} "
         "--vcf {params.local_resources}homo_sapiens-chr{wildcards.chromosome}.vcf.gz "
         "--hm_sumstats {wildcards.ss_file}/{wildcards.chromosome}.merged.hm "
         "--hm_statfile {wildcards.ss_file}/{wildcards.chromosome}.merged.log.tsv.gz "
@@ -120,8 +126,10 @@ rule concatenate_chr_splits:
         expand("{{ss_file}}/{chromosome}.merged.hm", chromosome=config["chromosomes"])
     output:
         "{ss_file}/harmonised.tsv"
+    params:
+        repo_path=config["repo_path"]
     shell:
-        "./harmoniser/cat_chroms.sh {wildcards.ss_file}"
+        ".{params.repo_path}/harmoniser/cat_chroms.sh {wildcards.ss_file}"
 
 rule get_variation_tables:
     output:
@@ -143,13 +151,14 @@ rule make_local_synonyms_table:
         expand("{local}rsID.sql", local=config["local_resources"])
     params:
         remote_location=config["remote_ensembl_variation"],
-        local_resources=config["local_resources"]
+        local_resources=config["local_resources"],
+        repo_path=config["repo_path"]
     resources:
         mem_mb = lambda wildcards, attempt: attempt * 12000
     shell:
-        "python harmoniser/make_synonym_table.py -f {params.local_resources}variation.txt.gz -id_col 0 -name_col 2 -db {params.local_resources}rsID.sql; "
-        "python harmoniser/make_synonym_table.py -f {params.local_resources}variation_synonym.txt.gz -id_col 1 -name_col 4 -db {params.local_resources}rsID.sql; "
-        "python harmoniser/make_synonym_table.py -index -db {params.local_resources}/rsID.sql"
+        "python {params.repo_path}/harmoniser/make_synonym_table.py -f {params.local_resources}variation.txt.gz -id_col 0 -name_col 2 -db {params.local_resources}rsID.sql; "
+        "python {params.repo_path}/harmoniser/make_synonym_table.py -f {params.local_resources}variation_synonym.txt.gz -id_col 1 -name_col 4 -db {params.local_resources}rsID.sql; "
+        "python {params.repo_path}/harmoniser/make_synonym_table.py -index -db {params.local_resources}/rsID.sql"
         
 
 rule qc:
@@ -159,16 +168,17 @@ rule qc:
     output:
         "{ss_file}/harmonised.qc.tsv"
     params:
-        local_resources=config["local_resources"]
+        local_resources=config["local_resources"],
+        repo_path=config["repo_path"]
     run:
         if config["local_synonyms"]:
-            shell("python harmoniser/basic_qc.py "
+            shell("python {params.repo_path}/harmoniser/basic_qc.py "
                   "-f {input.in_ss} "
                   "-d {wildcards.ss_file}/ "
                   "--log {wildcards.ss_file}/report.txt "
                   "-db {input.db}")
         else:
-            shell("python harmoniser/basic_qc.py "
+            shell("python {params.repo_path}/harmoniser/basic_qc.py "
                   "-f {input.in_ss} "
                   "-d {wildcards.ss_file}/ "
                   "--log {wildcards.ss_file}/report.txt ")
