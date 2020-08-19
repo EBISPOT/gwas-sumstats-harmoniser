@@ -37,7 +37,8 @@ Edit the [config.yaml](config.yaml) if you want to change from any of the defaul
 - The name must follow the convention `<any identifier><genome assembly number>.tsv` e.g. my_summary_stats_37.tsv (37 denotes the genome assembly of the data in the file is hg19 or GRCh37 - see [config](config.yaml) for the assembly table). Note that his number is not the desired build, that is set in the [config](config.yaml).
 
 - Assuming the pipeline will run on an LSF cluster and the file we want to harmonise is called `/path/to/example37.tsv`:
-- `snakemake --profile lsf /path/to/example37/harmonised.qc.tsv`
+- `snakemake --profile lsf --configfile config.yaml /path/to/example37/harmonised.qc.tsv`
+- see [this](example_wrapper.sh) for an idea of how to run
 
 # Pipeline 
 - First make sure your files are correctly [formatted](https://www.ebi.ac.uk/gwas/docs/methods/summary-statistics) using the [validator](https://github.com/EBISPOT/gwas-sumstats-validator). 
