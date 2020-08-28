@@ -10,17 +10,16 @@ rule get_vcf_files:
         local_resources=config["local_resources"]
     shell:
         "mkdir -p {params.local_resources}; "
-        "wget -P {params.local_resources} {params.remote_location}homo_sapiens-chr{wildcards.chromosome}.vcf.gz"
+        "wget -P {params.local_resources} {params.remote_location}/homo_sapiens-chr{wildcards.chromosome}.vcf.gz"
 
 
 rule get_tbi_files:
     output:
         expand("{local}homo_sapiens-chr{{chromosome}}.vcf.gz.tbi", local=config["local_resources"])
     params:
-        remote_location=config["remote_vcf_location"],
         local_resources=config["local_resources"]
     shell:
-        "wget -P {params.local_resources} {params.remote_location}/homo_sapiens-chr{wildcards.chromosome}.vcf.gz.tbi"
+        "tabix -p vcf {params.local_resources}/homo_sapiens-chr{wildcards.chromosome}.vcf.gz"
 
 
 rule make_parquet_refs:
