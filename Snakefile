@@ -86,7 +86,7 @@ rule summarise_strand_counts:
     params:
         repo_path=config["repo_path"]
     shell:
-        "python {params.repo_path}/harmoniser/sum_strand_counts.py -i {wildcards.ss_file} -o {wildcards.ss_file} -config config.yaml" 
+        "python {params.repo_path}/harmoniser/sum_strand_counts.py -i {wildcards.ss_file} -o {wildcards.ss_file} -config {params.repo_path}/config.yaml" 
 
 
 rule harmonisation:

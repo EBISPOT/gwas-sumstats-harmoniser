@@ -2,8 +2,9 @@
 
 
 file_dir=$1
-cat $file_dir/1.merged.hm > $file_dir/harmonised.tsv
-for c in {2..22}; do
+
+head -q -n1 $file_dir/*.merged.hm | head -n1 > $file_dir/harmonised.tsv
+for c in {1..22}; do
         tail -n+2  $file_dir/$c.merged.hm >> $file_dir/harmonised.tsv
 done
 tail -n+2  $file_dir/X.merged.hm >> $file_dir/harmonised.tsv
