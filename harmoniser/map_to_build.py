@@ -21,10 +21,14 @@ def merge_ss_vcf(ss, vcf, from_build, to_build):
     dirname = os.path.splitext(ss)[0]
     if not os.path.exists(dirname):
         os.mkdir(dirname)
-    while not ssdf_with_rsid.empty:
+    print("starting rsid mapping")
+    print("ssdf with rsid empty?: {}".format(ssdf_with_rsid.empty))
+    # if there are records with rsids
+    if not ssdf_with_rsid.empty:
         for vcf in vcfs:
             vcf_df = pd.read_parquet(vcf)
             chrom = vcf_df.CHR[0]
+            # merge on rsid, update chr and position from vcf ref
             mergedf = ssdf_with_rsid.merge(vcf_df, left_on=SNP_DSET, right_on="ID", how="left")
             mapped = mergedf.dropna(subset=["ID"]).drop([CHR_DSET, BP_DSET], axis=1)
             mapped[CHR_DSET] = mapped["CHR"].astype("str").str.replace("\..*$","")
@@ -35,23 +39,33 @@ def merge_ss_vcf(ss, vcf, from_build, to_build):
 
             ssdf_with_rsid = mergedf[mergedf["ID"].isnull()]
             ssdf_with_rsid = ssdf_with_rsid[header]
+            if ssdf_with_rsid.empty:
+                break
     
+    print("finished rsid mapping")
+    # liftover the snps without rsids and those with unrecognised rsids 
+    print("liftover remaining variants")
     ssdf = pd.concat([ssdf_with_rsid, ssdf_without_rsid])
     build_map = lft.LiftOver(lft.ucsc_release.get(from_build), lft.ucsc_release.get(to_build)) if from_build != to_build else None
     if build_map:
         ssdf[BP_DSET] = [lft.map_bp_to_build_via_liftover(chromosome=x, bp=y, build_map=build_map) for x, y in zip(ssdf[CHR_DSET], ssdf[BP_DSET])]
     for chrom in CHROMOSOMES:
+        print(chrom)
         df = ssdf.loc[ssdf[CHR_DSET].astype("str") == chrom]
         df[BP_DSET] = df[BP_DSET].astype("str").str.replace("\..*$","")
         outfile = os.path.join(dirname, "{}.merged".format(chrom))
         if os.path.isfile(outfile):
+            print("df to {}".format(outfile))
+            print(df)
             df.to_csv(outfile, sep="\t", mode='a', header=False, index=False, na_rep="NA")
         else:
+            print("df to {}".format(outfile))
+            print(df)
             df.to_csv(outfile, sep="\t", mode='w', index=False, na_rep="NA")
+    print("liftover complete")
     no_chr_df = ssdf[ssdf[CHR_DSET].isnull()]
     outfile = os.path.join(dirname, "unmapped")
     no_chr_df.to_csv(outfile, sep="\t", index=False, na_rep="NA")
-
 
 
 def main():
