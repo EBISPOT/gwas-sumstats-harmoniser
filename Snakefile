@@ -67,7 +67,7 @@ rule generate_strand_counts:
         local_resources=config["local_resources"],
         repo_path=config["repo_path"]
     shell:
-        "{params.repo_path}/harmoniser/genetics-sumstat-harmoniser/bin/sumstat_harmoniser --sumstats {input.in_ss} "
+        "python {params.repo_path}/harmoniser/genetics-sumstat-harmoniser/sumstat_harmoniser/main.py --sumstats {input.in_ss} "
         "--vcf {params.local_resources}homo_sapiens-chr{wildcards.chromosome}.vcf.gz "
         "--chrom_col chromosome "
         "--pos_col base_pair_location "
@@ -101,7 +101,7 @@ rule harmonisation:
         repo_path=config["repo_path"]
     shell:
         "palin_mode=$(grep palin_mode {input.sc_sum} | cut -f2 );"
-        "{params.repo_path}/harmoniser/genetics-sumstat-harmoniser/bin/sumstat_harmoniser --sumstats {input.in_ss} "
+        "python {params.repo_path}/harmoniser/genetics-sumstat-harmoniser/sumstat_harmoniser/main.py --sumstats {input.in_ss} "
         "--vcf {params.local_resources}homo_sapiens-chr{wildcards.chromosome}.vcf.gz "
         "--hm_sumstats {wildcards.ss_file}/{wildcards.chromosome}.merged.hm "
         "--hm_statfile {wildcards.ss_file}/{wildcards.chromosome}.merged.log.tsv.gz "
