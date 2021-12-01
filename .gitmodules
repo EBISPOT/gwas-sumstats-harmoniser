@@ -1,0 +1,3 @@
+[submodule "harmoniser/genetics-sumstat-harmoniser"]
+	path = harmoniser/genetics-sumstat-harmoniser
+	url = https://github.com/opentargets/genetics-sumstat-harmoniser.git
