@@ -1,0 +1,9 @@
+language: python
+python:
+  - "3.6"
+branches:
+  only:
+  - master
+  - dev
+script:
+  - sonar-scanner -Dsonar.organization=gwas-ebi -Dsonar.projectKey=gwas-sumstats-harmoniser -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=0566d66d0cfe16cd2cb8ba02db7fcd0b6d1e7ee6
