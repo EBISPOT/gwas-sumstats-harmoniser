@@ -2,6 +2,8 @@
 
 #configfile: "config.yaml"
 
+#singularity: "docker://ebispot/gwas-sumstats-harmoniser:latest"
+
 rule get_vcf_files:
     output:
         expand("{local}homo_sapiens-chr{{chromosome}}.vcf.gz", local=config["local_resources"])
@@ -226,4 +228,4 @@ rule qc:
         local_resources=config["local_resources"],
         repo_path=config["repo_path"]
     shell:
-        "python {params.repo_path}/harmon
+        "python {params.repo_path}/harmoniser/basic_qc.py -f {input.in_ss} -d {wildcards.ss_file}/ --log {wildcards.ss_file}/report.txt -db {input.db}"
