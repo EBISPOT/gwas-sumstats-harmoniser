@@ -15,7 +15,7 @@ f=$study
 n=$(echo $f | sed "s/.tsv//g")
 h=$n/harmonised.qc.tsv
 
-bsub -q standard -c 30 -C 3 -M 10G -R "rusage[mem=10G]" -o $n/stdout -e $n/stderr "snakemake --use-singularity --latency-wait 60 -d $n \
+bsub -q standard -c 30 -C 3 -M 28G -R "rusage[mem=28G]" -o $n/stdout -e $n/stderr "snakemake --use-singularity --latency-wait 60 -d $n \
 --snakefile $snakemake_dir/10_percent_Snakefile \
 --configfile $snakemake_dir/config.yaml \
 --profile $snakemakeProfile \
