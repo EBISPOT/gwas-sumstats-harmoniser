@@ -40,7 +40,7 @@ def aggregate_counts(in_dir, out_dir, threshold):
         tot = fwd + rev
 
         if tot > 0:
-            tsvout.write("Full ratio" + "\t"+ str(fwd/tot) + '\n')
+            tsvout.write("Full:ratio" + "\t"+ str(fwd/tot) + '\n')
             if fwd / tot >= threshold:
                 tsvout.write("palin_mode" + "\t" + "forward")
             elif rev / tot >= threshold:
