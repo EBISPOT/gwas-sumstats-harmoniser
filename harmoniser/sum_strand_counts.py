@@ -8,7 +8,6 @@ from utils import *
 
 
 def aggregate_counts(in_dir, out_dir, threshold):
-
     variant_type_dict = {
         "Palindormic variant": 0,
         "Forward strand variant": 0,
@@ -25,13 +24,13 @@ def aggregate_counts(in_dir, out_dir, threshold):
 
     with open(os.path.join(out_dir, "total_strand_count.tsv"), 'w') as tsvout:
         for f in all_files:
-            with open(f,'r') as tsvin:
+            with open(f, 'r') as tsvin:
                 tsvin = csv.reader(tsvin, delimiter='\t')
                 for line in tsvin:
                     for variant_type, count in variant_type_dict.items():
                         if variant_type == line[0]:
                             variant_type_dict[variant_type] += int(line[1])
- 
+
         for variant_type, count in variant_type_dict.items():
             tsvout.write(variant_type + '\t' + str(count) + '\n')
 
@@ -40,7 +39,7 @@ def aggregate_counts(in_dir, out_dir, threshold):
         tot = fwd + rev
 
         if tot > 0:
-            tsvout.write("Full:ratio" + "\t"+ str(fwd/tot) + '\n')
+            tsvout.write("Full:ratio" + "\t" + str(fwd / tot) + '\n')
             if fwd / tot >= threshold:
                 tsvout.write("palin_mode" + "\t" + "forward")
             elif rev / tot >= threshold:
@@ -57,7 +56,7 @@ def main():
     argparser.add_argument('-o', help='The directory to write to', required=True)
     argparser.add_argument('-config', help='The path to the config.yaml file')
     args = argparser.parse_args()
-    
+
     in_dir = args.i
     out_dir = args.o
     config = args.config

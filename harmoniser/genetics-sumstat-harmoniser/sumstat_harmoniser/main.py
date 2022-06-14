@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 #
 # Ed Mountjoy
-#
-# Version 2
+# YUE - Using pysam to replace tabix in subprocess
 #
 # Harmonise GWAS summary statistics against a reference VCF
 
+#######YUE################
+import pysam
+#######YUE################
 import os
 import sys
 import gzip
@@ -24,14 +26,17 @@ def main():
     # Get args
     global args
     args = parse_args()
-
     # Intitate handles and counters
     header_written = False
     strand_counter = Counter()
     code_counter = Counter()
     if args.hm_sumstats:
         out_handle = open_gzip(args.hm_sumstats, "wb")
-
+    
+    #######YUE################
+    tbx=pysam.TabixFile(args.vcf)
+    #######YUE################
+    
     # Process each row in summary statistics
     for counter, ss_rec in enumerate(yield_sum_stat_records(args.sumstats,
                                                             args.in_sep)):
@@ -59,10 +64,9 @@ def main():
 
             # Get VCF reference variants for this record
             vcf_recs = get_vcf_records(
-                        args.vcf.replace("#", ss_rec.chrom),
+                        tbx,
                         ss_rec.chrom,
                         ss_rec.pos)
-
             # Extract the VCF record that matches the summary stat record
             vcf_rec, ret_code = exract_matching_record_from_vcf_records(
                 ss_rec, vcf_recs)
@@ -200,9 +204,7 @@ def main():
                 out_h.write('{0}\t{1}\t{2}\n'.format(key,
                                                      code_counter[key],
                                                      code_table[key]).encode('utf-8') )
-
-    print("Done!")
-
+   
     return 0
 
 
@@ -621,7 +623,7 @@ def af_to_maf(af):
     else:
         return 1 - af
 
-def get_vcf_records(in_vcf, chrom, pos):
+def get_vcf_records(tbx, chrom, pos):
     """ Uses tabix to query VCF file. Parses info from record.
     Args:
         in_vcf (str): vcf file
@@ -630,7 +632,11 @@ def get_vcf_records(in_vcf, chrom, pos):
     Returns:
         list of VCFRecords
     """
-    response = list(tabix_query(in_vcf, chrom, pos, pos))
+    #######YUE################
+    result=tbx.fetch(chrom, int(pos)-1, int(pos))
+    # each records returned by fetch is str, it needs to be change into list for VCF records to process
+    response=[list(n.split("\t")) for n in result]
+    #######YUE################
     return [VCFRecord(line) for line in response]
 
 def yield_sum_stat_records(inf, sep):
@@ -696,15 +702,6 @@ def open_gzip(inf, rw="rb"):
         return gzip.open(inf, rw)
     else:
         return open(inf, rw)
-
-def tabix_query(filename, chrom, start, end):
-    """Call tabix and generate an array of strings for each line it returns.
-       Author: https://github.com/slowkow/pytabix
-    """
-    query = '{}:{}-{}'.format(chrom, start, end)
-    process = Popen(['tabix', '-f', filename, query], stdout=PIPE)
-    for line in process.stdout:
-        yield [s.decode("utf-8") for s in line.strip().split()]
 
 def str2bool(v):
     """ Parses argpare boolean input

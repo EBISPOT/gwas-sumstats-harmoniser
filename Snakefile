@@ -2,6 +2,8 @@
 
 #configfile: "config.yaml"
 
+#singularity: "docker://ebispot/gwas-sumstats-harmoniser:latest"
+
 rule get_vcf_files:
     output:
         expand("{local}homo_sapiens-chr{{chromosome}}.vcf.gz", local=config["local_resources"])
@@ -31,7 +33,7 @@ rule make_parquet_refs:
         local_resources=config["local_resources"],
         repo_path=config["repo_path"]
     shell:
-        "python {params.repo_path}/harmoniser/vcf2parquet.py -f {params.local_resources}/homo_sapiens-chr{wildcards.chromosome}.vcf.gz"
+        "python {params.repo_path}/harmoniser/vcf2parquet.py -f {params.local_resources}homo_sapiens-chr{wildcards.chromosome}.vcf.gz"
 
 
 rule map_to_build:
@@ -55,18 +57,53 @@ rule map_to_build:
         "-to_build {params.to_build} "
         "-vcf '{params.local_resources}/homo_sapiens-chr*.parquet'"
 
-
-rule generate_strand_counts:
+rule ten_percent_generate_strand_counts:
     input:
         expand("{local}homo_sapiens-chr{{chromosome}}.vcf.gz", local=config["local_resources"]),
         expand("{local}homo_sapiens-chr{{chromosome}}.vcf.gz.tbi", local=config["local_resources"]),
         in_ss="{ss_file}/{chromosome}.merged"
     output:
-        "{ss_file}/{chromosome}.merged.sc"
+        "{ss_file}/10percent.{chromosome}.merged.sc"
     params:
         local_resources=config["local_resources"],
         repo_path=config["repo_path"]
     shell:
+        "select=$[$(wc -l < {input.in_ss})]; "
+        "if [ $[$select/10] -gt 100 ]; then n=$[$select/10]; else n=$select; fi; "
+        "(head -n 1 {input.in_ss}; sed '1d' {input.in_ss} | shuf -n $n)>{wildcards.ss_file}/10percent.{wildcards.chromosome}.merged;"
+        "python {params.repo_path}/harmoniser/genetics-sumstat-harmoniser/sumstat_harmoniser/main.py --sumstats {wildcards.ss_file}/10percent.{wildcards.chromosome}.merged "
+        "--vcf {params.local_resources}homo_sapiens-chr{wildcards.chromosome}.vcf.gz "
+        "--chrom_col chromosome "
+        "--pos_col base_pair_location "
+        "--effAl_col effect_allele "
+        "--otherAl_col other_allele "
+        "--rsid_col variant_id "
+        "--strand_counts {wildcards.ss_file}/10percent.{wildcards.chromosome}.merged.sc"
+
+rule ten_percent_summarise_strand_counts:
+    input:
+        expand("{{ss_file}}/10percent.{chromosome}.merged.sc", chromosome=config["chromosomes"])
+    output:
+        "{ss_file}/10_percent_total_strand_count.tsv"
+    params:
+        repo_path=config["repo_path"]
+    shell:
+        "python {params.repo_path}/harmoniser/sum_strand_counts_10percent.py -i {wildcards.ss_file} -o {wildcards.ss_file} -config {params.repo_path}/config.yaml"
+
+rule generate_strand_counts:
+    input:
+        expand("{local}homo_sapiens-chr{{chromosome}}.vcf.gz", local=config["local_resources"]),
+        expand("{local}homo_sapiens-chr{{chromosome}}.vcf.gz.tbi", local=config["local_resources"]),
+        in_ss="{ss_file}/{chromosome}.merged",
+        sc_sum="{ss_file}/10_percent_total_strand_count.tsv",
+        ten_ss="{ss_file}/10percent.{chromosome}.merged.sc",
+    output:
+        "{ss_file}/full.{chromosome}.merged.sc"
+    params:
+        local_resources=config["local_resources"],
+        repo_path=config["repo_path"]
+    shell:
+        "if [ `grep -c rerun {input.sc_sum}` == '0' ];then rename 10percent full {input.ten_ss}; else "
         "python {params.repo_path}/harmoniser/genetics-sumstat-harmoniser/sumstat_harmoniser/main.py --sumstats {input.in_ss} "
         "--vcf {params.local_resources}homo_sapiens-chr{wildcards.chromosome}.vcf.gz "
         "--chrom_col chromosome "
@@ -74,26 +111,47 @@ rule generate_strand_counts:
         "--effAl_col effect_allele "
         "--otherAl_col other_allele "
         "--rsid_col variant_id "
-        "--strand_counts {input.in_ss}.sc"
+        "--strand_counts {wildcards.ss_file}/full.{wildcards.chromosome}.merged.sc; fi"
 
 
 rule summarise_strand_counts:
     input:
-        expand("{{ss_file}}/{chromosome}.merged.sc", chromosome=config["chromosomes"])
+        expand("{{ss_file}}/full.{chromosome}.merged.sc", chromosome=config["chromosomes"]),
+        sc_sum="{ss_file}/10_percent_total_strand_count.tsv"
     output:
         "{ss_file}/total_strand_count.tsv"
     params:
         repo_path=config["repo_path"]
     shell:
-        "python {params.repo_path}/harmoniser/sum_strand_counts.py -i {wildcards.ss_file} -o {wildcards.ss_file} -config {params.repo_path}/config.yaml" 
+        "if [ `grep -c rerun {input.sc_sum}` == '0' ];then cp {input.sc_sum} {wildcards.ss_file}/total_strand_count.tsv; else "
+        "python {params.repo_path}/harmoniser/sum_strand_counts.py -i {wildcards.ss_file} -o {wildcards.ss_file} -config {params.repo_path}/config.yaml;fi"
 
+rule log_palindromic:
+    input:
+        expand("{local}homo_sapiens-chr22.vcf.gz", local=config["local_resources"]),
+        sc_sum="{ss_file}/total_strand_count.tsv"
+    output:
+        "{ss_file}/running.log"
+    params:
+        local_resources=config["local_resources"]
+    shell:
+        "palin_mode=$(grep palin_mode {wildcards.ss_file}/total_strand_count.tsv | cut -f2);"
+        "ratio=$(grep ratio {wildcards.ss_file}/total_strand_count.tsv);"
+        "echo The direction of palindromic SNPs infers as $palin_mode by $ratio > {wildcards.ss_file}/running.log;"
+        "echo reference: >> {wildcards.ss_file}/running.log;"
+        "echo '################################################################' >> {wildcards.ss_file}/running.log;"
+        "echo $(less {params.local_resources}homo_sapiens-chr22.vcf.gz | head -n 1000 | grep ^# | grep source) >> {wildcards.ss_file}/running.log;"
+        "echo $(less {params.local_resources}homo_sapiens-chr22.vcf.gz | head -n 1000 | grep ^# | grep reference) >> {wildcards.ss_file}/running.log;"
+        "echo $(less {params.local_resources}homo_sapiens-chr22.vcf.gz | head -n 1000 | grep ^# | grep dbSNP | sed 's/INFO=<//g' | sed 's/>//g' )>> {wildcards.ss_file}/running.log;"
+        "echo '################################################################' >> {wildcards.ss_file}/running.log;"
 
 rule harmonisation:
     input:
         expand("{local}homo_sapiens-chr{{chromosome}}.vcf.gz", local=config["local_resources"]),
         expand("{local}homo_sapiens-chr{{chromosome}}.vcf.gz.tbi", local=config["local_resources"]),
         in_ss="{ss_file}/{chromosome}.merged",
-        sc_sum="{ss_file}/total_strand_count.tsv"
+        sc_sum="{ss_file}/total_strand_count.tsv",
+        log="{ss_file}/running.log"
     output:
         "{ss_file}/{chromosome}.merged.hm"
     params:
@@ -169,15 +227,5 @@ rule qc:
     params:
         local_resources=config["local_resources"],
         repo_path=config["repo_path"]
-    run:
-        if config["local_synonyms"]:
-            shell("python {params.repo_path}/harmoniser/basic_qc.py "
-                  "-f {input.in_ss} "
-                  "-d {wildcards.ss_file}/ "
-                  "--log {wildcards.ss_file}/report.txt "
-                  "-db {input.db}")
-        else:
-            shell("python {params.repo_path}/harmoniser/basic_qc.py "
-                  "-f {input.in_ss} "
-                  "-d {wildcards.ss_file}/ "
-                  "--log {wildcards.ss_file}/report.txt ")
+    shell:
+        "python {params.repo_path}/harmoniser/basic_qc.py -f {input.in_ss} -d {wildcards.ss_file}/ --log {wildcards.ss_file}/report.txt -db {input.db}"
