@@ -23,7 +23,7 @@ def aggregate_counts(in_dir, out_dir, threshold):
     """
     all_files = glob.glob(os.path.join(in_dir, "*.sc"))
 
-    with open(os.path.join(out_dir, "total_strand_count.tsv"), 'w') as tsvout:
+    with open(os.path.join(out_dir, "10_percent_total_strand_count.tsv"), 'w') as tsvout:
         for f in all_files:
             with open(f,'r') as tsvin:
                 tsvin = csv.reader(tsvin, delimiter='\t')
@@ -38,13 +38,22 @@ def aggregate_counts(in_dir, out_dir, threshold):
         fwd = variant_type_dict["Forward strand variant"]
         rev = variant_type_dict["Reverse strand variant"]
         tot = fwd + rev
-
+        
+        low=1-10*(1-threshold) # 0.9
+        high=0.995
+        
         if tot > 0:
-            tsvout.write("Full:ratio" + "\t"+ str(fwd/tot) + '\n')
-            if fwd / tot >= threshold:
-                tsvout.write("palin_mode" + "\t" + "forward")
-            elif rev / tot >= threshold:
-                tsvout.write("palin_mode" + "\t" + "reverse")
+            tsvout.write("10_percent:ratio" + "\t"+ str(fwd/tot) + '\n')
+            if fwd / tot >= low:
+                if fwd / tot >= high:
+                    tsvout.write("palin_mode" + "\t" + "forward")
+                else:
+                    tsvout.write("rerun")
+            elif rev / tot >= low:
+                if rev / tot >= high:
+                    tsvout.write("palin_mode" + "\t" + "reverse")
+                else:
+                    tsvout.write("rerun")
             else:
                 tsvout.write("palin_mode" + "\t" + "drop")
         else:
