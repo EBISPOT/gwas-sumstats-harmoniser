@@ -103,7 +103,7 @@ rule generate_strand_counts:
         local_resources=config["local_resources"],
         repo_path=config["repo_path"]
     shell:
-        "if [ `grep -c rerun {input.sc_sum}` == '0' ];then rename 10percent full {input.ten_ss}; else "
+        "if [ `grep -c rerun {input.sc_sum}` == '0' ];then rename.ul 10percent full {input.ten_ss}; else "
         "python {params.repo_path}/harmoniser/genetics-sumstat-harmoniser/sumstat_harmoniser/main.py --sumstats {input.in_ss} "
         "--vcf {params.local_resources}homo_sapiens-chr{wildcards.chromosome}.vcf.gz "
         "--chrom_col chromosome "
