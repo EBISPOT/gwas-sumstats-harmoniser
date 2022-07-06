@@ -1,12 +1,13 @@
 #!/bin/bash
 
+file_dir=$2
+output=$4
 
-file_dir=$1
 
-head -q -n1 $file_dir/*.merged.hm | head -n1 > $file_dir/harmonised.tsv
+head -q -n1 $file_dir/chr*.merged.hm | head -n1 > $output
 for c in {1..22}; do
-        tail -n+2  $file_dir/$c.merged.hm >> $file_dir/harmonised.tsv
+        tail -n+2  $file_dir/chr$c.merged.hm >> $output
 done
-tail -n+2  $file_dir/X.merged.hm >> $file_dir/harmonised.tsv
-tail -n+2  $file_dir/Y.merged.hm >> $file_dir/harmonised.tsv
-tail -n+2  $file_dir/MT.merged.hm >> $file_dir/harmonised.tsv
+tail -n+2  $file_dir/chrX.merged.hm >> $output
+tail -n+2  $file_dir/chrY.merged.hm >> $output
+tail -n+2  $file_dir/chrMT.merged.hm >> $output
