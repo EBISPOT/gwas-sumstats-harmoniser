@@ -185,7 +185,8 @@ def main():
 
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-f', help='The name of the file to be processed', required=True)
-    argparser.add_argument('-d', help='The name of the output directory', required=True)
+    #argparser.add_argument('-d', help='The name of the output directory', required=True)
+    argparser.add_argument('-o', help='The name of the output file', required=True)
     argparser.add_argument('-db', help='The name of the synonyms database. If not provided ensembl rest API will be used', default=None, required=False)
     argparser.add_argument('--print_only', help='only print the lines removed and do not write a new file', action='store_true')
     argparser.add_argument('--log', help='The name of the log file')
@@ -193,13 +194,15 @@ def main():
 
     file = args.f
     db = args.db
-    out_dir = args.d
+    #out_dir = args.d
+    filename=args.o
     log_file = args.log
-    filename = get_filename(file)
+    #filename = get_filename(file)
 
     #new_filename = out_dir + drop_last_element_from_filename(filename) + '.tsv' # drop the build from the filename
-    new_filename = out_dir + filename + '.qc.tsv' 
-    
+    #new_filename = out_dir + filename + '.qc.tsv' 
+    new_filename=filename
+
     header = None
     is_header = True
     lines = []
