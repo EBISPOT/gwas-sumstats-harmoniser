@@ -18,9 +18,9 @@ def merge_ss_vcf(ss, vcf, from_build, to_build):
     ssdf_with_rsid = ssdf[rsid_mask]
     ssdf_without_rsid = ssdf[~rsid_mask]
     header = list(ssdf.columns.values)
-    dirname = os.path.splitext(ss)[0]
-    if not os.path.exists(dirname):
-        os.mkdir(dirname)
+    #dirname = os.path.splitext(ss)[0]
+    #if not os.path.exists(dirname):
+    #    os.mkdir(dirname)
     print("starting rsid mapping")
     print("ssdf with rsid empty?: {}".format(ssdf_with_rsid.empty))
     # if there are records with rsids
@@ -34,7 +34,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build):
             mapped[CHR_DSET] = mapped["CHR"].astype("str").str.replace("\..*$","")
             mapped[BP_DSET] = mapped["POS"].astype("str").str.replace("\..*$","")
             mapped = mapped[header]
-            outfile = os.path.join(dirname, "{}.merged".format(chrom))
+            outfile = os.path.join("{}.merged".format(chrom))
             mapped.to_csv(outfile, sep="\t", index=False, na_rep="NA")
 
             ssdf_with_rsid = mergedf[mergedf["ID"].isnull()]
@@ -53,7 +53,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build):
         print(chrom)
         df = ssdf.loc[ssdf[CHR_DSET].astype("str") == chrom]
         df[BP_DSET] = df[BP_DSET].astype("str").str.replace("\..*$","")
-        outfile = os.path.join(dirname, "{}.merged".format(chrom))
+        outfile = os.path.join("{}.merged".format(chrom))
         if os.path.isfile(outfile):
             print("df to {}".format(outfile))
             print(df)
@@ -64,7 +64,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build):
             df.to_csv(outfile, sep="\t", mode='w', index=False, na_rep="NA")
     print("liftover complete")
     no_chr_df = ssdf[ssdf[CHR_DSET].isnull()]
-    outfile = os.path.join(dirname, "unmapped")
+    outfile = os.path.join("unmapped")
     no_chr_df.to_csv(outfile, sep="\t", index=False, na_rep="NA")
 
 
