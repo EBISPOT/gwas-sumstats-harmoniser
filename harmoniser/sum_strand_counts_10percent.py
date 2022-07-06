@@ -7,7 +7,7 @@ import os
 from utils import *
 
 
-def aggregate_counts(in_dir, out_dir, threshold):
+def aggregate_counts(in_dir,out,threshold):
 
     variant_type_dict = {
         "Palindormic variant": 0,
@@ -23,7 +23,7 @@ def aggregate_counts(in_dir, out_dir, threshold):
     """
     all_files = glob.glob(os.path.join(in_dir, "*.sc"))
 
-    with open(os.path.join(out_dir, "10_percent_total_strand_count.tsv"), 'w') as tsvout:
+    with open(os.path.join(out), 'w') as tsvout:
         for f in all_files:
             with open(f,'r') as tsvin:
                 tsvin = csv.reader(tsvin, delimiter='\t')
@@ -40,38 +40,42 @@ def aggregate_counts(in_dir, out_dir, threshold):
         tot = fwd + rev
         
         low=1-10*(1-threshold) # 0.9
+        #high=1-(1-threshold)/10 # 0.999
         high=0.995
         
         if tot > 0:
-            tsvout.write("10_percent:ratio" + "\t"+ str(fwd/tot) + '\n')
+            tsvout.write("10_percent_ratio" + "\t"+ str(fwd/tot) + '\n')
             if fwd / tot >= low:
                 if fwd / tot >= high:
-                    tsvout.write("palin_mode" + "\t" + "forward")
+                    tsvout.write("palin_mode" + "\t" + "forward"+ '\n')
+                    tsvout.write("status" + "\t"+"contiune")
                 else:
-                    tsvout.write("rerun")
+                    tsvout.write("status" + "\t"+"rerun")
             elif rev / tot >= low:
                 if rev / tot >= high:
-                    tsvout.write("palin_mode" + "\t" + "reverse")
+                    tsvout.write("palin_mode" + "\t" + "reverse"+ '\n')
+                    tsvout.write("status" + "\t"+"contiune")
                 else:
-                    tsvout.write("rerun")
+                    tsvout.write("status" + "\t"+"rerun")
             else:
-                tsvout.write("palin_mode" + "\t" + "drop")
+                tsvout.write("palin_mode" + "\t" + "drop"+ '\n')
+                tsvout.write("status" + "\t"+"contiune")
         else:
-            tsvout.write("palin_mode" + "\t" + "drop")
+            tsvout.write("palin_mode" + "\t" + "drop"+ '\n')
+            tsvout.write("status" + "\t"+"contiune")
 
 
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-i', help='The directory of strand ccount files', required=True)
-    argparser.add_argument('-o', help='The directory to write to', required=True)
-    argparser.add_argument('-config', help='The path to the config.yaml file')
+    argparser.add_argument('-o', help='output file name', required=True)
+    argparser.add_argument('-t', help='The threshold determine the number')
     args = argparser.parse_args()
     
     in_dir = args.i
-    out_dir = args.o
-    config = args.config
-    threshold = get_properties(config)['threshold']
-    aggregate_counts(in_dir, out_dir, threshold)
+    out = str(args.o)
+    threshold = float(args.t)
+    aggregate_counts(in_dir,out,threshold)
 
 
 if __name__ == "__main__":
