@@ -18,6 +18,8 @@ from subprocess import Popen, PIPE
 from collections import OrderedDict, Counter
 from lib.SumStatRecord import SumStatRecord
 from lib.VCFRecord import VCFRecord
+from vgraph import norm # need additional installation (YUE)
+from lib.Seq import Seq
 
 def main():
     """ Implements main logic.
@@ -35,17 +37,18 @@ def main():
     
     #######YUE################
     tbx=pysam.TabixFile(args.vcf)
+    build=pysam.Fastafile(args.fasta)
     #######YUE################
     
     # Process each row in summary statistics
     for counter, ss_rec in enumerate(yield_sum_stat_records(args.sumstats,
                                                             args.in_sep)):
-
         # If set to only process 1 chrom, skip none matching chroms
         if args.only_chrom and not args.only_chrom == ss_rec.chrom:
             continue
 
         # Validate summary stat record
+        # check if pos is int, other_al==effect_al,or N appears in alleles
         ret_code = ss_rec.validate_ssrec()
         if ret_code:
             ss_rec.hm_code = ret_code
@@ -65,10 +68,18 @@ def main():
             # Get VCF reference variants for this record
             vcf_recs = get_vcf_records(
                         tbx,
-                        ss_rec.chrom,
+                       ss_rec.chrom,
                         ss_rec.pos)
+            
             # Extract the VCF record that matches the summary stat record
             vcf_rec, ret_code = exract_matching_record_from_vcf_records(
+                ss_rec, vcf_recs)
+            # if cannot extractVCF record or failed to matches VCF record, normalize the summary stat record. Then extract and match again(YUE)
+            if vcf_rec is None:
+                print ("vcf rec is empty")
+                ss_rec=normalise(ss_rec,build)
+                vcf_recs = get_vcf_records(tbx,ss_rec.chrom,ss_rec.pos)
+                vcf_rec, ret_code = exract_matching_record_from_vcf_records(
                 ss_rec, vcf_recs)
 
             # Set return code when vcf_rec was not found
@@ -220,6 +231,9 @@ def parse_args():
                         required=True)
     infile_group.add_argument('--vcf', metavar="<file>",
                         help=('Reference VCF file. Use # as chromosome wildcard.'), type=str, required=True)
+    infile_group.add_argument('--fasta', metavar="<file>",
+                        help=('Indexed reference genome fasta file'), type=str,
+                        required=True)
 
     # Output file args
     outfile_group = parser.add_argument_group(title='Output files')
@@ -636,6 +650,7 @@ def get_vcf_records(tbx, chrom, pos):
     result=tbx.fetch(chrom, int(pos)-1, int(pos))
     # each records returned by fetch is str, it needs to be change into list for VCF records to process
     response=[list(n.split("\t")) for n in result]
+    print(response)
     #######YUE################
     return [VCFRecord(line) for line in response]
 
@@ -703,6 +718,54 @@ def open_gzip(inf, rw="rb"):
     else:
         return open(inf, rw)
 
+# from gwas2vcf normalise function with vgraph (YUE)
+def normalise(rec, build, padding=100):
+    """normalization result:
+       before normalization Sum stat record:
+             chrom        : 1
+             pos          : 233431153
+             other allele : GAAAACAAAAACA
+             effect allele: GAAAACAAAAACAAAAACA
+             beta         : -0.125
+             odds ratio   : 1.1257
+             EAF          : 0.420723
+       
+       After normalization Sum stat record:
+              chrom        : 1
+              pos          : 233431153
+              other allele : G
+              effect allele: GAAAACA
+              beta         : -0.125
+              odds ratio   : 1.1257
+              EAF          : 0.420723
+    """
+    # skip SNVs which do not need trimming
+    if len(str(rec.other_al)) < 2 and len(str(rec.effect_al)) < 2:
+        return
+    pos0=rec.pos-1
+    seq=build.fetch("chr"+rec.chrom,pos0 - padding,pos0 + padding) # pysam fetch
+    # left-align and trim alleles by normalize_alleles function
+    start, stop, alleles = norm.normalize_alleles(str(seq), padding, padding + len(str(rec.other_al)), (str(rec.other_al), str(rec.effect_al)))
+    # set trimmed alleles and new position
+    rec.other_al = alleles[0]
+    rec.effect_al = alleles[1]
+    rec.pos = (pos0 - padding) + start + 1
+
+    # add start base if lost during trimming ("." is not allowed to appear in alleles)
+    if len(str(rec.other_al)) == 0 or len(str(rec.effect_al )) == 0:
+        # get distance from old and new positions
+        dist = (rec.pos - 1) - pos0
+        # extract base from seq
+        left_nucleotide = seq[(padding + dist) - 1 : (padding + dist)]
+        # set alleles and pos
+        rec.other_al = left_nucleotide + rec.other_al
+        rec.effect_al  = left_nucleotide + rec.effect_al 
+        rec.pos = rec.pos - 1
+        
+    rec.other_al=Seq(rec.other_al) # change str into Seq
+    rec.effect_al=Seq( rec.effect_al)
+    return rec
+            
 def str2bool(v):
     """ Parses argpare boolean input
     """
