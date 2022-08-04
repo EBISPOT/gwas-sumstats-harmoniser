@@ -1,18 +1,17 @@
 #!/bin/bash
 
-snakemake_dir=./
-source .env/bin/activate
-cd $snakemake_dir
+set +u;source ~/.bashrc;set -u
+set +u;source /homes/yueji/miniconda3/etc/profile.d/conda.sh;set -u
+set +u;conda init;set -u
+set +u;conda activate /homes/yueji/miniconda3/envs/conda_harmonization/;set -u 
 
-for f in /toharmonise/*.tsv; do
-    n=$(echo $f | sed "s/.tsv//g")
-    h=$n/harmonised.qc.tsv
-    # if job already running or snakemake target already exists.
-    if bjobs -w | grep -q $n || [ -e $h ] ; then
-        :
-    else
-        echo "Submitting $n for harmonisation"
-        mkdir -p $n
-        bsub "snakemake -d $n --configfile $snakemake_dir/config.yaml --profile lsf $h"
-    fi
-done
+nextflow='path of main.nf'
+config='path of config.ymal'
+to_harm='path of Ready_to_harmonise'
+
+# Creat a folder as the launch folder (default is using date)
+folder=$(date +'%d_%m_%Y')
+mkdir -p $folder
+
+cd $folder
+nextflow $nextflow -c $config --inputPath $folder --to_harm $to_harm --date +'%d_%m_%Y' -resume 
