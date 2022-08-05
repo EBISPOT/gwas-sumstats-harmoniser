@@ -15,6 +15,8 @@ process map_to_build {
 
     shell:
     """
+    mv $from_build ${launchDir}/
+    
     python ${params.script_path}/bin/map_to_build_nf.py -f $tsv \
     -from_build $from_build \
     -to_build $params.to_build \
