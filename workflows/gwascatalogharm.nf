@@ -53,7 +53,7 @@ include {  move_files } from '../subworkflows/local/move_files'
 
 // Info required for completion email and summary
 
-workflow {
+workflow GWASCATALOGHARM {
     //
     // MODULE: check reference
     //
