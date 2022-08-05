@@ -12,4 +12,5 @@ folder=$(date +'%d_%m_%Y')
 mkdir -p $folder
 
 cd $folder
-nextflow $nextflow -c $config --inputPath $folder --to_harm_folder $to_harm -resume --execute local(or LSF)
+nextflow $nextflow -c $config --inputPath $folder --to_harm_folder $to_harm -resume 
+#further function: --execute local(or LSF)
