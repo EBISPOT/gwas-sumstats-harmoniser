@@ -49,7 +49,8 @@ workflow {
     //
     ch_chrom=Channel.from(params.chrom).flatten().map{"chr"+it}
     // ch_chrom looks like: [chr1,chr2,chr3...]
-    ch_files=Channel.fromPath("${params.inputPath}/*.tsv").map{input_list(it)} 
+    ch_files=Channel.fromPath("${params.to_harm_folder}/*.tsv").map{input_list(it)}.take(200)
+    
     // input path containing all tsv file to be processed
     // ch_files channel looks like: [GCST010681, 37,path of the file]
     prepare_reference(ch_chrom)
