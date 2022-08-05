@@ -15,9 +15,9 @@ process map_to_build {
 
     shell:
     """
-    mv $tsv ${launchDir}/
+    mv $tsv ${launchDir}/${GCST}.f.tsv
     
-    python ${params.script_path}/bin/map_to_build_nf.py -f $tsv \
+    python ${params.script_path}/bin/map_to_build_nf.py -f ${GCST}.f.tsv \
     -from_build $from_build \
     -to_build $params.to_build \
     -vcf "${params.ref}/homo_sapiens-chr*.parquet"
