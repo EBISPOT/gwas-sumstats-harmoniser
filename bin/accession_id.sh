@@ -24,7 +24,7 @@ then
 fi
 
 id=$(echo $GCST|sed 's/GCST/1/g')
-lower=$((10#$id/1000*1000))
+lower=$((10#$id/1000*1000+1))
 upper=$(((10#$id/1000+1)*1000))
 
 gl=GCST${lower:1}
