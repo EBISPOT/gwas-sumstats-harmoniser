@@ -20,6 +20,7 @@ psutil==5.7.0
 pyarrow==0.17.1
 pyliftover==0.4
 pyrsistent==0.16.0
+pysam==0.18.0
 python-dateutil==2.8.1
 pytz==2020.1
 PyYAML==5.3.1
