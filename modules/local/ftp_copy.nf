@@ -17,7 +17,7 @@ process ftp_copy{
 
     shell:
     """
-    folder=\$(sh ${params.script_path}/bin/accession_id.sh -n $GCST)
+    folder=\$(bash ${params.script_path}/bin/accession_id.sh -n $GCST)
     path=${params.ftp}/\$folder/$GCST/harmonised/
 
     if [ ! -d \$path ] 
