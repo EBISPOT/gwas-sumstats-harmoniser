@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # merge on hm_variant_id with vcf of desired build
 # if variant_id is rsid and ID != variant_id or not synonym --> drop and create discrep df
 
