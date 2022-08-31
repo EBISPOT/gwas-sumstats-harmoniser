@@ -52,3 +52,16 @@ TO_QUERY_DSETS_DEFAULT = {SNP_DSET, MANTISSA_DSET, EXP_DSET, STUDY_DSET, CHR_DSE
                                 HM_EFFECT_DSET, HM_OTHER_DSET, HM_FREQ_DSET, HM_VAR_ID, HM_CODE}
 TO_INDEX = {SNP_DSET, PVAL_DSET, CHR_DSET, BP_DSET}
 REQUIRED = {CHR_DSET, PVAL_DSET, SNP_DSET}#, EFFECT_DSET, OTHER_DSET}
+
+HARMONISER_ARG_MAP = {
+    CHR_DSET: "--chrom_col",
+    BP_DSET: "--pos_col",
+    EFFECT_DSET: "--effAl_col",
+    OTHER_DSET: "--otherAl_col",
+    SNP_DSET: "--rsid_col",
+    BETA_DSET: "--beta_col",
+    OR_DSET: "--or_col",
+    RANGE_L_DSET: "--or_col_lower",
+    RANGE_U_DSET: "--or_col_upper",
+    FREQ_DSET: "--eaf_col"
+}
