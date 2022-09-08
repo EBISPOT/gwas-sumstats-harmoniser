@@ -1,64 +1,114 @@
 # gwas-sumstats-harmoniser
-GWAS Summary Statistics Data Harmonisation pipeline
 
-The pipeline workflow is managed by `snakemake`, so it can be followed in the [Snakefile](Snakefile). 
+GWAS Summary Statistics Data Harmonisation pipeline aims to bring the variants to the desired genome assembly and then harmonises variants to match variants in reference data.
 
-This pipeline, brings the variants to the desired genome assembly and then harmonises them. The harmonisation is performed by [sumstat_harmoniser](https://github.com/opentargets/sumstat_harmoniser) which is used to a) find the orientation of the variants, b) resolve RSIDs from locations and alleles and c) orientate the variants to the reference strand.
+The harmonisation process is the following:
+      a) Mapping variant IDs to locations*.
+      b) find the orientation of the variants*. 
+      c) resolve RSIDs from locations and alleles 
+      d) orientate the variants to the reference strand.
 
-# Installation
-
-The following are required:
-
-- python3
-- [HTSlib](http://www.htslib.org/download/) for tabix
-
-- `git clone --recurse-submodules https://github.com/EBISPOT/gwas-sumstats-harmoniser.git` # clone this repo and submodules
-- `cd gwas-sumstats-harmoniser`
-- `virtualenv --python=python3 .venv` # create virtual environment
-- `source .venv/bin/activate` # activate virtual environment
-- `pip install -r requirements.txt`
-
-# Executing the pipeline
-
-### Environment
-The recommended way to run the pipeline is on HPC. Follow the snakemake [guidelines](https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles) for setting up a profile for your cluster. Although not recommended, it is possible to run locally but understand the memory and disk space requirements. See [here](https://github.com/Snakemake-Profiles/snakemake-lsf) for LSF (bsub) snakemake profile.
-
+## Prerequisites 
 ### Memory
-To optimise for speed, the pipeline allocates 28GB for the mapping rule. You could lower this (edit the Snakefile) to around 20GB, but expect failures anywhere lower.
+To optimise for speed, the pipeline allocates 28GB for the mapping variants on all chromosomes. You could lower this to around 20GB, but expect failures anywhere lower. For any user who wants to run on the local computer, we suggest running chr22 for testing purposes.
+### Packages
+Compulsory:
+1. python3
+2. [HTSlib for tabix](http://www.htslib.org/download/)
+3. [Nextflow (>=21.04.0)](https://www.nextflow.io/docs/latest/getstarted.html#installation)
 
-### Disk space
-Allow 20GB for the VCF reference files. If using a local synonyms table (see configuration) allow an additional 70GB (for Ensembl release 100).
+optional:
+1. conda  
+2. or Singularity (2.3.x or higher)
+3. or Docker
 
-### Configuration
-Edit the [config.yaml](config.yaml) if you want to change from any of the defaults. It's recommended to set an absoulte path for the `local_resources`. Set `local_synonyms` to `False` if you wish to check variant name synonynms against the Ensembl REST API (not recommended, but if you don't have 70GB free space, you can do this).
+## 1. Installation
+First clone this repository:
+```
+git clone -b nextflow --recurse-submodules https://github.com/EBISPOT/gwas-sumstats-harmoniser.git 
+cd gwas-sumstats-harmoniser
+```
+If you decide to run on conda, please run:
+```
+conda create -n harmonisation python=3.9
+conda activate harmonisation
+pip install -r requirements.txt
+```
+Change the permission of all scripts in the bin folder:
+```
+chmod -R 777 ${script_folder}/bin
+```
 
-### Execution
-- The pipeline takes .tsv summary statistics in [this format](https://www.ebi.ac.uk/gwas/docs/methods/summary-statistics)
-- The name must follow the convention `<any identifier><genome assembly number>.tsv` e.g. my_summary_stats_37.tsv (37 denotes the genome assembly of the data in the file is hg19 or GRCh37 - see [config](config.yaml) for the assembly table). Note that his number is not the desired build, that is set in the [config](config.yaml).
+## 2. Reference preparation
 
-- Assuming the pipeline will run on an LSF cluster and the file we want to harmonise is called `/path/to/example37.tsv`:
-- `snakemake --configfile config.yaml --profile lsf /path/to/example37/harmonised.qc.tsv`
-- see [this](example_wrapper.sh) for an idea of how to run
+The resource bundle is a collection of standard files for harmonizaing GWAS summary statistics data. We support the ensembl variants VCF reference (hg38, dbSNP 151) and synonyms table . These files can be directly downloaded from our [FTP](http:) server.
 
-# Pipeline 
-- First make sure your files are correctly [formatted](https://www.ebi.ac.uk/gwas/docs/methods/summary-statistics) using the [validator](https://github.com/EBISPOT/gwas-sumstats-validator). 
-- Understand the [configuration](config.yaml) and edit to you requirements.
-## Steps
-### 1. Get references
-- Fetch VCF files from Ensembl and convert to .parquet format
-### 2. Map variants to desired genome assembly
-- Checks variant IDs against those in the references and updates locations. If not found, or no variant IDs are given, liftover is used.
-### 3. Determine strand consensus
-- Check the the strand of non-palindromic variants by querying their position and alleles against the refereces. If the percentage is >= threshold (default set to 0.99 in [config](config.yaml)), a consensus is made. This value (forward, reverse or drop) is carried to the next step.
-### 4. Harmonise associations to reference
-- see [here](https://github.com/opentargets/sumstat_harmoniser) for more details.
-### 5. QC
-- Update any missing variant IDs.
-- If given variant ID is different from the one inferred, check if it is a synonym - if not, drop it.
-  - The first time this runs, if you have specified to use a local synonyms table in the config, it will need to build that table. 
-- Drop any records with missing mandatory fields.
+Users can also prepare their own reference:
+```
+nextflow main.nf --reference -c ./config/reference.config
+```
+Path of the resources can be changed in the file ./config/reference.config
 
+## 3. Running the pipeline:
+### 3.1 General users
 
+step1: prepare input file:
+* Files are correctly formatted using the validator.
+* The name must follow the convention <any identifier>_<genome assembly number>.tsv e.g. my_summary_stats_37.tsv (37 denotes the genome assembly of the data in the file is hg19 or GRCh37)
 
+step2: run the pipeline:
+Harmonising one file:
 
+```
+nextflow main.nf --reference -c ./config/lsf.config --harm --file Full_path_of_file_to_be_harmonized (--list path_of_list.txt)
+```
+or harmonising a batch of files in list.txt file, which is a txt file that each row is a full path of tsv files to be harmonised. 
+```
+nextflow main.nf --reference -c ./config/lsf.config --harm --list path_of_list.txt
+```
 
+All results will be stored in the current working directory.
+
+### 3.2 GWAS catalog users
+
+We constructed a customized pipeline for GWAS catalog daily running. This pipeline will automatically capture the first 200 studies from all_harm_folder and move files to the current working folder. Then harmonise all files and store intermediate files in the working folder. Successfully harmonised files' results (*.h.tsv.gz, *.tsv.gz.tbi and *.running.log) will be moved to ftp_folder, and files that failed to be harmonised are moved to failed_folder. All paths can be customized in ./config/gwascatalog.config files.
+
+```
+nextflow main.nf --reference -c ./config/gwascatalog.config --gwascatalog
+```
+
+### 3.3. Other options:
+* -resume (Execute the script using the cached results)
+* -with-docker 'docker://ebispot/gwas-sumstats-harmoniser:latest' (run docker)
+* -with-singularity 'docker://ebispot/gwas-sumstats-harmoniser:latest' (run Singularity)
+  
+# 6. The harmonisation process is the following:
+
+### 1. Mapping variant IDs to locations
+  a. Update base pair location value by mapping variant ID using latest Ensembl release, or
+  b. if above not possible, liftover base pair location to latest genome build, or
+  c. if above not possible, remove variant from file.
+
+### 2. Orientation (Open Targets project)
+a. Using chromosome, base pair location and the effect and other alleles, check the orientation of all non-palindromic variants against Ensembl VCF references to detemine consensus:
+  * forward
+  * reverse
+  * mixed
+b. If the consensus is 'forward' or 'reverse', the following harmonisation steps are performed on the palindromic variants, with the assumption that they are orientated according to the consensus, otherwise palindromic variants are not orientated.
+
+c. Using chromosome, base pair location and the effect and other alleles, query each variant against the Ensembl VCF reference to harmonise as appropriate by either:
+  * keeping record as is because:
+        it is already correctly orientated
+        it cannot be orientated
+  * orientating to reference strand:
+        reverse complement the effect and other alleles
+  * flipping the effect and other alleles
+        because the effect and other alleles are flipped in the reference
+        this also means the beta, odds ratio, 95% CI and effect allele frequency are inverted
+  * a combination of the orientating and flipping the alleles.
+
+d.The result of the orientation is the addition of a set of new fields for each record (see below). A harmonisation code is assigned to each record indicating the harmonisation process that was performed (note that currently any processes involving 'Infer strand' are not being used).
+
+### 3. Filtering and QC
+  * Variant ID is set to variant IDs found by step (2).
+  * Records without a valid value for variant ID, chromosome, base pair location and p-value are removed.
