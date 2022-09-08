@@ -3,10 +3,10 @@
 GWAS Summary Statistics Data Harmonisation pipeline aims to bring the variants to the desired genome assembly and then harmonises variants to match variants in reference data.
 
 The harmonisation process is the following:
-      a) Mapping variant IDs to locations*.
-      b) find the orientation of the variants*. 
-      c) resolve RSIDs from locations and alleles 
-      d) orientate the variants to the reference strand.
+* a) Mapping variant IDs to locations.
+* b) Find the orientation of the variants. 
+* c) Resolve RSIDs from locations and alleles 
+* d) Orientate the variants to the reference strand.
 
 ## Prerequisites 
 ### Memory
@@ -82,33 +82,5 @@ nextflow main.nf --reference -c ./config/gwascatalog.config --gwascatalog
 * -with-docker 'docker://ebispot/gwas-sumstats-harmoniser:latest' (run docker)
 * -with-singularity 'docker://ebispot/gwas-sumstats-harmoniser:latest' (run Singularity)
   
-# 6. The harmonisation process is the following:
-
-### 1. Mapping variant IDs to locations
-  a. Update base pair location value by mapping variant ID using latest Ensembl release, or
-  b. if above not possible, liftover base pair location to latest genome build, or
-  c. if above not possible, remove variant from file.
-
-### 2. Orientation (Open Targets project)
-a. Using chromosome, base pair location and the effect and other alleles, check the orientation of all non-palindromic variants against Ensembl VCF references to detemine consensus:
-  * forward
-  * reverse
-  * mixed
-b. If the consensus is 'forward' or 'reverse', the following harmonisation steps are performed on the palindromic variants, with the assumption that they are orientated according to the consensus, otherwise palindromic variants are not orientated.
-
-c. Using chromosome, base pair location and the effect and other alleles, query each variant against the Ensembl VCF reference to harmonise as appropriate by either:
-  * keeping record as is because:
-        it is already correctly orientated
-        it cannot be orientated
-  * orientating to reference strand:
-        reverse complement the effect and other alleles
-  * flipping the effect and other alleles
-        because the effect and other alleles are flipped in the reference
-        this also means the beta, odds ratio, 95% CI and effect allele frequency are inverted
-  * a combination of the orientating and flipping the alleles.
-
-d.The result of the orientation is the addition of a set of new fields for each record (see below). A harmonisation code is assigned to each record indicating the harmonisation process that was performed (note that currently any processes involving 'Infer strand' are not being used).
-
-### 3. Filtering and QC
-  * Variant ID is set to variant IDs found by step (2).
-  * Records without a valid value for variant ID, chromosome, base pair location and p-value are removed.
+# 6. Harmonization steps:
+More information about the harmonization process refers to [GWAS catalog documents](https://www.ebi.ac.uk/gwas/docs/methods/summary-statistics)
