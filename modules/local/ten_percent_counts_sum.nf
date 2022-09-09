@@ -1,10 +1,4 @@
 process ten_percent_counts_sum {
-    publishDir "${launchDir}/$GCST", mode: 'copy'
-    queue 'short'
-    memory { 1.GB * task.attempt }
-    time { 1.hour * task.attempt }
-    errorStrategy 'retry'
-    maxRetries 3
 
     input:
     val GCST
@@ -14,7 +8,7 @@ process ten_percent_counts_sum {
 
     shell:
     """
-    python ${params.script_path}/bin/sum_strand_counts_10percent_nf.py \
+    sum_strand_counts_10percent_nf.py \
     -i ${launchDir}/$GCST/ten_sc \
     -o ten_percent_total_strand_count.tsv \
     -t ${params.threshold} 

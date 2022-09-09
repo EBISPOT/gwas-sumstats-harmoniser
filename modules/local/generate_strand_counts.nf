@@ -1,10 +1,4 @@
 process generate_strand_counts {
-    publishDir "${launchDir}/$GCST/all_sc", mode: 'copy'
-    queue 'short'
-    memory { 5.GB * task.attempt }
-    time { 1.hour * task.attempt }
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'ignore' } // error caused by memory retry; others ignore
-    maxRetries 3
 
     input:
     tuple val(GCST), val(chrom), path(merged), path(vcf), val(status)
@@ -17,7 +11,7 @@ process generate_strand_counts {
 
     shell:
     """
-    python ${params.script_path}/bin/sumstat_harmoniser/main_pysam.py \
+    main_pysam.py \
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
     --chrom_col chromosome \

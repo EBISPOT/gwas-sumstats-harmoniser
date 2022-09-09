@@ -1,10 +1,4 @@
 process ftp_copy{
-    publishDir "${params.ftp}", mode: 'move'
-    queue 'short' // will change into datamover in real case.
-    memory { 1.GB * task.attempt }
-    time { 1.hour * task.attempt }
-    errorStrategy 'retry'
-    maxRetries 3
 
     input:
     tuple val(GCST), path(tsv), path(qc_tsv), path (log), val(status)
@@ -17,7 +11,7 @@ process ftp_copy{
 
     shell:
     """
-    folder=\$(bash ${params.script_path}/bin/accession_id.sh -n $GCST)
+    folder=\$(accession_id.sh -n $GCST)
     path=${params.ftp}/\$folder/$GCST/harmonised/
 
     if [ ! -d \$path ] 

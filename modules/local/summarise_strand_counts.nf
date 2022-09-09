@@ -1,10 +1,4 @@
 process summarise_strand_counts {
-    publishDir "${launchDir}/$GCST", mode: 'copy'
-    queue 'short'
-    memory { 1.GB * task.attempt }
-    time { 1.hour * task.attempt }
-    errorStrategy 'retry'
-    maxRetries 3
 
     input:
     tuple val(GCST), val(status)
@@ -17,7 +11,7 @@ process summarise_strand_counts {
 
     shell:
     """ 
-    python ${params.script_path}/bin/sum_strand_counts_nf.py \
+    sum_strand_counts_nf.py \
     -i ${launchDir}/$GCST/all_sc \
     -o total_strand_count.tsv \
     -t ${params.threshold}

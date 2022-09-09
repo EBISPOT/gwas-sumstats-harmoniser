@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[97]:
+
+
 import pandas as pd
 import os
 import glob
@@ -10,6 +13,10 @@ from copy import deepcopy
 from subprocess import Popen, PIPE
 from collections import OrderedDict, Counter
 
+
+# In[147]:
+
+
 def complement(s): 
     basecomplement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N'} 
     letters = list(s) 
@@ -17,6 +24,9 @@ def complement(s):
     return ''.join(letters)
 def revcom(s):
     return complement(s[::-1])
+
+
+# In[ ]:
 
 
 def fill_hm_15(ss,palin_mode,outfile):
@@ -54,6 +64,11 @@ def fill_hm_15(ss,palin_mode,outfile):
         # Add new code hm_code=17, which changed from 15, means alleles in the data do not match reference alleles, but they are indels, so keep revcomp allele of raw data at here.
         
     ssdf.to_csv(outfile, sep="\t", index=False, na_rep="NA")
+
+        
+
+
+# In[ ]:
 
 
 def main():

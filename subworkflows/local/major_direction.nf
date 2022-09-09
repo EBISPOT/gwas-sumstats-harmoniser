@@ -6,11 +6,14 @@ include {summarise_strand_counts} from '../../modules/local/summarise_strand_cou
 
 workflow major_direction{
     take:
-    input
     chr
+    files
     
     main:
-    map_to_build(input,chr)
+    //input: val(GCST), val(from_build), path(tsv), chr
+    files.view()
+    chr.view()
+    map_to_build(files,chr)
     //example: output is [GCST1,[path of 1.merged, path of 2.merged .....]]
     map_to_build.out.mapped
                     .transpose()
@@ -26,8 +29,8 @@ workflow major_direction{
     /* example:
     homo_sapiens-chr1.vcf.gz ->[chr1, path of homo_sapiens-chr1.vcf.gz] (ref_ch_chr)
     */
-
-    map_chr_ch.combine(ref_chr_ch,by:0).set{count_ch}
+    
+    count_ch=map_chr_ch.combine(ref_chr_ch,by:0)
     /* example
     [chr1, path of homo_sapiens-chr1.vcf.gz] (ref_chr_ch) + 
     [chr1, GCST1, path of 1.merged] (map_chr_ch)
@@ -40,7 +43,6 @@ workflow major_direction{
     ten_percent_counts_sum(ten_to_sum)
     //example: output [GCST,path ten_percent.tsv,drop,rerun],[GCST,path ten_percent.tsv,forward,countiune]
     
-
     // determine whether conatin a string in the output txt file
     ten_percent_counts_sum.out.ten_sum.branch{rerun:it.contains("rerun")
                                           contiune:it.contains("contiune")}
@@ -64,34 +66,25 @@ workflow major_direction{
 
     //branch contiune
     // [GCST, ten_percent, forward,contiune] (contiune_branch)
-    summarise_strand_counts.out.all_sum.mix(branch.contiune).set{all_files}
+    all_files=summarise_strand_counts.out.all_sum.mix(branch.contiune)
     //hm_input: [GCST,path ten_percent.tsv,forward,countiune],[GCST,path Full.tsv,reverse,countiune]
-    count_ch.map{tuple(it[1],it[0],it[2],it[3])}.set{rearrnaged_count_ch}
+    rearrnaged_count_ch=count_ch.map{tuple(it[1],it[0],it[2],it[3])}
     // example: [chr1, GCST1, path of 1.merged,path of homo_sapiens-chr1.vcf.gz] (count_ch) 
     // example into: [GCST1,chr1,path of merged, path of vcf]
-    all_files.combine(rearrnaged_count_ch,by:0).set{all_input}
+    all_input=all_files.combine(rearrnaged_count_ch,by:0)
     //example: [GCST,path ten_percent.tsv,forward,countiune,chr,path of merged, path of vcf]
-    all_input.map{it[0,2..6]}.set{hm_input}
-    all_input.map{it[0..1]}.unique().set{direction_sum}
-    
+    hm_input=all_input.map{it[0,2..6]}
+    direction_sum=all_input.map{it[0..1]}.unique()
+
     emit:
-    //hm_input=hm_input
     hm_input=hm_input
     direction_sum=direction_sum
 }
 
 // groovy function
-def input_list(Path input) {
-    return ["chr"+input.getName().split('\\.')[0],input]
-}
-
 def prepare_reference (Path input) {
     // extract chromosome from file path and form a list in list
     return [input.getName().split('-')[1].split('\\.')[0], input]
-}
-
-def extract_from_build(Path input){
-    return[input.getName().split('\\.')[0].reverse().take(2).reverse(),input]
 }
 
 def get_chr(Path input) {

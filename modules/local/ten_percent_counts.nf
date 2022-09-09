@@ -1,10 +1,4 @@
 process ten_percent_counts {
-    publishDir "${launchDir}/$GCST/ten_sc", mode: 'copy'
-    queue 'short'
-    memory { 1.GB * task.attempt }
-    time { 1.hour * task.attempt }
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'ignore' } // error caused by memory retry; others ignore
-    maxRetries 3
 
     input:
     tuple val(chrom), val(GCST), path(merged), path(ref) 
@@ -23,7 +17,7 @@ process ten_percent_counts {
 
     (head -n 1 $merged; sed '1d' $merged| shuf -n \$n)>ten_percent.${chrom}.merged
 
-    python ${params.script_path}/bin/sumstat_harmoniser/main_pysam.py \
+    main_pysam.py \
     --sumstats ten_percent.${chrom}.merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
     --chrom_col chromosome \

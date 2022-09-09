@@ -1,10 +1,4 @@
 process failed_copy {
-    publishDir "${params.failed}", mode: 'move'
-    queue 'short'
-    memory { 1.GB * task.attempt }
-    time { 1.hour * task.attempt }
-    errorStrategy 'retry'
-    maxRetries 3
 
     input:
     tuple val(GCST), path(tsv), path(qc_tsv), path (log), val(status)
