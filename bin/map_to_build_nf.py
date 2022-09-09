@@ -11,17 +11,10 @@ from common_constants import *
 import os
 import glob
 import argparse
-<<<<<<< HEAD
 from ast import literal_eval
 
 
 def merge_ss_vcf(ss, vcf, from_build, to_build, chroms):
-=======
-
-CHROMOSOMES = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']
-
-def merge_ss_vcf(ss, vcf, from_build, to_build):
->>>>>>> bb62883ac728aff5bf9c4f0ed3ee6346aa16ccdd
     vcfs = glob.glob(vcf)
     ssdf = pd.read_csv(ss, sep='\t', dtype=str)
     rsid_mask = ssdf[SNP_DSET].str.startswith("rs").fillna(False)
