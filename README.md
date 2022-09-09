@@ -41,7 +41,7 @@ chmod -R 777 ${script_folder}/bin
 
 ## 2. Reference preparation
 
-The resource bundle is a collection of standard files for harmonizaing GWAS summary statistics data. We support the ensembl variants VCF reference (hg38, dbSNP 151) and synonyms table . These files can be directly downloaded from our [FTP](http:) server.
+The resource bundle is a collection of standard files for harmonisaing GWAS summary statistics data. We support the ensembl variants VCF reference (hg38, dbSNP 151) and synonyms table . These files can be directly downloaded from our [FTP](http:) server.
 
 Users can also prepare their own reference:
 ```
@@ -60,7 +60,7 @@ step2: run the pipeline:
 Harmonising one file:
 
 ```
-nextflow main.nf --reference -c ./config/lsf.config --harm --file Full_path_of_file_to_be_harmonized (--list path_of_list.txt)
+nextflow main.nf --reference -c ./config/lsf.config --harm --file Full_path_of_file_to_be_harmonised (--list path_of_list.txt)
 ```
 or harmonising a batch of files in list.txt file, which is a txt file that each row is a full path of tsv files to be harmonised. 
 ```
@@ -82,5 +82,5 @@ nextflow main.nf --reference -c ./config/gwascatalog.config --gwascatalog
 * -with-docker 'docker://ebispot/gwas-sumstats-harmoniser:latest' (run docker)
 * -with-singularity 'docker://ebispot/gwas-sumstats-harmoniser:latest' (run Singularity)
   
-# 6. Harmonization steps:
-More information about the harmonization process refers to [GWAS catalog documents](https://www.ebi.ac.uk/gwas/docs/methods/summary-statistics)
+# 6. Harmonisation steps:
+More information about the harmonisation process refers to [GWAS catalog documents](https://www.ebi.ac.uk/gwas/docs/methods/summary-statistics)
