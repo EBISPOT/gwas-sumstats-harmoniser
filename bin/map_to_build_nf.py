@@ -11,12 +11,10 @@ from common_constants import *
 import os
 import glob
 import argparse
-from utils import get_nextflow_config
+from ast import literal_eval
 
 
-CHROMOSOMES = get_nextflow_config()['params.chrom']
-
-def merge_ss_vcf(ss, vcf, from_build, to_build):
+def merge_ss_vcf(ss, vcf, from_build, to_build, chroms):
     vcfs = glob.glob(vcf)
     ssdf = pd.read_csv(ss, sep='\t', dtype=str)
     rsid_mask = ssdf[SNP_DSET].str.startswith("rs").fillna(False)
@@ -56,7 +54,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build):
     build_map = lft.LiftOver(lft.ucsc_release.get(from_build), lft.ucsc_release.get(to_build)) if from_build != to_build else None
     if build_map:
         ssdf[BP_DSET] = [lft.map_bp_to_build_via_liftover(chromosome=x, bp=y, build_map=build_map) for x, y in zip(ssdf[CHR_DSET], ssdf[BP_DSET])]
-    for chrom in CHROMOSOMES:
+    for chrom in chroms:
         print(chrom)
         df = ssdf.loc[ssdf[CHR_DSET].astype("str") == chrom]
         df[BP_DSET] = df[BP_DSET].astype("str").str.replace("\..*$","")
@@ -75,6 +73,27 @@ def merge_ss_vcf(ss, vcf, from_build, to_build):
     outfile = os.path.join("unmapped")
     no_chr_df.to_csv(outfile, sep="\t", index=False, na_rep="NA")
 
+def listify_string(string):
+    """
+    listify the input. If it's a list leave it.
+    It it looks like at list, make it a list.
+    Otherwise convert the input into a list - which is probably not what's wanted.
+    :param string:
+    :return: a list
+    """
+    if type(string) is str:
+        if "[" and "]" in string:
+            listified = literal_eval(string)
+        else:
+            listified = list(string)
+    elif type(string) is list:
+        listified = string
+    else:
+        listified = list(str(string))
+    return listified
+
+
+
 
 def main():
     argparser = argparse.ArgumentParser()
@@ -83,13 +102,17 @@ def main():
     argparser.add_argument('--log', help='The name of the log file')
     argparser.add_argument('-from_build', help='The original build e.g. "36" for NCBI36 or hg18', required=True)
     argparser.add_argument('-to_build', help='The latest (desired) build e.g. "38"', required=True)
+    argparser.add_argument('-chroms', help='A list of chromosomes to process', default=DEFAULT_CHROMS)
     args = argparser.parse_args()
 
     ss = args.f
     vcf = args.vcf
     from_build = args.from_build
     to_build = args.to_build
-    merge_ss_vcf(ss, vcf, from_build, to_build) 
+    chroms = listify_string(args.chroms)
+
+
+    merge_ss_vcf(ss, vcf, from_build, to_build, chroms)
 
 
 

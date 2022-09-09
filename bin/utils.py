@@ -3,8 +3,6 @@ import sys
 import yaml
 import pandas as pd
 import argparse
-import subprocess
-from ast import literal_eval
 
 
 sys_paths = ['SumStats/sumstats/','../SumStats/sumstats/','../../SumStats/sumstats/']
@@ -40,21 +38,6 @@ def get_harmonisation_mapper_args(csv_file):
     arg_list = ["{v} {k}".format(k=k, v=v) for k, v in HARMONISER_ARG_MAP.items() if k in list_headers(csv_file)]
     harm_args = " ".join(arg_list)
     return harm_args
-
-def get_nextflow_config():
-    nf_conf_str = subprocess.run(['nextflow', 'config', '-flat'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-    nf_conf_list = nf_conf_str.split("\n")
-    nf_conf = {}
-    for p in nf_conf_list:
-        if "=" in p:
-            k, v = p.split("=")
-            k = k.strip()
-            v = v.strip()
-            if v.startswith("[") and v.endswith("]"):
-                v = literal_eval(v)
-            nf_conf[k] = v
-    return nf_conf
-
 
 def main():
     argparser = argparse.ArgumentParser()
