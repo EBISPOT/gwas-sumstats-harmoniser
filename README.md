@@ -61,7 +61,7 @@ Step2: Run the pipeline.
 Harmonising one file:
 
 ```
-nextflow main.nf --reference -c ./config/lsf.config --harm --file Full_path_of_file_to_be_harmonised (--list path_of_list.txt)
+nextflow main.nf --reference -c ./config/lsf.config --harm --file Full_path_of_file_to_be_harmonised
 ```
 or harmonising a batch of files in list.txt file, which is a txt file that each row is a full path of tsv files to be harmonised. 
 ```
