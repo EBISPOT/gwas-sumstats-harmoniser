@@ -52,11 +52,12 @@ Path of the resources can be changed in the file ./config/reference.config
 ## 3. Running the pipeline:
 ### 3.1 General users
 
-step1: prepare input file:
+Step1: Prepare input file:
 * Files are correctly formatted using the validator.
 * The name must follow the convention <any identifier>_<genome assembly number>.tsv e.g. my_summary_stats_37.tsv (37 denotes the genome assembly of the data in the file is hg19 or GRCh37)
 
-step2: run the pipeline:
+Step2: Run the pipeline.
+  
 Harmonising one file:
 
 ```
@@ -82,5 +83,5 @@ nextflow main.nf --reference -c ./config/gwascatalog.config --gwascatalog
 * -with-docker 'docker://ebispot/gwas-sumstats-harmoniser:latest' (run docker)
 * -with-singularity 'docker://ebispot/gwas-sumstats-harmoniser:latest' (run Singularity)
   
-# 6. Harmonisation steps:
+# 4. Harmonisation steps:
 More information about the harmonisation process refers to [GWAS catalog documents](https://www.ebi.ac.uk/gwas/docs/methods/summary-statistics)
