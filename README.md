@@ -61,11 +61,11 @@ Step2: Run the pipeline.
 Harmonising one file:
 
 ```
-nextflow main.nf --reference -c ./config/lsf.config --harm --file Full_path_of_file_to_be_harmonised
+nextflow main.nf -c ./config/lsf.config --harm --file Full_path_of_file_to_be_harmonised
 ```
 or harmonising a batch of files in list.txt file, which is a txt file that each row is a full path of tsv files to be harmonised. 
 ```
-nextflow main.nf --reference -c ./config/lsf.config --harm --list path_of_list.txt
+nextflow main.nf -c ./config/lsf.config --harm --list path_of_list.txt
 ```
 
 All results will be stored in the current working directory.
@@ -75,7 +75,7 @@ All results will be stored in the current working directory.
 We constructed a customized pipeline for GWAS catalog daily running. This pipeline will automatically capture the first 200 studies from all_harm_folder and move files to the current working folder. Then harmonise all files and store intermediate files in the working folder. Successfully harmonised files' results (*.h.tsv.gz, *.tsv.gz.tbi and *.running.log) will be moved to ftp_folder, and files that failed to be harmonised are moved to failed_folder. All paths can be customized in ./config/gwascatalog.config files.
 
 ```
-nextflow main.nf --reference -c ./config/gwascatalog.config --gwascatalog
+nextflow main.nf -c ./config/gwascatalog.config --gwascatalog
 ```
 
 ### 3.3. Other options:
