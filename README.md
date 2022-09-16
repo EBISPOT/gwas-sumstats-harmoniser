@@ -80,7 +80,7 @@ nextflow main.nf -c ./config/gwascatalog.config --gwascatalog
 
 ### 3.3. Other options:
 * -resume (Execute the script using the cached results)
-* -with-docker 'docker://ebispot/gwas-sumstats-harmoniser:latest' (run docker)
+* -with-docker 'ebispot/gwas-sumstats-service:latest' (run docker)
 * -with-singularity 'docker://ebispot/gwas-sumstats-harmoniser:latest' (run Singularity)
   
 # 4. Harmonisation steps:
