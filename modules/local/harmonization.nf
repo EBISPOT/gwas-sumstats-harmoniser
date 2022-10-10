@@ -1,5 +1,9 @@
 process harmonization {
 
+    conda (params.enable_conda ? "$projectDir/environments/environment.yml" : null)
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'docker://athenaji/gwas_harm_test'}"
+        
     input:
     tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref)
 
