@@ -1,4 +1,8 @@
 process make_local_synonyms_table{
+    conda (params.enable_conda ? "$projectDir/environments/environment.yml" : null)
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'docker://athenaji/gwas_harm_test'}"
+        
     storeDir params.ref
 
     input:
