@@ -1,8 +1,8 @@
 /* download reference */
 process get_vcf_files {
-  conda (params.enable_conda ? "$projectDir/environments/environment.yml" : null)
-  container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker://athenaji/gwas_harm_test' : null }"
+  conda (params.enable_conda ? "$projectDir/environments/pgscatalog_utils/environment.yml" : null)
+  def dockerimg = "athenaji/gwas_harm_test"
+  container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://athenaji/gwas_harm_test' : dockerimg }"
         
   storeDir params.ref
   errorStrategy = { 'ignore' }
