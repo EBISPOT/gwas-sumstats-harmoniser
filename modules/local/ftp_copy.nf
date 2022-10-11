@@ -1,4 +1,8 @@
 process ftp_copy{
+    conda (params.enable_conda ? "$projectDir/environments/pgscatalog_utils/environment.yml" : null)
+    def dockerimg = "athenaji/gwas_harm_test"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://athenaji/gwas_harm_test' : dockerimg }"
+   
 
     input:
     tuple val(GCST), path(tsv), path(qc_tsv), path (log), val(status)
