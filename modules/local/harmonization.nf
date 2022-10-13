@@ -1,6 +1,6 @@
 process harmonization {
 
-    conda (params.enable_conda ? "$projectDir/environments/pgscatalog_utils/environment.yml" : null)
+    conda (params.enable_conda ? "$projectDir/environments/conda_environment.yml" : null)
     def dockerimg = "athenaji/gwas_harm_test"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://athenaji/gwas_harm_test' : dockerimg }"
    
