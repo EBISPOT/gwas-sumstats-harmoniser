@@ -69,8 +69,9 @@ workflow GWASCATALOGHARM {
             .map{input_files(it)}
     }
     /* MODULE: check reference
-     ch_chrom looks like: [chr1,chr2,chr3...]
-    ch_for_direction [chr1] */
+    ch_chrom looks like: [chr1,chr2,chr3...]
+    chr_check() cross check required chromsomes with available reference
+    ch_for_direction [chr1,chr2...] */
 
     ch_for_direction=chr_check().ch_input
     major_direction(ch_for_direction,files)
