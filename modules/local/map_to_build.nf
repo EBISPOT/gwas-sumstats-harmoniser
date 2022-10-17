@@ -17,6 +17,6 @@ process map_to_build {
     -from_build $from_build \
     -to_build $params.to_build \
     -vcf "${params.ref}/homo_sapiens-chr*.parquet" \
-    -chroms \"${params.chrom}\"
+    -chroms "${chr}"
     """
 }
