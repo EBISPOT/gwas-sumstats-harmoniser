@@ -84,7 +84,7 @@ nextflow run  EBISPOT/gwas-sumstats-harmoniser \
 * -resume (Execute the script using the cached results)
 
 ### 3.4. Other Executors:
-To run the harmonisation pipeline with other executors, user can import the customized config files using `--custom.config path_of_custom.config` and using `-profile` to select the process configuration strategy.
+To run the harmonisation pipeline with other executors, user can import the customized config files using `--custom_config path_of_custom_config` and using `-profile` to select the process configuration strategy.
  ```
 profiles {
 
@@ -102,5 +102,8 @@ profiles {
 
 }
  ```
+Conda environments are stored on the file system. By default Nextflow instructs Conda to save the required environments in the pipeline work directory. Therefore the same environment can be created/saved multiple times across multiple executions when using a different work directory. You can specify the directory where the Conda environments are stored using the conda.cacheDir in the custom_config file. More setting about executors and container can refer to 
+[Nextflow’s documentation](https://www.nextflow.io/docs/latest/executor.html).
+ 
 # 4. Harmonisation steps:
 More information about the harmonisation process refers to [GWAS catalog documents](https://www.ebi.ac.uk/gwas/docs/methods/summary-statistics)
