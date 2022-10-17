@@ -15,7 +15,7 @@ workflow chr_check {
     ch.toList().subscribe { println it + ' is being harmonized' }
 
     emit:
-    ch_input=ch.last()
+    ch_input=ch
 }
 
 def extract_name(Path input){
