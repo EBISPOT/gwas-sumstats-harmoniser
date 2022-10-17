@@ -80,7 +80,8 @@ def listify_string(string):
     """
     if type(string) is str:
         if "[" and "]" in string:
-            listified = literal_eval(string)
+            new=string.replace(" ", "").replace("[", '["').replace("]", '"]').replace(",", '","')
+            listified = literal_eval(new)
         else:
             listified = list(string)
     elif type(string) is list:
