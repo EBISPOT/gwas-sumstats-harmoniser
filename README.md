@@ -35,7 +35,6 @@ The resource bundle is a collection of standard files for harmonisaing GWAS summ
 Users can also prepare your own reference:
 ```
 nextflow run  EBISPOT/gwas-sumstats-harmoniser \
--r nextflow(github branch) \
 --reference \
 --ref 'full path to store reference' \
 -profile cluster,singularity/conda (running on the cluster) or -profile standard,docker/conda  (running locally)
@@ -62,7 +61,6 @@ Harmonising one file:
 
 ```
 nextflow run  EBISPOT/gwas-sumstats-harmoniser \
--r nextflow(github branch) \
 --ref 'full path to store reference' \
 --harm \
 --file Full_path_of_the_file_to_be_harmonised or --list path_of_list.txt \
@@ -77,7 +75,6 @@ All results will be stored in the current working directory.
 We constructed a customized pipeline for GWAS catalog daily running. This pipeline will automatically capture the first 200 studies from all_harm_folder and move files to the current working folder. Then harmonise all files and store intermediate files in the working folder. Successfully harmonised files' results (*.h.tsv.gz, *.tsv.gz.tbi and *.running.log) will be moved to ftp_folder, and files that failed to be harmonised are moved to failed_folder. All paths can be customized in the file $HOME/.nextflow/assets/EBISPOT/gwas-sumstats-harmoniser/config/gwascatalog.config.
 ```
 nextflow run  EBISPOT/gwas-sumstats-harmoniser \
--r nextflow(github branch) \
 --ref 'full path to store reference' \
 --gwascatalog \
 -profile cluster,singularity/
