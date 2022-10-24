@@ -39,12 +39,12 @@ def isNumber(value):
 
 
 def map_bp_to_build_via_liftover(chromosome, bp, build_map):
-    if isNumber(bp):
-        data = build_map.convert_coordinate('chr' + str(chromosome), int(bp))
+    if is_number(bp):
+        data = build_map.convert_coordinate('chr' + str(chromosome), int(bp)-1)
         if data is not None:
             if len(data) > 0:
-                return data[0][1]
-    return None
+                return data[0][0].replace("chr",""), int(data[0][1])+1
+    return "Unable to be mapped", None
 
 
 def map_bp_to_build_via_ensembl(chromosome, bp, from_build, to_build):
