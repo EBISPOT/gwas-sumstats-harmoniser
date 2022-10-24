@@ -80,7 +80,7 @@ workflow GWASCATALOGHARM {
     //major_direction.out.hm_input: tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref)
     main_harm(major_direction.out.hm_input)
     // out:[GCST009150, forward, path of harmonised.tsv]
-    quality_control(main_harm.out.hm,major_direction.out.direction_sum,files)
+    quality_control(main_harm.out.hm,major_direction.out.direction_sum,files,ch_for_direction)
 }
 
 def input_files(Path input)
