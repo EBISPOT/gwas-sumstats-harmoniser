@@ -10,6 +10,7 @@ workflow quality_control{
     ch_tsv
     ch_direction
     inputs
+    chroms
 
     main:
     qc(ch_tsv)
@@ -17,7 +18,7 @@ workflow quality_control{
     ch_to_log.view()
     //ch_to_log: val(GCST), val(mode),path(all_hm), path('harmonized.qc.tsv'), path('report.txt'), path (total_sum), val(build), path (input)
 
-    def to_log=params.chrom.last()
+    def to_log=chroms.last()
     harmonization_log("${params.ref}/homo_sapiens-chr${to_log}.vcf.gz",ch_to_log)
 
     emit:
