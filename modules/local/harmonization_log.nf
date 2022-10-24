@@ -5,7 +5,7 @@ process harmonization_log {
    
 
     input:
-    path ref
+    val chr
     tuple val(GCST), val(mode), path(all_hm), path(qc_result), path(delete_sites), path(count), val(build), path(input)
 
     output:
@@ -14,7 +14,7 @@ process harmonization_log {
     shell:
     """
     log_script.sh \
-    -r $ref \
+    -r "${params.ref}/homo_sapiens-${chr}.vcf.gz" \
     -i $input \
     -c $count \
     -d $delete_sites \
