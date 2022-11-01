@@ -23,12 +23,6 @@ process ftp_copy{
        mkdir -p \$path
     fi
 
-    cp ${launchDir}/$GCST/final/${GCST}.f.tsv.gz \$path
-
-    md5_f_tsv=\$(md5sum<${launchDir}/$GCST/final/${GCST}.f.tsv.gz | awk '{print \$1}')
-    md5_f_tsv_copied=\$(md5sum<\$path/${GCST}.f.tsv.gz | awk '{print \$1}')
-    
-
     cp ${launchDir}/$GCST/final/${GCST}.h.tsv.gz \$path
     md5_h_tsv=\$(md5sum<${launchDir}/$GCST/final/${GCST}.h.tsv.gz | awk '{print \$1}')
     md5_h_tsv_copied=\$(md5sum<\$path/${GCST}.h.tsv.gz | awk '{print \$1}')
@@ -36,7 +30,7 @@ process ftp_copy{
     cp ${launchDir}/$GCST/final/${GCST}.h.tsv.gz.tbi \$path
     cp ${launchDir}/$GCST/final/${GCST}.running.log  \$path
 
-    if [ \$md5_f_tsv==\$md5_f_tsv_copied ] && [ \$md5_h_tsv==\$md5_h_tsv_copied ]
+    if [ \$md5_h_tsv==\$md5_h_tsv_copied ]
     then 
          copy="copied"
     else
