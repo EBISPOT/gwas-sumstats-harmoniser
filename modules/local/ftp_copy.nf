@@ -35,9 +35,9 @@ process ftp_copy{
     if [ \$md5_h_tsv==\$md5_h_tsv_copied ]
     then 
          copy="copied"
-         echo \$md5_h_tsv > \$path/md5sum.txt
-         echo \$md5_h_tbi >> \$path/md5sum.txt
-         rm -v $tsv
+         echo "\$md5_h_tsv  ${GCST}.h.tsv.gz" > \$path/md5sum.txt
+         echo "\$md5_h_tbi  ${GCST}.h.tsv.gz.tbi" >> \$path/md5sum.txt
+         echo "remove $tsv"
     else
          copy="failed_copy"
     fi
