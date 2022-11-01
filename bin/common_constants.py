@@ -9,11 +9,11 @@ OR_DSET = 'odds_ratio'
 RANGE_U_DSET = 'ci_upper'
 RANGE_L_DSET = 'ci_lower'
 BETA_DSET = 'beta'
-RSID = 'rsid'
 SE_DSET = 'standard_error'
 EFFECT_DSET = 'effect_allele'
 OTHER_DSET = 'other_allele'
 FREQ_DSET = 'effect_allele_frequency'
+HM_CC_DSET = 'hm_coordinate_conversion'
 HM_OR_DSET = 'hm_odds_ratio'
 HM_RANGE_U_DSET = 'hm_ci_upper'
 HM_RANGE_L_DSET = 'hm_ci_lower'
@@ -29,7 +29,7 @@ DSET_TYPES = {SNP_DSET: str, PVAL_DSET: float, MANTISSA_DSET: float, EXP_DSET: i
               CHR_DSET: int, BP_DSET: int, OR_DSET: float, RANGE_U_DSET: float, RANGE_L_DSET: float, BETA_DSET: float, SE_DSET: float,
               EFFECT_DSET: str, OTHER_DSET: str, FREQ_DSET: float, HM_EFFECT_DSET: str,
               HM_OTHER_DSET: str, HM_BETA_DSET: float, HM_OR_DSET: float, HM_FREQ_DSET: float, HM_CODE: int,
-              HM_VAR_ID: str, HM_RANGE_L_DSET: float, HM_RANGE_U_DSET: float}
+              HM_VAR_ID: str, HM_RANGE_L_DSET: float, HM_RANGE_U_DSET: float, HM_CC_DSET: str}
 
 REFERENCE_DSET = MANTISSA_DSET
 HARMONISATION_PREFIX = 'hm_'
@@ -66,5 +66,3 @@ HARMONISER_ARG_MAP = {
     RANGE_U_DSET: "--or_col_upper",
     FREQ_DSET: "--eaf_col"
 }
-
-DEFAULT_CHROMS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']
