@@ -11,9 +11,8 @@ workflow major_direction{
     
     main:
     //input: val(GCST), val(from_build), path(tsv), chr
-    files.view()
-    chr.view()
-    map_to_build(files,chr.map{it.toString().replaceAll("chr","")})
+    chroms=chr.flatten().map{it.toString().replaceAll("chr","")}.collect()
+    map_to_build(files,chroms)
     //example: output is [GCST1,[path of 1.merged, path of 2.merged .....]]
     map_to_build.out.mapped
                     .transpose()
