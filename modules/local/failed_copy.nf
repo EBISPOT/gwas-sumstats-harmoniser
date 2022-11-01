@@ -15,9 +15,6 @@ process failed_copy {
 
     shell:
     """
-    md5_tsv=\$(md5sum $tsv | awk '{print \$1}')
-
-    cp $tsv ${params.failed}/
 
     log_file=${launchDir}/$GCST/final/${GCST}.running.log
     
@@ -26,13 +23,6 @@ process failed_copy {
        cp ${launchDir}/$GCST/final/${GCST}.running.log ${params.failed}/
     fi
 
-    md5_tsv_copied=\$(md5sum ${params.failed}/${GCST}*.tsv | awk '{print \$1}')
-
-    if [ \$md5_tsv==\$md5_tsv_copied ]
-    then 
-         copy="copied"
-    else
-         copy="failed_copy"
-    fi
+    copy="copied"
     """
 }
