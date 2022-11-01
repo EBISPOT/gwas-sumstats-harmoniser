@@ -20,11 +20,11 @@ process qc {
     --log report.txt \
     -db ${params.ref}/rsID.sql
 
-    (head -n 1 ${launchDir}/$GCST*.tsv| sed 's/^/#/'; sed '1d' ${launchDir}/$GCST*.tsv | sort -k1,1n -k2,2n) | bgzip -c > ${launchDir}/$GCST/final/${GCST}.f.tsv.gz
+    (head -n 1 ${launchDir}/$GCST*.tsv; sed '1d' ${launchDir}/$GCST*.tsv | sort -k1,1n -k2,2n) | bgzip -c > ${launchDir}/$GCST/final/${GCST}.f.tsv.gz
 
-    (head -n 1 harmonised.qc.tsv| sed 's/^/#/'; sed '1d' harmonised.qc.tsv | sort -k13,13n -k14,14n) | bgzip -c > ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
+    (head -n 1 harmonised.qc.tsv; sed '1d' harmonised.qc.tsv | sort -k13,13n -k14,14n) | bgzip -c > ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
 
-    tabix -f -s 13 -b 14 -e 14 ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
+    tabix -S 1 -f -s 13 -b 14 -e 14 ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
     """
 }
 
