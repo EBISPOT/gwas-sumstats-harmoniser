@@ -16,7 +16,7 @@ process harmonization {
 
     shell:
     """
-    header_args=\$(python ${params.script_path}/bin/utils.py -f $merged -harm_args);
+    header_args=\$(utils.py -f $merged -harm_args);
     main_pysam.py \
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \

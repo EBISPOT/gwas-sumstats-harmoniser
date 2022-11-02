@@ -33,8 +33,8 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms):
             mapped = mergedf.dropna(subset=["ID"]).drop([CHR_DSET, BP_DSET], axis=1)
             mapped[CHR_DSET] = mapped["CHR"].astype("str").str.replace("\..*$","")
             mapped[BP_DSET] = mapped["POS"].astype("str").str.replace("\..*$","")
-            mapped[HM_CC_DSET] = "rs"
             mapped = mapped[header]
+            mapped[HM_CC_DSET] = "rs"
             outfile = os.path.join("{}.merged".format(chrom))
             mapped.to_csv(outfile, sep="\t", index=False, na_rep="NA")
             ssdf_with_rsid = mergedf[mergedf["ID"].isnull()]
