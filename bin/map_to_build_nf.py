@@ -33,7 +33,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms):
             mapped = mergedf.dropna(subset=["ID"]).drop([CHR_DSET, BP_DSET], axis=1)
             mapped[CHR_DSET] = mapped["CHR"].astype("str").str.replace("\..*$","")
             mapped[BP_DSET] = mapped["POS"].astype("str").str.replace("\..*$","")
-            mapped[HM_CC_DSET] = "rsid"
+            mapped[HM_CC_DSET] = "rs"
             mapped = mapped[header]
             outfile = os.path.join("{}.merged".format(chrom))
             mapped.to_csv(outfile, sep="\t", index=False, na_rep="NA")
@@ -46,7 +46,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms):
     # liftover the snps without rsids and those with unrecognised rsids 
     print("liftover remaining variants")
     ssdf = pd.concat([ssdf_with_rsid, ssdf_without_rsid])
-    ssdf[HM_CC_DSET] = "liftover"
+    ssdf[HM_CC_DSET] = "lo"
     build_map = lft.LiftOver(lft.ucsc_release.get(from_build), lft.ucsc_release.get(to_build)) if from_build != to_build else None
     if build_map:
         ssdf[BP_DSET] = [lft.map_bp_to_build_via_liftover(chromosome=x, bp=y, build_map=build_map) for x, y in zip(ssdf[CHR_DSET], ssdf[BP_DSET])]
@@ -65,7 +65,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms):
             df.to_csv(outfile, sep="\t", mode='w', index=False, na_rep="NA")
     print("liftover complete")
     no_chr_df = ssdf[ssdf[CHR_DSET].isnull()]
-    no_chr_df[HM_CC_DSET] = "unmapped"
+    no_chr_df[HM_CC_DSET] = "NA"
     outfile = os.path.join("unmapped")
     no_chr_df.to_csv(outfile, sep="\t", index=False, na_rep="NA")
 
