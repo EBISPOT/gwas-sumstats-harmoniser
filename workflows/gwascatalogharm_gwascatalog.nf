@@ -62,8 +62,10 @@ workflow GWASCATALOGHARM_GWASCATALOG {
      //ch_for_direction [chr1]
     ch_direction=chr_check().ch_input
     // ch_chrom looks like: [chr1,chr2,chr3...]
-    ch_files=Channel.fromPath("${params.all_harm_folder}/*.tsv").map{input_list(it)}.take(200)
-    // input path containing all tsv file to be processed
+    ch_files=Channel.fromPath("${params.all_harm_folder}/*").map{input_list(it)}
+    // input path containing all file to be processed
+    //TODO: for standard implementation - this wildcard match will need to be constrained to tsv.gz
+    // metadata files will follow the pattern <filename>-meta.yaml
     // ch_files channel looks like: [GCST010681, 37,path of the file]
     
     major_direction(ch_direction,ch_files)
