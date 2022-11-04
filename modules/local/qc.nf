@@ -20,7 +20,7 @@ process qc {
     --log report.txt \
     -db ${params.ref}/rsID.sql
 
-    (head -n 1 harmonised.qc.tsv; sed '1d' harmonised.qc.tsv | sort -k3,3n -k4,4n) | bgzip -c > ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
+    cat harmonised.qc.tsv | bgzip -c > ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
 
     tabix -S 1 -f -s 3 -b 4 -e 4 ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
     """
