@@ -27,7 +27,6 @@ process harmonization {
     --na_rep_out NA \
     --palin_mode $palin_mode;
 
-    # TODO: filter out un harmonised variants
     head -n1 ${chrom}.merged_unsorted.hm > ${chrom}.merged.hm;
     tail -n+2 ${chrom}.merged_unsorted.hm | grep -v ^NA | sort -k3,3n -k4,4n >> ${chrom}.merged.hm
     """
