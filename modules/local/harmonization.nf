@@ -20,11 +20,15 @@ process harmonization {
     main_pysam.py \
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
-    --hm_sumstats ${chrom}.merged.hm \
+    --hm_sumstats ${chrom}.merged_unsorted.hm \
     --hm_statfile ${chrom}.merged.log.tsv.gz \
     \$header_args \
     --na_rep_in NA \
     --na_rep_out NA \
-    --palin_mode $palin_mode
+    --palin_mode $palin_mode;
+
+    # TODO: filter out un harmonised variants
+    head -n1 ${chrom}.merged_unsorted.hm > ${chrom}.merged.hm;
+    tail -n+2 ${chrom}.merged_unsorted.hm | grep -v ^NA | sort -k3,3n -k4,4n >> ${chrom}.merged.hm
     """
 }

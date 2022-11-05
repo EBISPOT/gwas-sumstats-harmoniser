@@ -17,10 +17,8 @@ process concatenate_chr_splits {
     for c in \$(seq 1 22) X Y MT; do
     if [ -f chr\$c.merged.hm ]; then
             echo chr\$c.merged.hm
-            tail -n+2 chr\$c.merged.hm | sort -k3,3n -k4,4n >> harmonised.tsv
+            tail -n+2 chr\$c.merged.hm >> harmonised.tsv
     fi
     done
-
-    #cat_chroms.sh -d . -o harmonised.tsv
     """
 }

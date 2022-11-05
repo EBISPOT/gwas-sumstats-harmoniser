@@ -22,7 +22,7 @@ process qc {
 
     cat harmonised.qc.tsv | bgzip -c > ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
 
-    tabix -S 1 -f -s 3 -b 4 -e 4 ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
+    tabix -c N -S 1 -f -s 3 -b 4 -e 4 ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
     """
 }
 
