@@ -76,7 +76,7 @@ workflow GWASCATALOGHARM_GWASCATALOG {
 
     main_harm(major_direction.out.hm_input)
     // out:[GCST009150, forward, path of harmonised.tsv]
-    quality_control(main_harm.out.hm,major_direction.out.direction_sum,ch_files,ch_direction)
+    quality_control(main_harm.out.hm,major_direction.out.direction_sum,ch_files,ch_direction,major_direction.out.unmapped)
     harmonnized_ch=quality_control.out.qclog
     all_files_ch=ch_files.join(harmonnized_ch,remainder: true)
     //example:[GCST90029037, 37, path *.tsv, path qc.tsv, path GCST90029037.running.log, SUCCESS_HARMONIZATION]

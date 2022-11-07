@@ -7,6 +7,7 @@ process harmonization_log {
     input:
     val chr
     tuple val(GCST), val(mode), path(all_hm), path(qc_result), path(delete_sites), path(count), val(build), path(input)
+    path(unmapped)
 
     output:
     tuple val(GCST), path(qc_result), path ("${GCST}.running.log"), env(result), emit: running_result
@@ -19,6 +20,7 @@ process harmonization_log {
     -c $count \
     -d $delete_sites \
     -h $all_hm \
+    -u $unmapped \
     -o ${GCST}.running.log
 
     sed 1d $qc_result| awk -F "\t" '{print \$12}' | creat_log.py >> ${GCST}.running.log

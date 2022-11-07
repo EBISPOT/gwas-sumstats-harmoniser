@@ -8,7 +8,7 @@ process map_to_build {
     val chr
 
     output:
-    tuple val(GCST), path ('*.merged'), emit:mapped
+    tuple val(GCST), path ('*.merged'), path('unmapped'), emit:mapped
 
     shell:
     """

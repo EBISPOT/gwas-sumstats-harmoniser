@@ -11,6 +11,7 @@ workflow quality_control{
     ch_direction
     inputs
     chroms
+    unmapped
 
     main:
     qc(ch_tsv)
@@ -19,7 +20,7 @@ workflow quality_control{
     //ch_to_log: val(GCST), val(mode),path(all_hm), path('harmonized.qc.tsv'), path('report.txt'), path (total_sum), val(build), path (input)
 
     def to_log=chroms.flatten().last()
-    harmonization_log(to_log,ch_to_log)
+    harmonization_log(to_log,ch_to_log,unmapped)
 
     emit:
     qclog=harmonization_log.out.running_result
