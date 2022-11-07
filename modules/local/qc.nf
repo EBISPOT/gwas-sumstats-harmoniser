@@ -25,6 +25,3 @@ process qc {
     tabix -c N -S 1 -f -s 3 -b 4 -e 4 ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
     """
 }
-
-// sort -k1,1n -k2,2n harmonised.qc.tsv | bgzip -c > harmonised.qc.tsv.gz 
-// tabix -s 1 -b 2 harmonised.qc.tsv.gz 

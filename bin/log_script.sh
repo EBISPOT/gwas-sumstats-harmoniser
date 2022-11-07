@@ -44,9 +44,9 @@ printf "1. Pipeline details\n
 
 printf "2. Reference data\n
 ################################################################\n
-$(less $reference | head -n 1000 | grep ^# | grep source)\n
-$(less $reference | head -n 1000 | grep ^# | grep reference)\n
-$(less $reference | head -n 1000 | grep ^# | grep dbSNP | sed 's/INFO=<//g' | sed 's/>//g')\n
+$(zcat $reference | head -n 1000 | grep ^# | grep source)\n
+$(zcat $reference | head -n 1000 | grep ^# | grep reference)\n
+$(zcat $reference | head -n 1000 | grep ^# | grep dbSNP | sed 's/INFO=<//g' | sed 's/>//g')\n
 ################################################################\n
 " >> $output
 
