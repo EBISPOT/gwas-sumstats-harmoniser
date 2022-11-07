@@ -13,10 +13,10 @@ class SumStatRecord:
         self.other_al = other_al
         self.effect_al = effect_al
         self.data = data
-        self.beta = float(beta) if beta else None
-        self.oddsr = safe_float(oddsr) if oddsr else None
-        self.oddsr_lower = safe_float(oddsr_lower) if oddsr_lower else None
-        self.oddsr_upper = safe_float(oddsr_upper) if oddsr_upper else None
+        self.beta = float(beta) if beta is not None else None
+        self.oddsr = safe_float(oddsr) if oddsr is not None else None
+        self.oddsr_lower = safe_float(oddsr_lower) if oddsr_lower is not None else None
+        self.oddsr_upper = safe_float(oddsr_upper) if oddsr_upper is not None else None
         self.rsid = rsid
 
         # Effect allele frequency is not required if we assume +ve strand

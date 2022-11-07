@@ -37,7 +37,7 @@ fi
 
 # Begin script in case all parameters are correct
 printf "1. Pipeline details\n
-    A. Pipeline Version: ???\n
+    A. Pipeline Version: 0.1.0\n
     B. Running date: $(date | awk '{print $2,$3,$6}')\n
     C. Input file: $(basename $input)\n
 " > $output

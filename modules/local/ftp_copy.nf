@@ -1,7 +1,7 @@
 process ftp_copy{
-    conda (params.enable_conda ? "$projectDir/environments/conda_environment.yml" : null)
-    def dockerimg = "athenaji/gwas_harm_test"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://athenaji/gwas_harm_test' : dockerimg }"
+    //conda (params.enable_conda ? "$projectDir/environments/conda_environment.yml" : null)
+    //def dockerimg = "ebispot/gwas-sumstats-harmoniser:6472eaf3b58d76efe01327f74da9b8dc4eb8920e"
+    //container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://ebispot/gwas-sumstats-harmoniser:6472eaf3b58d76efe01327f74da9b8dc4eb8920e' : dockerimg }"
    
 
     input:
@@ -27,12 +27,18 @@ process ftp_copy{
     md5_h_tsv=\$(md5sum<${launchDir}/$GCST/final/${GCST}.h.tsv.gz | awk '{print \$1}')
     md5_h_tsv_copied=\$(md5sum<\$path/${GCST}.h.tsv.gz | awk '{print \$1}')
 
+    md5_h_tbi=\$(md5sum<${launchDir}/$GCST/final/${GCST}.h.tsv.gz.tbi | awk '{print \$1}')
+
     cp ${launchDir}/$GCST/final/${GCST}.h.tsv.gz.tbi \$path
     cp ${launchDir}/$GCST/final/${GCST}.running.log  \$path
 
     if [ \$md5_h_tsv==\$md5_h_tsv_copied ]
     then 
          copy="copied"
+         echo "\$md5_h_tsv  ${GCST}.h.tsv.gz" > \$path/md5sum.txt
+         echo "\$md5_h_tbi  ${GCST}.h.tsv.gz.tbi" >> \$path/md5sum.txt
+         rm -v ${params.all_harm_folder}/$tsv
+         rm -vr ${launchDir}/$GCST
     else
          copy="failed_copy"
     fi

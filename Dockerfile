@@ -6,5 +6,5 @@ RUN apt-get update \
 
 COPY . .
 
-RUN pip install -r requirements.txt \
+RUN pip install -r environments/requirements.txt \
     && apt-get purge -y --auto-remove gcc python-dev
