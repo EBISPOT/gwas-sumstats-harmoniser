@@ -73,7 +73,6 @@ workflow GWASCATALOGHARM_GWASCATALOG {
 
     //major_direction.out.direction_sum: [GCST, path of sum_count]
     //major_direction.out.hm_input: tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref)
-
     main_harm(major_direction.out.hm_input)
     // out:[GCST009150, forward, path of harmonised.tsv]
     quality_control(main_harm.out.hm,major_direction.out.direction_sum,ch_files,ch_direction,major_direction.out.unmapped)
@@ -88,6 +87,8 @@ workflow GWASCATALOGHARM_GWASCATALOG {
 def input_list(Path input) {
     return [input.getName().split('_')[0],input.getName().split('\\.')[0][-2..-1],input,]
 }
+
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

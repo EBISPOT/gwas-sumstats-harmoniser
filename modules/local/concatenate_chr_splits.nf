@@ -5,8 +5,7 @@ process concatenate_chr_splits {
    
 
     input:
-    tuple val(GCST), val(palin_mode)
-    path("*")
+    tuple val(GCST), val(palin_mode), path("*")
 
     output:
     tuple val(GCST), val(palin_mode), path ('harmonised.tsv'), emit: all_hm
