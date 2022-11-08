@@ -73,7 +73,7 @@ class SumStatRecord:
                             to flipping.
         """
         # Flip beta
-        if self.beta:
+        if self.beta != 0:
             self.beta = self.beta * -1
         # Flip OR
         if self.oddsr:
