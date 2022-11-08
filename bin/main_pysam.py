@@ -9,12 +9,9 @@
 #######YUE################
 import pysam
 #######YUE################
-import os
 import sys
 import gzip
 import argparse
-from copy import deepcopy
-from subprocess import Popen, PIPE
 from collections import OrderedDict, Counter
 from lib.SumStatRecord import SumStatRecord
 from lib.VCFRecord import VCFRecord
@@ -146,11 +143,11 @@ def main():
             out_row["hm_pos"] = ss_rec.hm_pos if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_row["hm_other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_row["hm_effect_allele"] = ss_rec.hm_effect_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_beta"] = ss_rec.beta if ss_rec.beta and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_OR"] = ss_rec.oddsr if ss_rec.oddsr and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_OR_lowerCI"] = ss_rec.oddsr_lower if ss_rec.oddsr_lower and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_OR_upperCI"] = ss_rec.oddsr_upper if ss_rec.oddsr_upper and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_eaf"] = ss_rec.eaf if ss_rec.eaf and ss_rec.is_harmonised else args.na_rep_out
+            out_row["hm_beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_row["hm_OR"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_row["hm_OR_lowerCI"] = ss_rec.oddsr_lower is not None if ss_rec.oddsr_lower and ss_rec.is_harmonised else args.na_rep_out
+            out_row["hm_OR_upperCI"] = ss_rec.oddsr_upper is not None if ss_rec.oddsr_upper and ss_rec.is_harmonised else args.na_rep_out
+            out_row["hm_eaf"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
             out_row["hm_code"] = ss_rec.hm_code
             # Add other data from summary stat file
             for key in ss_rec.data:
