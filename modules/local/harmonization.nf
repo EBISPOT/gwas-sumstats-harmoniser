@@ -8,6 +8,7 @@ process harmonization {
     input:
     tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref)
 
+
     output:
     tuple val(GCST), val(palin_mode), path("${chrom}.merged.hm"),path("${chrom}.merged.log.tsv.gz"), emit: hm_by_chrom
 
