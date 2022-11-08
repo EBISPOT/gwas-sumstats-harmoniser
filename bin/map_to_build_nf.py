@@ -53,6 +53,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms):
     for chrom in chroms:
         print(chrom)
         df = ssdf.loc[ssdf[CHR_DSET].astype("str") == chrom]
+        df = df.dropna(subset=[BP_DSET])
         df[BP_DSET] = df[BP_DSET].astype("str").str.replace("\..*$","")
         outfile = os.path.join("{}.merged".format(chrom))
         if os.path.isfile(outfile):
@@ -65,9 +66,11 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms):
             df.to_csv(outfile, sep="\t", mode='w', index=False, na_rep="NA")
     print("liftover complete")
     no_chr_df = ssdf[ssdf[CHR_DSET].isnull()]
-    no_chr_df[HM_CC_DSET] = "NA"
+    no_pos_df = ssdf[ssdf[BP_DSET].isnull()]
+    no_loc_df = pd.concat([no_chr_df, no_pos_df])
+    no_loc_df[HM_CC_DSET] = "NA"
     outfile = os.path.join("unmapped")
-    no_chr_df.to_csv(outfile, sep="\t", index=False, na_rep="NA")
+    no_loc_df.to_csv(outfile, sep="\t", index=False, na_rep="NA")
 
 def listify_string(string):
     """

@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os
 import pandas as pd
-import argparse
 import sys
 
 data = sys.stdin.readlines()
 file = pd.DataFrame(data, columns=['hm_code'])
-# file=pd.read_csv("/Users/yueji/downloads/del.tsv",sep='\t')
 file["count"]=1
 result=file.groupby(["hm_code"])[["count"]].sum()
-all=sum(result["count"].tolist())
+with open('report.txt', 'r') as f:
+    fails=f.readlines()
+all=sum(result["count"].tolist())+len(fails)
 result["percentage"]=result["count"]/all
 
 code_table = {
@@ -32,12 +31,13 @@ code_table = {
         15: 'No matching variants in reference VCF; Cannot harmonise',
         16: 'Multiple matching variants in reference VCF (ambiguous); Cannot harmonise',
         17: 'Palindromic; Infer strand; EAF or reference VCF AF not known; Cannot harmonise',
-        18: 'Palindromic; Infer strand; EAF < --maf_palin_threshold; Will not harmonise' }
+        18: 'Palindromic; Infer strand; EAF < --maf_palin_threshold; Will not harmonise',
+        19: 'QC failure; Any of rsID mismatch with reference, data type mismatch, missing data'}
 
 result["hm_code"]=result.index.astype(int,copy=False)
 
 # successfully harmonized variants
-print("\n5. Successfully harmonised variants:\n")
+print("\n5. Successfully harmonised variants\n")
 success=result[(result['hm_code'] <14) & (result['hm_code'] !=9)]
 success_all=sum(success["count"].tolist())
 success_ratio=success_all/all
@@ -48,23 +48,36 @@ for i in range(0,len(success.index)):
     count=success.iloc[i,0]
     per=success.iloc[i,1]
     print(key,count,"{0:.2%}".format(per),code_table[key],sep="\t")
+print("\n################################################################\n\n")
 
 # Failed harmonized variants
-print("\n6. Failed harmonisation:\n")
-fail=result[(result['hm_code'] ==9) | (result['hm_code'] >13)]
-fail_all=sum(fail["count"].tolist())
+print("\n6. Failed harmonisation\n")
+HM_CODE_FILTER = {9,14,15,16,17,18,19}
+with open('report.txt', 'r') as f:
+    fails=f.readlines()
+hm_code_fail_dict = {}
+fail_all = 0
+for line in fails:
+    hm_code = int(line.split('hm_code')[-1].strip()) if 'hm_code' in line else None
+    if hm_code in HM_CODE_FILTER:
+        if hm_code in hm_code_fail_dict:
+            hm_code_fail_dict[hm_code] += 1
+        else:
+            hm_code_fail_dict[hm_code] = 1
+        fail_all += 1
 fail_ratio=fail_all/all
 print ("{0:.2%}".format(fail_ratio),"(",fail_all, "of", all ,") sites failed to harmonise.\n")
 
 print("hm_code","Number","Percentage","Explanation",sep="\t")
-for i in range(0,len(fail.index)):
-    key=fail.iloc[i,2]
-    count=fail.iloc[i,0]
-    per=fail.iloc[i,1]
-    print(key,count,"{0:.2%}".format(per),code_table[key],sep="\t")
 
-print("\n7. Overview")
+for key, count in hm_code_fail_dict.items():
+    per = count/all
+    print(key,count,"{0:.2%}".format(per),code_table[key],sep="\t")
+print("\n################################################################\n\n")
+
+
+print("\n7. Overview\n")
 if fail_ratio==1.0:
-    print ("Result","FAILED_HARMONIZATION",sep="\t")
+    print ("Result","FAILED_HARMONIZATION\n",sep="\t")
 else:
-    print ("Result","SUCCESS_HARMONIZATION",sep="\t")
+    print ("Result","SUCCESS_HARMONIZATION\n",sep="\t")

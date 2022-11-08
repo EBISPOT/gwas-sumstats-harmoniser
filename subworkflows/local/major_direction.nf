@@ -18,6 +18,8 @@ workflow major_direction{
                     .transpose()
                     .map{tuple(get_chr(it[1]),it[0],it[1])}
                     .set{map_chr_ch}
+    // capture unmapped sites for reporting
+    unmapped = map_to_build.out.mapped.map{it[2]}
     
     //example: out of map_to_build [GCST010681,[1,2,...]] tranpose into [[GCST010681,path 1.merged],[GCST010681,path 2.merged]] and then into [chr1,GCST010681,path 1.merged][chr2,GCST010681,path 2.merged].....
     
@@ -78,6 +80,7 @@ workflow major_direction{
     emit:
     hm_input=hm_input
     direction_sum=direction_sum
+    unmapped=unmapped
 }
 
 // groovy function

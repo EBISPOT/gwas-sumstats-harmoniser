@@ -15,7 +15,7 @@ csv.field_size_limit(sys.maxsize)
 
 logger = logging.getLogger('basic_qc')
 logger.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(message)s')
+formatter = logging.Formatter('%(message)s')
 
 # 1) must have SNP, PVAL, CHR, BP
 # 2) *coerce headers
@@ -80,6 +80,9 @@ hm_header_transformations = {
 REQUIRED_HEADERS = [SNP_DSET, PVAL_DSET, CHR_DSET, BP_DSET]
 BLANK_SET = {'', ' ', '-', '.', 'na', None, 'none', 'nan', 'nil'}
 
+# hm codes to drop
+HM_CODE_FILTER = {9,14,15,16,17,18}
+
 
 def refactor_header(header):
     return [hm_header_transformations[h] if h in hm_header_transformations else h for h in header]
@@ -108,6 +111,11 @@ def remove_row_if_required_is_blank(row, header):
     else:
         return False
 
+def remove_row_if_unharmonisable(row, header):
+    if row[header.index(HM_CODE)] in HM_CODE_FILTER:
+        return True
+    else:
+        return False
 
 def blanks_to_NA(row):
     for n, i in enumerate(row):
@@ -188,7 +196,6 @@ def main():
 
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-f', help='The name of the file to be processed', required=True)
-    #argparser.add_argument('-d', help='The name of the output directory', required=True)
     argparser.add_argument('-o', help='The name of the output file', required=True)
     argparser.add_argument('-db', help='The name of the synonyms database. If not provided ensembl rest API will be used', default=None, required=False)
     argparser.add_argument('--print_only', help='only print the lines removed and do not write a new file', action='store_true')
@@ -197,34 +204,26 @@ def main():
 
     file = args.f
     db = args.db
-    #out_dir = args.d
     filename=args.o
     log_file = args.log
-    #filename = get_filename(file)
 
-    #new_filename = out_dir + drop_last_element_from_filename(filename) + '.tsv' # drop the build from the filename
-    #new_filename = out_dir + filename + '.qc.tsv' 
     new_filename=filename
 
     header = None
     is_header = True
-    lines = []
-    removed_lines =[]
-    missing_headers = []
 
     file_handler = logging.FileHandler(log_file, mode='a')
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
     with open(file) as csv_file:
-        result_file = None
         writer = None
         if not args.print_only:
             result_file = open(new_filename, 'w')
             writer = csv.writer(result_file, delimiter='\t')
         csv_reader = get_csv_reader(csv_file)
 
-        for row in csv_reader:
+        for index, row in enumerate(csv_reader):
             if is_header:
                 header = refactor_header(row)
                 is_header = False
@@ -241,11 +240,13 @@ def main():
                 row = resolve_invalid_rsids(row, header, ensembl_client, sql_client)
                 row = blanks_to_NA(row)
                 row = map_chr_values_to_numbers(row, header)
+                unharmonisable = remove_row_if_unharmonisable(row, header)
                 blank = remove_row_if_required_is_blank(row, header)
                 wrong_type_chr = (remove_row_if_wrong_data_type(row, header, CHR_DSET, int)) 
                 wrong_type_bp = (remove_row_if_wrong_data_type(row, header, BP_DSET, int))
                 wrong_type_pval = (remove_row_if_wrong_data_type(row, header, PVAL_DSET, float))
-                remove_row_tests = [blank == False,
+                remove_row_tests = [unharmonisable == False,
+                                    blank == False,
                                     wrong_type_chr == False,
                                     wrong_type_bp == False,
                                     wrong_type_pval == False]
@@ -254,7 +255,10 @@ def main():
                         writer.writerows([row])
                 else:
                     # print lines that are removed
-                    logger.info('Removing record: {}'.format(row))
+                    hm_code = int(row[header.index(HM_CODE)])
+                    if hm_code not in HM_CODE_FILTER:
+                        hm_code = 19
+                    logger.info(f'Removing record number {index}, with hm_code {hm_code}')
 
            
 if __name__ == "__main__":

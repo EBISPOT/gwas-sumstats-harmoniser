@@ -62,7 +62,7 @@ workflow GWASCATALOGHARM_GWASCATALOG {
      //ch_for_direction [chr1]
     ch_direction=chr_check().ch_input
     // ch_chrom looks like: [chr1,chr2,chr3...]
-    ch_files=Channel.fromPath("${params.all_harm_folder}/*").map{input_list(it)}
+    ch_files=Channel.fromPath(["${params.all_harm_folder}/*.gz", "${params.all_harm_folder}/*.tsv", "${params.all_harm_folder}/*.csv", "${params.all_harm_folder}/*.txt"]).map{input_list(it)}
     // input path containing all file to be processed
     //TODO: for standard implementation - this wildcard match will need to be constrained to tsv.gz
     // metadata files will follow the pattern <filename>-meta.yaml
@@ -76,7 +76,7 @@ workflow GWASCATALOGHARM_GWASCATALOG {
 
     main_harm(major_direction.out.hm_input)
     // out:[GCST009150, forward, path of harmonised.tsv]
-    quality_control(main_harm.out.hm,major_direction.out.direction_sum,ch_files,ch_direction)
+    quality_control(main_harm.out.hm,major_direction.out.direction_sum,ch_files,ch_direction,major_direction.out.unmapped)
     harmonnized_ch=quality_control.out.qclog
     all_files_ch=ch_files.join(harmonnized_ch,remainder: true)
     //example:[GCST90029037, 37, path *.tsv, path qc.tsv, path GCST90029037.running.log, SUCCESS_HARMONIZATION]
