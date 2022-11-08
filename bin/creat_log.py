@@ -37,7 +37,7 @@ code_table = {
 result["hm_code"]=result.index.astype(int,copy=False)
 
 # successfully harmonized variants
-print("\n5. Successfully harmonised variants:\n")
+print("\n5. Successfully harmonised variants\n")
 success=result[(result['hm_code'] <14) & (result['hm_code'] !=9)]
 success_all=sum(success["count"].tolist())
 success_ratio=success_all/all
@@ -48,10 +48,10 @@ for i in range(0,len(success.index)):
     count=success.iloc[i,0]
     per=success.iloc[i,1]
     print(key,count,"{0:.2%}".format(per),code_table[key],sep="\t")
-print("################################################################\n\n")
+print("\n################################################################\n\n")
 
 # Failed harmonized variants
-print("\n6. Failed harmonisation:\n")
+print("\n6. Failed harmonisation\n")
 HM_CODE_FILTER = {9,14,15,16,17,18,19}
 with open('report.txt', 'r') as f:
     fails=f.readlines()
@@ -73,11 +73,11 @@ print("hm_code","Number","Percentage","Explanation",sep="\t")
 for key, count in hm_code_fail_dict.items():
     per = count/all
     print(key,count,"{0:.2%}".format(per),code_table[key],sep="\t")
-print("################################################################\n\n")
+print("\n################################################################\n\n")
 
 
-print("\n7. Overview")
+print("\n7. Overview\n")
 if fail_ratio==1.0:
-    print ("Result","FAILED_HARMONIZATION",sep="\t")
+    print ("Result","FAILED_HARMONIZATION\n",sep="\t")
 else:
-    print ("Result","SUCCESS_HARMONIZATION",sep="\t")
+    print ("Result","SUCCESS_HARMONIZATION\n",sep="\t")

@@ -72,25 +72,25 @@ MAPPED_SITES=$(($TOTAL_SITES - $UNMAPPED_SITES))
 
 #TODO: add the number of rs vs liftover
 echo -e '
-3.Mapping result\n'$(awk "BEGIN {print $UNMAPPED_SITES/$TOTAL_SITES*100}")'% ('$UNMAPPED_SITES' sites out of '$TOTAL_SITES') were dropped because they could not be mapped. \n'$(awk "BEGIN {print $MAPPED_SITES/$TOTAL_SITES*100}")'% ('$MAPPED_SITES' sites) were carried forward.\n
+3.Mapping result\n\n'$(awk "BEGIN {print $UNMAPPED_SITES/$TOTAL_SITES*100}")'% ('$UNMAPPED_SITES' sites out of '$TOTAL_SITES') were dropped because they could not be mapped. \n'$(awk "BEGIN {print $MAPPED_SITES/$TOTAL_SITES*100}")'% ('$MAPPED_SITES' sites) were carried forward.\n
 ################################################################\n\n
 ' >> $output
 
 # PALIN MODE
 
-
+echo -e '4.Palindromic SNPs\n\npalin_mode=${palin_mode}\n'
 palin_mode=$(grep palin_mode $count | cut -f2);
 ratio=$(grep ratio $count);
 number=$(echo -e $ratio | awk '{print $2}')
 if [ $palin_mode = "drop" ]; then
-if [ ! $number]; then echo -e '4.Palindromic SNPs\nPalindromic SNPs could not be harmonized because the direction of palindromic SNPs cannot be inferred from consensus direction.\n'>> $output;
-else echo -e '4.Palindromic SNPs\nPalindromic SNPs could not be harmonized because the direction of palindromic SNPs cannot be inferred from consensus direction (forward sites ratio ='$number').\n'>> $output;
+if [ ! $number]; then echo -e '4.Palindromic SNPs could not be harmonized because the direction of palindromic SNPs cannot be inferred from consensus direction.\n'>> $output;
+else echo -e '4.Palindromic SNPs could not be harmonized because the direction of palindromic SNPs cannot be inferred from consensus direction (forward sites ratio ='$number').\n'>> $output;
 fi
 elif [[ $ratio =~ "Full" ]]; then
-echo -e '4.Palindromic SNPs\nDirection of palindromic SNPs inferred as '$palin_mode' by establishing consensus direction of all sites (forward sites ratio ='$number').\n'>> $output;
+echo -e 'Direction of palindromic SNPs inferred as '$palin_mode' by establishing consensus direction of all sites (forward sites ratio ='$number').\n'>> $output;
 elif [[ $ratio =~ "10_percent" ]]; then
-echo -e '4.Palindromic SNPs\nDirection of palindromic SNPs inferred as '$palin_mode' by establishing consensus direction of 10% of all sites (forward sites ratio ='$number').\n'>> $output;
+echo -e 'Direction of palindromic SNPs inferred as '$palin_mode' by establishing consensus direction of 10% of all sites (forward sites ratio ='$number').\n'>> $output;
 fi
 
-echo -e '\n################################################################\n\n' >> $output
+echo -e '################################################################\n\n' >> $output
 
