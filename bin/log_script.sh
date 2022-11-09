@@ -66,7 +66,6 @@ $(tabix -H $reference | grep dbSNP | sed 's/INFO=<//g' | sed 's/>//g')\n
 
 # MAPPING
 
-
 UNMAPPED_SITES=$(tail -n+2 $unmapped | wc -l)
 MAPPED_SITES=$(tail -n+2 $harmonized | wc -l)
 TOTAL_SITES=$(($UNMAPPED_SITES + $MAPPED_SITES))
@@ -74,6 +73,7 @@ TOTAL_SITES=$(($UNMAPPED_SITES + $MAPPED_SITES))
 #TODO: add the number of rs vs liftover
 echo -e '
 3. Mapping result\n\n'$(awk "BEGIN {print $UNMAPPED_SITES/$TOTAL_SITES*100}")'% ('$UNMAPPED_SITES' sites out of '$TOTAL_SITES') were dropped because they could not be mapped. \n'$(awk "BEGIN {print $MAPPED_SITES/$TOTAL_SITES*100}")'% ('$MAPPED_SITES' sites) were carried forward.\n
+
 ################################################################\n\n
 ' >> $output
 

@@ -20,4 +20,3 @@ workflow main_harm {
     emit:
     hm=concatenate_chr_splits.out.all_hm
 }
-
