@@ -6,7 +6,11 @@ workflow main_harm {
     hm_input
 
     main:
-    harmonization(hm_input)
+    hm_ch = hm_input.transpose()
+
+    //def count = 2
+
+    harmonization(hm_ch)
     //hm_by_chrom: [GCST009150, forward, path of hm, path of log]
     //hm_input.map{it[6]}.dump(tag:'bar')
     id_palin_ch = harmonization.out.hm_by_chrom.map{it[0,1]}.unique()
@@ -20,3 +24,4 @@ workflow main_harm {
     emit:
     hm=concatenate_chr_splits.out.all_hm
 }
+
