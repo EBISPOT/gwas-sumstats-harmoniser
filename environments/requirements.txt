@@ -14,7 +14,7 @@ ipython-genutils==0.2.0
 jsonschema==3.2.0
 jupyter-core==4.6.3
 nbformat==5.0.6
-numpy==1.18.4
+numpy==1.22.0
 pandas==1.0.3
 psutil==5.7.0
 pyarrow==0.17.1
