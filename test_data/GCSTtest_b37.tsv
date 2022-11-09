@@ -1,0 +1,2 @@
+variant_id	p_value	chromosome	base_pair_location	effect_allele	other_allele	effect_allele_frequency	beta	standard_error	odds_ratio	ci_lower	ci_upper
+rs376238049	0.77	22	16052962	T	C	0.089851	-0.00477642	0.0164749	NA	NA	NA

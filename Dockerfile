@@ -1,10 +1,10 @@
 FROM python:3.7-slim-buster
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gcc openssh-client python-dev libmagic-dev rsync tabix \
+    && apt-get install -y --no-install-recommends gcc wget python-dev libmagic-dev tabix \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 
-RUN pip install -r requirements.txt \
+RUN pip install -r environments/requirements.txt \
     && apt-get purge -y --auto-remove gcc python-dev
