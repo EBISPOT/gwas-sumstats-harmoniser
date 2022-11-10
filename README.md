@@ -30,7 +30,7 @@ This repository is stored in the Nextflow home directory, that is by default the
 
 ## 2. Reference preparation
 
-The resource bundle is a collection of standard files for harmonisaing GWAS summary statistics data. We support the ensembl variants VCF reference (hg38, dbSNP 151) and synonyms table . These files can be directly downloaded from our [FTP](http:) server.
+The resource bundle is a collection of standard files for harmonisaing GWAS summary statistics data. We support the ensembl variants VCF reference (hg38, dbSNP 151) and synonyms table . These files can be directly downloaded from our [FTP](https://ftp.ebi.ac.uk/pub/databases/gwas/harmonisation_resources/) server.
 
 Users can also prepare your own reference:
 ```
