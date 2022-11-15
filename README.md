@@ -6,7 +6,7 @@ The harmonisation process is the following:
 * a) Mapping variant IDs to locations.
 * b) Find the orientation of the variants. 
 * c) Resolve RSIDs from locations and alleles 
-* d) Orientate the variants to the reference strand.
+* d) Orient the variants to the reference strand.
 
 ## Prerequisites 
 ### Memory
@@ -18,7 +18,7 @@ Compulsory:
 
 
 optional:
-1. conda  
+1. Conda  
 2. or Singularity (3.7.x or higher)
 3. or Docker
 
@@ -30,7 +30,7 @@ This repository is stored in the Nextflow home directory, that is by default the
 
 ## 2. Reference preparation
 
-The resource bundle is a collection of standard files for harmonisaing GWAS summary statistics data. We support the ensembl variants VCF reference (hg38, dbSNP 151) and synonyms table . These files can be directly downloaded from our [FTP](https://ftp.ebi.ac.uk/pub/databases/gwas/harmonisation_resources/) server.
+The resource bundle is a collection of standard files for harmonising GWAS summary statistics data. We support the Ensembl variants VCF reference (hg38, dbSNP 151) and synonyms table . These files can be directly downloaded from our [FTP](https://ftp.ebi.ac.uk/pub/databases/gwas/harmonisation_resources/) server.
 
 Users can also prepare your own reference:
 ```
