@@ -12,7 +12,7 @@ process map_to_build {
 
     shell:
     """
-    from_build=\$(grep genomeAssembly $yaml | awk -F "GRCh" '{print $2}' )
+    from_build=\$(grep genomeAssembly $yaml | awk -F "GRCh" '{print \$2}' )
     map_to_build_nf.py \
     -f $tsv \
     -from_build \$from_build \
