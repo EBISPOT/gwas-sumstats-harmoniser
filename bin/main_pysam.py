@@ -137,16 +137,19 @@ def main():
 
             # Add harmonised other allele, effect allele, eaf, beta, or to output
             out_row = OrderedDict()
-            out_row["hm_chrom"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_pos"] = ss_rec.hm_pos if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_effect_allele"] = ss_rec.hm_effect_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_row["chromosome"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_row["base_pair_location"] = ss_rec.hm_pos if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_row["effect_allele"] = ss_rec.hm_effect_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_row["other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             if args.beta_col:
-                out_row["hm_beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
-            if args.or_col:
-                out_row["hm_OR"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
+                out_row["beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
+            elif args.or_col:
+                out_row["OR"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
+            else:
+                out_row["beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
+
             out_row["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
-            out_row["hm_eaf"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_row["effect_allele_frequency"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
             out_row["p_value"]=ss_rec.data["p_value"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
             out_row["hm_varid"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_row["hm_rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
@@ -156,9 +159,12 @@ def main():
                 out_row["hm_OR_lowerCI"] = ss_rec.oddsr_lower is not None if ss_rec.oddsr_lower and ss_rec.is_harmonised else args.na_rep_out
                 out_row["hm_OR_upperCI"] = ss_rec.oddsr_upper is not None if ss_rec.oddsr_upper and ss_rec.is_harmonised else args.na_rep_out
             out_row["hm_code"] = ss_rec.hm_code
+            out_row["hm_coordinate_conversion"] = ss_rec.data["hm_coordinate_conversion"]
+            if args.or_col:
+                out_row["OR"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
             
             # Add other data from summary stat file
-            outed=["chromosome","base_pair_location","variant_id","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","ref_allele"]
+            outed=["chromosome","base_pair_location","variant_id","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","ref_allele","hm_coordinate_conversion","info"]
             for key in ss_rec.data:
                 if key not in outed:
                     value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
