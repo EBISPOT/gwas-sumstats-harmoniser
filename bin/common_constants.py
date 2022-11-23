@@ -14,6 +14,7 @@ SE_DSET = 'standard_error'
 EFFECT_DSET = 'effect_allele'
 OTHER_DSET = 'other_allele'
 FREQ_DSET = 'effect_allele_frequency'
+INFO_DSET='info'
 HM_CC_DSET = 'hm_coordinate_conversion'
 HM_OR_DSET = 'hm_odds_ratio'
 HM_RANGE_U_DSET = 'hm_ci_upper'
@@ -65,7 +66,8 @@ HARMONISER_ARG_MAP = {
     OR_DSET: "--or_col",
     RANGE_L_DSET: "--or_col_lower",
     RANGE_U_DSET: "--or_col_upper",
-    FREQ_DSET: "--eaf_col"
+    FREQ_DSET: "--eaf_col",
+    INFO_DSET:"--info"
 }
 
 DEFAULT_CHROMS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']

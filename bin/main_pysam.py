@@ -137,22 +137,32 @@ def main():
 
             # Add harmonised other allele, effect allele, eaf, beta, or to output
             out_row = OrderedDict()
-            out_row["hm_varid"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_row["hm_chrom"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_row["hm_pos"] = ss_rec.hm_pos if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_row["hm_effect_allele"] = ss_rec.hm_effect_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_OR"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_OR_lowerCI"] = ss_rec.oddsr_lower is not None if ss_rec.oddsr_lower and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_OR_upperCI"] = ss_rec.oddsr_upper is not None if ss_rec.oddsr_upper and ss_rec.is_harmonised else args.na_rep_out
+            out_row["hm_other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            if args.beta_col:
+                out_row["hm_beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
+            if args.or_col:
+                out_row["hm_OR"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_row["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
             out_row["hm_eaf"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_row["p_value"]=ss_rec.data["p_value"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
+            out_row["hm_varid"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_row["hm_rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            if args.info:
+                out_row["info"] = ss_rec.data["info"]
+            if any([args.or_col_lower, args.or_col_upper]):
+                out_row["hm_OR_lowerCI"] = ss_rec.oddsr_lower is not None if ss_rec.oddsr_lower and ss_rec.is_harmonised else args.na_rep_out
+                out_row["hm_OR_upperCI"] = ss_rec.oddsr_upper is not None if ss_rec.oddsr_upper and ss_rec.is_harmonised else args.na_rep_out
             out_row["hm_code"] = ss_rec.hm_code
+            
             # Add other data from summary stat file
+            outed=["chromosome","base_pair_location","variant_id","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","ref_allele"]
             for key in ss_rec.data:
-                value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
-                out_row[key] = str(value)
+                if key not in outed:
+                    value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
+                    out_row[key] = str(value)
 
             # Write header
             if not header_written:
@@ -163,6 +173,7 @@ def main():
             # Write row
             outline = args.out_sep.join([str(x) for x in out_row.values()]) + "\n"
             out_handle.write(outline.encode("utf-8"))
+            
 
     # Close output handle
     if args.hm_sumstats:
@@ -270,6 +281,8 @@ def parse_args():
                         help=('Effect allele frequency column'), type=str)
     incols_group.add_argument('--rsid_col', metavar="<str>",
                         help=('rsID column in the summary stat file'), type=str)
+    incols_group.add_argument('--info', metavar="<str>",
+                        help=('info column in the summary stat file'), type=str)
 
     # Global other args
     other_group = parser.add_argument_group(title='Other args')
