@@ -61,7 +61,7 @@ HARMONISER_ARG_MAP = {
     BP_DSET: "--pos_col",
     EFFECT_DSET: "--effAl_col",
     OTHER_DSET: "--otherAl_col",
-    SNP_DSET: "--rsid_col",
+    RSID: "--rsid_col",
     BETA_DSET: "--beta_col",
     OR_DSET: "--or_col",
     RANGE_L_DSET: "--or_col_lower",
