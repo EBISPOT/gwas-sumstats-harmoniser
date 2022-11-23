@@ -59,7 +59,7 @@ workflow GWASCATALOGHARM {
         println ("Harmonizing the file ${params.file}")
         files = Channel.fromPath(params.file).map{input_files(it)}
     }
-    
+    //files: GCST, path of ymal, path of GCST
     else if (params.list){
         println ("Harmonizing files in the file ${params.list}")
         files = Channel
@@ -86,7 +86,7 @@ workflow GWASCATALOGHARM {
 
 def input_files(Path input)
 {
-    return [input.getName().split('\\.')[0],input.getParent()/input.getName().split('\\.')[0]+".ymal",input]
+    return [input.getName().split('\\.')[0],input+"-meta.yaml",input]
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
