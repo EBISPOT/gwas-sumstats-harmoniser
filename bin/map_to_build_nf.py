@@ -17,7 +17,6 @@ from ast import literal_eval
 def merge_ss_vcf(ss, vcf, from_build, to_build, chroms):
     vcfs = glob.glob(vcf)
     ssdf = pd.read_table(ss, sep=None, engine='python', dtype=str)
-    print(ssdf.head())
     add_fields_if_missing(df=ssdf)
     rsid_mask = ssdf[SNP_DSET].str.startswith("rs").fillna(False)
     ssdf_with_rsid = ssdf[rsid_mask]
