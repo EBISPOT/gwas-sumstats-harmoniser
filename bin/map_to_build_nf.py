@@ -16,7 +16,9 @@ from ast import literal_eval
 
 def merge_ss_vcf(ss, vcf, from_build, to_build, chroms):
     vcfs = glob.glob(vcf)
-    ssdf = pd.read_csv(ss, sep='\t', dtype=str)
+    ssdf = pd.read_table(ss, sep=None, engine='python', dtype=str)
+    print(ssdf.head())
+    add_fields_if_missing(df=ssdf)
     rsid_mask = ssdf[SNP_DSET].str.startswith("rs").fillna(False)
     ssdf_with_rsid = ssdf[rsid_mask]
     ssdf_without_rsid = ssdf[~rsid_mask]
@@ -92,6 +94,14 @@ def listify_string(string):
         listified = list(str(string))
     return listified
 
+def add_fields_if_missing(df):
+    add_column_to_df(df=df, column=SNP_DSET)
+    add_column_to_df(df=df, column=CHR_DSET)
+    add_column_to_df(df=df, column=BP_DSET)
+
+def add_column_to_df(df, column, value='NA'):
+    if column not in df.columns:
+        df[column] = value
 
 
 
