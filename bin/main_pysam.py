@@ -151,18 +151,17 @@ def main():
             out_row["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
             out_row["effect_allele_frequency"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
             out_row["p_value"]=ss_rec.data["p_value"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
-            out_row["hm_varid"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_row["hm_code"] = ss_rec.hm_code
+            out_row["hm_coordinate_conversion"] = ss_rec.data["hm_coordinate_conversion"]
+            out_row["hm_variant_id"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_row["hm_rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             if args.info:
                 out_row["info"] = ss_rec.data["info"]
             if any([args.or_col_lower, args.or_col_upper]):
                 out_row["hm_OR_lowerCI"] = ss_rec.oddsr_lower is not None if ss_rec.oddsr_lower and ss_rec.is_harmonised else args.na_rep_out
                 out_row["hm_OR_upperCI"] = ss_rec.oddsr_upper is not None if ss_rec.oddsr_upper and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_code"] = ss_rec.hm_code
-            out_row["hm_coordinate_conversion"] = ss_rec.data["hm_coordinate_conversion"]
             if args.or_col:
                 out_row["OR"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
-            
             # Add other data from summary stat file
             outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","ref_allele","hm_coordinate_conversion","info"]
             for key in ss_rec.data:
