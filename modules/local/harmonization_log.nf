@@ -23,7 +23,8 @@ process harmonization_log {
     -u $unmapped \
     -o ${GCST}.running.log
 
-    sed 1d $qc_result| awk -F "\t" '{print \$12}' | creat_log.py >> ${GCST}.running.log
+    N=\$(awk -v RS='\t' '/hm_code/{print NR; exit}' $qc_result)
+    sed 1d $qc_result| awk -F "\t" '{print \$'"\$N"'}' | creat_log.py >> ${GCST}.running.log
     
     result=\$(grep Result ${GCST}.running.log | cut -f2)
     """
