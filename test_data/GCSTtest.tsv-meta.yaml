@@ -4,7 +4,7 @@ authorNotes: "author provided text"
 dataFileMd5sum: 0b6d30452027a49fad0c86b77ab4477c
 dataFileName: GCSTtest.tsv
 fileType: "GWAS-SFF v0.1"
-genomeAssembly: GRCh37
+genomeAssembly: GRCh38
 genotypingTechnology: 
   - "Genome-wide genotyping array"
 sampleAncestry: 
