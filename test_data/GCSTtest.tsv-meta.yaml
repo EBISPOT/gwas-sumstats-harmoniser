@@ -1,0 +1,15 @@
+GWASCatalogAPI: "https://www.ebi.ac.uk/gwas/rest/api/studies/GCST90012345"
+GWASID: GCSTtest
+authorNotes: "author provided text"
+dataFileMd5sum: 0b6d30452027a49fad0c86b77ab4477c
+dataFileName: GCSTtest.tsv
+fileType: "GWAS-SFF v0.1"
+genomeAssembly: GRCh38
+genotypingTechnology: 
+  - "Genome-wide genotyping array"
+sampleAncestry: 
+  - European
+  - "East Asian"
+sampleSize: 18096
+traitDescription: 
+  - "myocardial fractal dimension slice 6"
