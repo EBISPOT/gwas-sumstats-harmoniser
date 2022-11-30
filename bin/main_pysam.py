@@ -164,7 +164,7 @@ def main():
                 out_row["OR"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
             
             # Add other data from summary stat file
-            outed=["chromosome","base_pair_location","variant_id","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","ref_allele","hm_coordinate_conversion","info"]
+            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","ref_allele","hm_coordinate_conversion","info"]
             for key in ss_rec.data:
                 if key not in outed:
                     value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
