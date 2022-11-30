@@ -17,7 +17,7 @@ class SumStatRecord:
         self.oddsr = safe_float(oddsr) if oddsr is not None else None
         self.oddsr_lower = safe_float(oddsr_lower) if oddsr_lower is not None else None
         self.oddsr_upper = safe_float(oddsr_upper) if oddsr_upper is not None else None
-        self.rsid = rsid
+        self.rsid = str(rsid) if rsid is not None else None
 
         # Effect allele frequency is not required if we assume +ve strand
         if eaf:
