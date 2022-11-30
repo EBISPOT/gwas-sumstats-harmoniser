@@ -6,7 +6,7 @@ process harmonization_log {
 
     input:
     val chr
-    tuple val(GCST), val(mode), path(all_hm), path(qc_result), path(delete_sites), path(count), val(build), path(input)
+    tuple val(GCST), val(mode), path(all_hm), path(qc_result), path(delete_sites), path(count), path(raw_yaml), path(input)
     path(unmapped)
 
     output:
