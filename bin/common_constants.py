@@ -66,8 +66,7 @@ HARMONISER_ARG_MAP = {
     OR_DSET: "--or_col",
     RANGE_L_DSET: "--or_col_lower",
     RANGE_U_DSET: "--or_col_upper",
-    FREQ_DSET: "--eaf_col",
-    INFO_DSET:"--info"
+    FREQ_DSET: "--eaf_col"
 }
 
 DEFAULT_CHROMS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']
