@@ -28,7 +28,10 @@ process harmonization {
     --na_rep_out NA \
     --palin_mode $palin_mode;
 
+    chr=\$(awk -v RS='\t' '/chromosome/{print NR; exit}' ${chrom}.merged_unsorted.hm)
+    pos=\$(awk -v RS='\t' '/base_pair_location/{print NR; exit}' ${chrom}.merged_unsorted.hm)
+
     head -n1 ${chrom}.merged_unsorted.hm > ${chrom}.merged.hm;
-    tail -n+2 ${chrom}.merged_unsorted.hm | sort -k3,3n -k4,4n >> ${chrom}.merged.hm
+    tail -n+2 ${chrom}.merged_unsorted.hm | sort -k \$chr,\$chr -k \$pos,\$pos -n >> ${chrom}.merged.hm
     """
 }
