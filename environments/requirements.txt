@@ -1,6 +1,6 @@
 appdirs==1.4.4
 attrs==19.3.0
-certifi==2020.4.5.1
+certifi==2022.12.7
 chardet==3.0.4
 ConfigArgParse==1.2.3
 datrie==0.8.2
