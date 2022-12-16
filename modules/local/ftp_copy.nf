@@ -5,7 +5,7 @@ process ftp_copy{
    
 
     input:
-    tuple val(GCST), path(tsv), path(qc_tsv), path (log), val(status)
+    tuple val(GCST), path(tsv), path(qc_tsv), path (log), path (yaml), val(status)
 
     output:
     tuple val(GCST), val(status), env(copy), emit: done
@@ -31,6 +31,7 @@ process ftp_copy{
 
     cp ${launchDir}/$GCST/final/${GCST}.h.tsv.gz.tbi \$path
     cp ${launchDir}/$GCST/final/${GCST}.running.log  \$path
+    cp ${launchDir}/$GCST/final/${GCST}.h.tsv.gz-meta.yaml  \$path
 
     if [ \$md5_h_tsv==\$md5_h_tsv_copied ]
     then 

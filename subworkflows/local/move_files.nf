@@ -7,7 +7,7 @@ workflow move_files{
     
     main:
     
-    har_result_ch=input.map{it[0,2..5]}.branch{success:it.contains("SUCCESS_HARMONIZATION")
+    har_result_ch=input.map{it[0,2..6]}.branch{success:it.contains("SUCCESS_HARMONIZATION")
     failed:it.contains("FAILED_HARMONIZATION")}
     //success_harmonized_file move to FTP
     //failed harmonized file move to Failed folder

@@ -10,7 +10,7 @@ process harmonization_log {
     path(unmapped)
 
     output:
-    tuple val(GCST), path(qc_result), path ("${GCST}.running.log"), env(result), emit: running_result
+    tuple val(GCST), path(qc_result), path ("${GCST}.running.log"),  path ("${GCST}.h.tsv.gz-meta.yaml"), env(result), emit: running_result
 
     shell:
     """
@@ -27,5 +27,26 @@ process harmonization_log {
     sed 1d $qc_result| awk -F "\t" '{print \$'"\$N"'}' | creat_log.py >> ${GCST}.running.log
     
     result=\$(grep Result ${GCST}.running.log | cut -f2)
+
+    # metadata file
+
+    dataFileName="${GCST}.h.tsv.gz"
+    outYaml="${GCST}.h.tsv.gz-meta.yaml"
+    dataFileMd5sum=\$(md5sum<${launchDir}/$GCST/final/${GCST}.h.tsv.gz | awk '{print \$1}')
+    dateLastModified=\$(date  +"%Y-%m-%d")
+    harmonisationReference=\$(tabix -H "${params.ref}/homo_sapiens-${chr}.vcf.gz" | grep reference | cut -f2 -d '=')
+    effectStatistic=\$(zcat ${launchDir}/$GCST/final/${GCST}.h.tsv.gz | head -n1 | cut -f5)
+
+    gwas_metadata.py \
+    -i $raw_yaml \
+    -o \$outYaml \
+    --dataFileName \$dataFileName \
+    --dataFileMd5sum \$dataFileMd5sum \
+    --isHarmonised True \
+    --isSorted True \
+    --genomeAssembly GRCh38  \
+    --dateLastModified \$dateLastModified \
+    --harmonisationReference \$harmonisationReference \
+    --effectStatistic \$effectStatistic -e
     """
 }

@@ -87,7 +87,7 @@ workflow GWASCATALOGHARM_GWASCATALOG {
 }
 
 def input_list(Path input) {
-    return [input.getName().split('_')[0],input.getName().split('\\.')[0][-2..-1],input,]
+    return [input.getName().split('\\.')[0],input+"-meta.yaml",input]
 }
 
 
