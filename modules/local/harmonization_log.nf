@@ -44,7 +44,8 @@ process harmonization_log {
     --dataFileMd5sum \$dataFileMd5sum \
     --isHarmonised True \
     --isSorted True \
-    --genomeAssembly GRCh38  \
+    --genomeAssembly GRCh38 \
+    --coordinateSystem 1-based \
     --dateLastModified \$dateLastModified \
     --harmonisationReference \$harmonisationReference \
     --effectStatistic \$effectStatistic -e

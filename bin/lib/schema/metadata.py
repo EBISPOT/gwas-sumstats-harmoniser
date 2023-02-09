@@ -1,13 +1,12 @@
-from pydantic import BaseModel, validator
-from typing import List, Optional
+from pydantic import (BaseModel,
+                      constr)
 from datetime import date
-from enum import Enum
+from typing import List, Optional
 
 
-class EffectStatisticEnum(str, Enum):
-    beta = 'beta'
-    odds_ratio = 'odds_ratio'
-    hazard_ratio = 'hazard_ratio'
+"""
+Models
+"""
 
 
 class SampleMetadata(BaseModel):
@@ -18,25 +17,10 @@ class SampleMetadata(BaseModel):
     sampleSize: int = None
     sampleAncestry: List[str] = None
 
-    @validator('ancestryMethod', 'sampleAncestry', pre=True)
-    def split_str(cls, v):
-        if isinstance(v, str):
-            return v.split('|')
-        return v
-
-    @validator('caseControlStudy', pre=True)
-    def str_to_bool(cls, v):
-        if str(v).lower() in {'no', 'false', 'n'}:
-            return False
-        elif str(v).lower() in {'yes', 'true', 'y'}:
-            return True
-        else:
-            return v
-
 
 class SumStatsMetadata(BaseModel):
     genotypingTechnology: List[str] = []
-    GWASID: str = None
+    GWASID: Optional[constr(regex=r'^GCST\d+$')] = None
     traitDescription: List[str] = None
     effectAlleleFreqLowerLimit: Optional[float] = None
     dataFileName: str = None
@@ -46,34 +30,19 @@ class SumStatsMetadata(BaseModel):
     isSorted: Optional[bool] = False
     dateLastModified: date = None
     genomeAssembly: str = None
-    effectStatistic: Optional[EffectStatisticEnum] = None
+    effectStatistic: Optional[str] = None
     pvalueIsNegLog10: Optional[bool] = False
     analysisSoftware: Optional[str] = None
     imputationPanel: Optional[str] = None
     imputationSoftware: Optional[str] = None
-    hmCodeDefinition: Optional[dict] = None
     harmonisationReference: Optional[str] = None
     adjustedCovariates: Optional[str] = None
     ontologyMapping: Optional[str] = None
     authorNotes: Optional[str] = None
     GWASCatalogAPI: Optional[str] = None
+    sex: Optional[str] = None
+    coordinateSystem: Optional[str] = None
     samples: List[SampleMetadata] = []
-
-    @validator('genotypingTechnology', 'traitDescription', pre=True)
-    def split_str(cls, v):
-        if isinstance(v, str):
-            return v.split('|')
-        return v
-
-    @validator('isHarmonised', 'isSorted', 'pvalueIsNegLog10',
-               pre=True)
-    def str_to_bool(cls, v):
-        if str(v).lower() in {'no', 'false', 'n'}:
-            return False
-        elif str(v).lower() in {'yes', 'true', 'y'}:
-            return True
-        else:
-            return v
-
+    
     class Config:
-        use_enum_values = True  
+        title = 'GWAS Summary Statistics metadata schema'
