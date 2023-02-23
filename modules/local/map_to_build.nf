@@ -12,12 +12,14 @@ process map_to_build {
 
     shell:
     """
+    coordinate=\$(grep coordinateSystem $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
     from_build=\$(grep genomeAssembly $yaml | awk -F "GRCh" '{print \$2}' )
     map_to_build_nf.py \
     -f $tsv \
     -from_build \$from_build \
     -to_build $params.to_build \
     -vcf "${params.ref}/homo_sapiens-chr*.parquet" \
-    -chroms "${chr}"
+    -chroms "${chr}" \
+    -coordinate \$coordinate
     """
 }
