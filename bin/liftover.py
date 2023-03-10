@@ -41,12 +41,12 @@ def isNumber(value):
         return False
 
 
-def map_bp_to_build_via_liftover(chromosome, bp, build_map):
+def map_bp_to_build_via_liftover(chromosome, bp, build_map, coordinate):
     if isNumber(bp):
-        data = build_map.convert_coordinate('chr' + str(chromosome), int(bp))
+        data = build_map.convert_coordinate('chr' + str(chromosome), int(bp)-int(coordinate))
         if data is not None:
             if len(data) > 0:
-                return data[0][1]
+                return data[0][1]+int(1)
     return None
 
 
@@ -77,10 +77,12 @@ def open_file_and_process(file, from_build, to_build):
         for row in csv_reader:
             chromosome = row[CHR_DSET].replace('23', 'X').replace('24', 'Y')
             bp = row[BP_DSET]
+            bp = row[BP_DSET]
+            coordinate=coordinate[0]
 
             # do the bp location mapping if needed
             if from_build != to_build:
-                mapped_bp = map_bp_to_build_via_liftover(chromosome=chromosome, bp=bp, build_map=build_map)
+                mapped_bp = map_bp_to_build_via_liftover(chromosome=chromosome, bp=bp, build_map=build_map, coordinate=coordinate)
                 if mapped_bp is None:
                     mapped_bp = map_bp_to_build_via_ensembl(chromosome=chromosome, bp=bp, from_build=from_build, to_build=to_build)
                 row[BP_DSET] = mapped_bp
@@ -100,6 +102,8 @@ def main():
     file = args.f
     from_build = args.original
     to_build = args.mapped
+
+
 
     open_file_and_process(file, from_build, to_build)
 

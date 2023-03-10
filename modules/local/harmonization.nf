@@ -6,7 +6,7 @@ process harmonization {
     tag "$GCST"
 
     input:
-    tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref)
+    tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref), path(yaml)
 
 
     output:
@@ -17,8 +17,9 @@ process harmonization {
 
     shell:
     """
-    header_args=\$(utils.py -f $merged -harm_args);
-    main_pysam.py \
+    coordinate=\$(grep coordinateSystem $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
+    header_args=\$(python /Users/yueji/Documents/GitHub/gwas-sumstats-harmoniser/bin/utils.py -f $merged -harm_args);
+    python /Users/yueji/Documents/GitHub/gwas-sumstats-harmoniser/bin/main_pysam.py \
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
     --hm_sumstats ${chrom}.merged_unsorted.hm \
@@ -26,6 +27,7 @@ process harmonization {
     \$header_args \
     --na_rep_in NA \
     --na_rep_out NA \
+    --coordinate \$coordinate \
     --palin_mode $palin_mode;
 
     chr=\$(awk -v RS='\t' '/chromosome/{print NR; exit}' ${chrom}.merged_unsorted.hm)

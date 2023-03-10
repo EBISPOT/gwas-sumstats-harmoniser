@@ -64,19 +64,12 @@ def main():
 
         # Skip rows that have code 14 (fail validation)
         if not ss_rec.hm_code:
-            # Get VCF reference variants for this recordls
-            coordinate=args.coordinate
-            print(ss_rec.lifmethod=="lo")
-            if int(coordinate[0])==0 and ss_rec.lifmethod=="lo" and len(str(ss_rec.effect_al))+len(str(ss_rec.other_al))>2: 
-                vcf_recs =get_vcf_records_0base(
-                    tbx,
-                    ss_rec.chrom,
-                    ss_rec.pos)
-            else:
-                vcf_recs = get_vcf_records(
-                    tbx,
-                    ss_rec.chrom,
-                    ss_rec.pos)
+
+            # Get VCF reference variants for this record
+            vcf_recs = get_vcf_records(
+                        tbx,
+                        ss_rec.chrom,
+                        ss_rec.pos)
             # Extract the VCF record that matches the summary stat record
             vcf_rec, ret_code = exract_matching_record_from_vcf_records(
                 ss_rec, vcf_recs)
@@ -263,11 +256,6 @@ def parse_args():
 
     # Harmonisation mode
     mode_group = parser.add_argument_group(title='Harmonisation mode')
-    mode_group.add_argument('--coordinate',
-                            help=('coordinate system of the input file:\n'
-                                  '(a) 1_base '
-                                  '(b) 0_base '),
-                            type=str)
     mode_group.add_argument('--palin_mode', metavar="[infer|forward|reverse|drop]",
                         help=('Mode to use for palindromic variants:\n'
                               '(a) infer strand from effect-allele freq, '
@@ -309,8 +297,6 @@ def parse_args():
                         help=('Effect allele frequency column'), type=str)
     incols_group.add_argument('--rsid_col', metavar="<str>",
                         help=('rsID column in the summary stat file'), type=str)
-    incols_group.add_argument('--hm_coordinate_conversion', metavar="<str>",
-                        help=('liftover method column'), type=str, required=True)
 
     # Global other args
     other_group = parser.add_argument_group(title='Other args')
@@ -677,22 +663,6 @@ def get_vcf_records(tbx, chrom, pos):
     #######YUE################
     return [VCFRecord(line) for line in response]
 
-def get_vcf_records_0base(tbx, chrom, pos):
-    """ Uses tabix to query VCF file. Parses info from record.
-    Args:
-        in_vcf (str): vcf file
-        chrom (str): chromosome
-        pos (int): base pair position
-    Returns:
-        list of VCFRecords
-    """
-    #######YUE################
-    result=tbx.fetch(chrom, int(pos)-2, int(pos))
-    # each records returned by fetch is str, it needs to be change into list for VCF records to process
-    response=[list(n.split("\t")) for n in result]
-    #######YUE################
-    return [VCFRecord(line) for line in response]
-
 def yield_sum_stat_records(inf, sep):
     """ Load lines from summary stat file and convert to SumStatRecord class.
     Args:
@@ -719,8 +689,7 @@ def yield_sum_stat_records(inf, sep):
                                   row.get(args.or_col_upper, None),
                                   row.get(args.eaf_col, None),
                                   row.get(args.rsid_col, None),
-                                  row,
-                                  row[args.hm_coordinate_conversion])
+                                  row)
         yield ss_record
 
 def parse_sum_stats(inf, sep):

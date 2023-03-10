@@ -79,7 +79,7 @@ workflow GWASCATALOGHARM {
     //major_direction.out.direction_sum: [GCST, path of sum_count]
     //major_direction.out.hm_input: tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref)
     harm_ch = major_direction.out.hm_input.groupTuple().transpose()
-    main_harm(harm_ch)
+    main_harm(harm_ch,files)
     // out:[GCST009150, forward, path of harmonised.tsv]
     quality_control(main_harm.out.hm,major_direction.out.direction_sum,files,ch_for_direction,major_direction.out.unmapped)
 }

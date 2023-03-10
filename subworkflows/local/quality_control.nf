@@ -16,7 +16,6 @@ workflow quality_control{
     main:
     qc(ch_tsv)
     ch_to_log=qc.out.qc_ed.combine(ch_direction,by:0).combine(inputs,by:0)
-    ch_to_log.view()
     //ch_to_log: val(GCST), val(mode),path(all_hm), path('harmonized.qc.tsv'), path('report.txt'), path (total_sum), path(yaml), path (input)
 
     def to_log=chroms.flatten().last()
