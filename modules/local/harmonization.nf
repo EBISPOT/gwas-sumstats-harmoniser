@@ -18,7 +18,7 @@ process harmonization {
     shell:
     """
     coordinate=\$(grep coordinateSystem $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
-    header_args=\$(python utils.py -f $merged -harm_args);
+    header_args=\$(utils.py -f $merged -harm_args);
     main_pysam.py \
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
