@@ -18,8 +18,8 @@ process harmonization {
     shell:
     """
     coordinate=\$(grep coordinateSystem $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
-    header_args=\$(python /Users/yueji/Documents/GitHub/gwas-sumstats-harmoniser/bin/utils.py -f $merged -harm_args);
-    python /Users/yueji/Documents/GitHub/gwas-sumstats-harmoniser/bin/main_pysam.py \
+    header_args=\$(python utils.py -f $merged -harm_args);
+    main_pysam.py \
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
     --hm_sumstats ${chrom}.merged_unsorted.hm \

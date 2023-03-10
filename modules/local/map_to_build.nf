@@ -14,7 +14,7 @@ process map_to_build {
     """
     coordinate=\$(grep coordinateSystem $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
     from_build=\$(grep genomeAssembly $yaml | awk -F "GRCh" '{print \$2}' )
-    python /Users/yueji/Documents/GitHub/gwas-sumstats-harmoniser/bin/map_to_build_nf.py \
+    map_to_build_nf.py \
     -f $tsv \
     -from_build \$from_build \
     -to_build $params.to_build \
