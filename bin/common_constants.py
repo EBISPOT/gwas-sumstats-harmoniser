@@ -67,7 +67,6 @@ HARMONISER_ARG_MAP = {
     RANGE_L_DSET: "--or_col_lower",
     RANGE_U_DSET: "--or_col_upper",
     FREQ_DSET: "--eaf_col",
-    FREQ_DSET: "--eaf_col",
     HM_CC_DSET:"--hm_coordinate_conversion"
 }
 
