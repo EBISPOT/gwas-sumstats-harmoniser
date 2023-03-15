@@ -3,7 +3,7 @@
 import yaml
 import argparse
 
-from lib.schema.metadata import SumStatsMetadata
+from gwas_sumstats_tools.schema.metadata import SumStatsMetadata
 
 
 class MetadataClient:

@@ -12,8 +12,8 @@ process map_to_build {
 
     shell:
     """
-    coordinate=\$(grep coordinateSystem $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
-    from_build=\$(grep genomeAssembly $yaml | awk -F "GRCh" '{print \$2}' )
+    coordinate=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
+    from_build=\$(grep genome_assembly $yaml | rev | cut -c 1-2 | rev )
     map_to_build_nf.py \
     -f $tsv \
     -from_build \$from_build \

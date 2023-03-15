@@ -17,7 +17,7 @@ process harmonization {
 
     shell:
     """
-    coordinate=\$(grep coordinateSystem $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
+    coordinate=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
     header_args=\$(utils.py -f $merged -harm_args);
     main_pysam.py \
     --sumstats $merged \
