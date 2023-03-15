@@ -10,7 +10,6 @@ workflow main_harm {
     main:
     yaml_path_ch=files.map{it[0,1]}
     harm_input=hm_input.combine(yaml_path_ch,by:0)
-    harm_input.view()
     harmonization(harm_input)
     //hm_by_chrom: [GCST009150, forward, path of hm, path of log]
     //hm_input.map{it[6]}.dump(tag:'bar')
