@@ -1,8 +1,11 @@
 process get_variation_tables{
-    conda (params.enable_conda ? "$projectDir/environments/conda_environment.yml" : null)
-    def dockerimg = "ebispot/gwas-sumstats-harmoniser:latest"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://ebispot/gwas-sumstats-harmoniser:latest' : dockerimg }"
-        
+    conda (params.enable_conda ? "${task.ext.conda}" : null)
+
+    container "${ workflow.containerEngine == 'singularity' &&
+        !task.ext.singularity_pull_docker_container ?
+        "${task.ext.singularity}${task.ext.singularity_version}" :
+        "${task.ext.docker}${task.ext.docker_version}" }"
+           
     storeDir params.ref
 
     input:
