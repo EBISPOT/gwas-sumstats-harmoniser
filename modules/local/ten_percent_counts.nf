@@ -23,14 +23,12 @@ process ten_percent_counts {
 
     (head -n 1 $merged; sed '1d' $merged| shuf -n \$n)>ten_percent.${chrom}.merged
 
+    header_args=\$(utils.py -f $merged -strand_count_args);
+
     main_pysam.py \
     --sumstats ten_percent.${chrom}.merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
-    --chrom_col chromosome \
-    --pos_col base_pair_location \
-    --effAl_col effect_allele \
-    --otherAl_col other_allele \
-    --rsid_col variant_id \
+    \$header_args \
     --strand_counts ten_percent_${chrom}.sc
     """
 }

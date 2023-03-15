@@ -17,14 +17,11 @@ process generate_strand_counts {
 
     shell:
     """
+    header_args=\$(utils.py -f $merged -strand_count_args);
     main_pysam.py \
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
-    --chrom_col chromosome \
-    --pos_col base_pair_location \
-    --effAl_col effect_allele \
-    --otherAl_col other_allele \
-    --rsid_col variant_id \
+    \$header_args \
     --strand_counts full_${chrom}.sc
     """
 }

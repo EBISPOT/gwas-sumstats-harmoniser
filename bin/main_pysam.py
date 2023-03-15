@@ -267,7 +267,8 @@ def parse_args():
                             help=('coordinate system of the input file:\n'
                                   '(a) 1_base '
                                   '(b) 0_base '),
-                            type=str)
+                            type=str,
+                            default="1-based")
     mode_group.add_argument('--palin_mode', metavar="[infer|forward|reverse|drop]",
                         help=('Mode to use for palindromic variants:\n'
                               '(a) infer strand from effect-allele freq, '

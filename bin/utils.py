@@ -37,19 +37,30 @@ def get_harmonisation_mapper_args(csv_file):
     harm_args = " ".join(arg_list)
     return harm_args
 
+def get_strandcount_mapper_args(csv_file):
+    arg_list = ["{v} {k}".format(k=k, v=v) for k, v in STRAND_COUNT_ARG_MAP.items() if k in list_headers(csv_file)]
+    count_args = " ".join(arg_list)
+    return count_args
+
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-f', help='The name of the file to be processed', required=True)
     argparser.add_argument('-harm_args',
                            help='Return the header mapper arguments for the harmonisation',
                            action='store_true')
+    argparser.add_argument('-strand_count_args',
+                           help='Return the header mapper arguments for strand count step',
+                           action='store_true')
     args = argparser.parse_args()
 
     ss_file = args.f
     harm_args = args.harm_args
+    count_args=args.strand_count_args
 
     if harm_args:
         print(get_harmonisation_mapper_args(ss_file))
+    if count_args:
+        print(get_strandcount_mapper_args(ss_file))
 
 
 if __name__ == '__main__':
