@@ -38,7 +38,6 @@ def main():
         # Get header
         header = in_handle.readline().decode("utf-8").rstrip().split(args.in_sep)
         effect=header[4]
-        print(effect)
     
     # Process each row in summary statistics
     for counter, ss_rec in enumerate(yield_sum_stat_records(args.sumstats,
@@ -66,7 +65,6 @@ def main():
         if not ss_rec.hm_code:
             # Get VCF reference variants for this recordls
             coordinate=args.coordinate
-            print(ss_rec.lifmethod=="lo")
             if int(coordinate[0])==0 and ss_rec.lifmethod=="lo" and len(str(ss_rec.effect_al))+len(str(ss_rec.other_al))>2: 
                 vcf_recs =get_vcf_records_0base(
                     tbx,
