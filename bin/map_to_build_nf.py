@@ -18,7 +18,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
     vcfs = glob.glob(vcf)
     ssdf = pd.read_table(ss, sep=None, engine='python', dtype=str)
     add_fields_if_missing(df=ssdf)
-    rsid_mask = ssdf[SNP_DSET].str.startswith("rs").fillna(False)
+    rsid_mask = ssdf[RSID].str.startswith("rs").fillna(False)
     ssdf_with_rsid = ssdf[rsid_mask]
     ssdf_without_rsid = ssdf[~rsid_mask]
     header = list(ssdf.columns.values)
@@ -30,7 +30,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
             vcf_df = pd.read_parquet(vcf)
             chrom = vcf_df.CHR[0]
             # merge on rsid, update chr and position from vcf ref
-            mergedf = ssdf_with_rsid.merge(vcf_df, left_on=SNP_DSET, right_on="ID", how="left")
+            mergedf = ssdf_with_rsid.merge(vcf_df, left_on=RSID, right_on="ID", how="left")
             mapped = mergedf.dropna(subset=["ID"]).drop([CHR_DSET, BP_DSET], axis=1)
             mapped[CHR_DSET] = mapped["CHR"].astype("str").str.replace("\..*$","")
             mapped[BP_DSET] = mapped["POS"].astype("str").str.replace("\..*$","")
@@ -94,7 +94,7 @@ def listify_string(string):
     return listified
 
 def add_fields_if_missing(df):
-    add_column_to_df(df=df, column=SNP_DSET)
+    add_column_to_df(df=df, column=RSID)
     add_column_to_df(df=df, column=CHR_DSET)
     add_column_to_df(df=df, column=BP_DSET)
 
