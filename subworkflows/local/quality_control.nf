@@ -14,7 +14,8 @@ workflow quality_control{
     unmapped
 
     main:
-    qc(ch_tsv)
+    rsID_file=Channel.fromPath("${params.ref}/rsID.sql")
+    qc(ch_tsv, rsID_file)
     ch_to_log=qc.out.qc_ed.combine(ch_direction,by:0).combine(inputs,by:0)
     ch_to_log.view()
     //ch_to_log: val(GCST), val(mode),path(all_hm), path('harmonized.qc.tsv'), path('report.txt'), path (total_sum), val(build), path (input)
