@@ -151,7 +151,8 @@ def drop_last_element_from_filename(filename):
     return '-'.join(filename_parts[:-1])
 
 
-def resolve_invalid_rsids(row, header, ensembl_client=None, sql_client=None):
+"""
+ def resolve_invalid_rsids(row, header, ensembl_client=None, sql_client=None):
     hm_rsid_idx = header.index('hm_rsid')
     snp_idx = header.index(RSID)
     # if possible, set variant_id to harmonised rsid
@@ -180,6 +181,7 @@ def resolve_invalid_rsids(row, header, ensembl_client=None, sql_client=None):
     if not row[snp_idx].startswith('rs'):
         row[snp_idx] = 'NA'
     return row
+"""
 
 
 def get_csv_reader(csv_file):
@@ -237,7 +239,7 @@ def main():
                 # Checks for blanks, integers and floats:
                 sql_client = sqlClient(db) if db else None
                 ensembl_client = EnsemblRestClient() if not db else None
-                row = resolve_invalid_rsids(row, header, ensembl_client, sql_client)
+                #row = resolve_invalid_rsids(row, header, ensembl_client, sql_client)
                 row = blanks_to_NA(row)
                 row = map_chr_values_to_numbers(row, header)
                 unharmonisable = remove_row_if_unharmonisable(row, header)

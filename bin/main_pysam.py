@@ -15,6 +15,7 @@ import argparse
 from collections import OrderedDict, Counter
 from lib.SumStatRecord import SumStatRecord
 from lib.VCFRecord import VCFRecord
+from gwas_sumstats_tools.interfaces.data_table import SumStatsTable
 
 def main():
     """ Implements main logic.
@@ -34,10 +35,7 @@ def main():
     tbx=pysam.TabixFile(args.vcf)
     #######YUE################
 
-    with open_gzip(args.sumstats, "rb") as in_handle:
-        # Get header
-        header = in_handle.readline().decode("utf-8").rstrip().split(args.in_sep)
-        effect=header[4]
+    out_header = SumStatsTable(sumstats_file=args.hm_sumstats)._set_header_order()
     
     # Process each row in summary statistics
     for counter, ss_rec in enumerate(yield_sum_stat_records(args.sumstats,
@@ -145,45 +143,35 @@ def main():
         #
 
         if args.hm_sumstats:
-
-            # Add harmonised other allele, effect allele, eaf, beta, or to output
-            out_row = OrderedDict()
-            out_row["chromosome"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["base_pair_location"] = ss_rec.hm_pos if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["effect_allele"] = ss_rec.hm_effect_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            if effect=="beta":
-                out_row["beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
-            elif effect=="odds_ratio":
-                out_row["odds_ratio"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
-            else:
-                out_row["effect"] = args.na_rep_out
-
-            try:
-                out_row["standard_error"]=ss_rec.data["standard_error"] 
-            except:
-                out_row["standard_error"]=args.na_rep_out
-            out_row["effect_allele_frequency"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_row["p_value"]=ss_rec.data["p_value"] if ss_rec.data["p_value"] is not None else args.na_rep_out
-            out_row["hm_code"] = ss_rec.hm_code
-            out_row["hm_coordinate_conversion"] = ss_rec.data["hm_coordinate_conversion"]
-            out_row["hm_variant_id"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            if any([args.or_col_lower, args.or_col_upper]):
-                out_row["hm_OR_lowerCI"] = ss_rec.oddsr_lower is not None if ss_rec.oddsr_lower and ss_rec.is_harmonised else args.na_rep_out
-                out_row["hm_OR_upperCI"] = ss_rec.oddsr_upper is not None if ss_rec.oddsr_upper and ss_rec.is_harmonised else args.na_rep_out
-            if args.or_col is not None and args.beta_col is not None:
-                if effect=="beta":
-                    out_row["odds_ratio"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
-                elif effect=="odds_ratio":
-                    out_row["beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
-            
+            out_raw = OrderedDict()
+            out_raw["chromosome"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["base_pair_location"] = ss_rec.hm_pos if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["effect_allele"] = ss_rec.hm_effect_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["odds_ratio"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["ci_lower"] = ss_rec.oddsr_lower is not None if ss_rec.oddsr_lower and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["ci_upper"] = ss_rec.oddsr_upper is not None if ss_rec.oddsr_upper and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["effect_allele_frequency"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["p_value"]=ss_rec.data["p_value"] if ss_rec.data["p_value"] is not None else args.na_rep_out
+            out_raw["hm_code"] = ss_rec.hm_code
+            out_raw["hm_coordinate_conversion"] = ss_rec.data["hm_coordinate_conversion"]
+            out_raw["variant_id"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
             # Add other data from summary stat file
             outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","ref_allele","hm_coordinate_conversion"]
             for key in ss_rec.data:
                 if key not in outed:
                     value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
-                    out_row[key] = str(value)
+                    out_raw[key] = str(value)
+
+            generated_new_header=["hm_code","variant_id","rsid"]
+            add_header=[x for x in generated_new_header if x not in out_header]
+            new_order=out_header+add_header
+
+            out_row = OrderedDict((k, out_raw[k]) for k in new_order)
+
 
             # Write header
             if not header_written:
