@@ -6,11 +6,13 @@ process qc {
 
     input:
     tuple val(GCST), val(mode), path(all_hm)
+    path(rsIDfile)    
 
     output:
     tuple val(GCST), val(mode),path(all_hm), path('harmonised.qc.tsv'), path('report.txt'), emit: qc_ed
     //path 'harmonised.qc.tsv.gz', emit: qc_result
     //path 'report.txt', emit:delete_sites
+    //tuple path("${GCST}.h.tsv.gz"), path("${GCST}.h.tsv.gz.tbi"), emit: ftp_folder_results
 
     shell:
     """
@@ -18,10 +20,10 @@ process qc {
     -f $all_hm \
     -o harmonised.qc.tsv \
     --log report.txt \
-    -db ${params.ref}/rsID.sql
+    -db $rsIDfile
 
-    cat harmonised.qc.tsv | bgzip -c > ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
-
-    tabix -c N -S 1 -f -s 3 -b 4 -e 4 ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
+    cat harmonised.qc.tsv | bgzip -c > ${GCST}.h.tsv.gz
+    
+    tabix -c N -S 1 -f -s 3 -b 4 -e 4 ${GCST}.h.tsv.gz
     """
 }
