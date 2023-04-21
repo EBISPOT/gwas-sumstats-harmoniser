@@ -35,7 +35,7 @@ def main():
     tbx=pysam.TabixFile(args.vcf)
     #######YUE################
 
-    out_header = SumStatsTable(sumstats_file=args.hm_sumstats)._set_header_order()
+    
     
     # Process each row in summary statistics
     for counter, ss_rec in enumerate(yield_sum_stat_records(args.sumstats,
