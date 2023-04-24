@@ -39,7 +39,7 @@ workflow major_direction{
     */
     
     ten_percent_counts(count_ch)
-    ten_to_sum=ten_percent_counts.out.ten_sc.map{it[0]}.unique()
+    ten_to_sum=ten_percent_counts.out.ten_sc.collect().map{it[0]}.unique()
     // example: ten_to_sum [GCST1],[GCST2].....
     ten_percent_counts_sum(ten_to_sum)
     //example: output [GCST,path ten_percent.tsv,drop,rerun],[GCST,path ten_percent.tsv,forward,countiune]
@@ -60,7 +60,7 @@ workflow major_direction{
     //example: rerun_branch: [GCST1,chr1, path of 1.merged,path of homo_sapiens-chr1.vcf.gz,return]
     generate_strand_counts(rerun_branch)
     //example: generate_strand_counts.out.all_sc: [GCST, rerun,path of full_sc]
-    all_to_sum=generate_strand_counts.out.all_sc.map{tuple(it[0],it[1])}.unique()
+    all_to_sum=generate_strand_counts.out.all_sc.collect().map{tuple(it[0],it[1])}.unique()
     //all_to_sum: [GCST, rerun]
     summarise_strand_counts(all_to_sum)
     // example: [GCST,path Full.tsv,drop,contiune],[GCST,path Full.tsv,forward,contiune]
