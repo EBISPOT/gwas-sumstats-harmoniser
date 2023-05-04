@@ -39,7 +39,14 @@ workflow major_direction{
     */
     
     ten_percent_counts(count_ch)
-    ten_to_sum=ten_percent_counts.out.ten_sc.collect().map{it[0]}.unique()
+    // need to count the  number of outputs and wait until all the chromosomes have completed
+    int nchr=params.chrom.size()
+    ten_to_sum=ten_percent_counts.out
+                      .ten_sc
+                      .groupTuple(by: 0)
+                      .branch{pass:it[1].size()==nchr}
+                      .map{it[0]}
+
     // example: ten_to_sum [GCST1],[GCST2].....
     ten_percent_counts_sum(ten_to_sum)
     //example: output [GCST,path ten_percent.tsv,drop,rerun],[GCST,path ten_percent.tsv,forward,countiune]
