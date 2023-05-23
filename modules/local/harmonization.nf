@@ -1,12 +1,16 @@
 process harmonization {
 
-    conda (params.enable_conda ? "$projectDir/environments/conda_environment.yml" : null)
-    def dockerimg = "ebispot/gwas-sumstats-harmoniser:latest"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://ebispot/gwas-sumstats-harmoniser:latest' : dockerimg }"
+    conda (params.enable_conda ? "${task.ext.conda}" : null)
+
+    container "${ workflow.containerEngine == 'singularity' &&
+        !task.ext.singularity_pull_docker_container ?
+        "${task.ext.singularity}${task.ext.singularity_version}" :
+        "${task.ext.docker}${task.ext.docker_version}" }"
+        
     tag "$GCST"
 
     input:
-    tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref)
+    tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref), path(yaml)
 
 
     output:
@@ -17,6 +21,7 @@ process harmonization {
 
     shell:
     """
+    coordinate=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
     header_args=\$(utils.py -f $merged -harm_args);
     main_pysam.py \
     --sumstats $merged \
@@ -26,9 +31,13 @@ process harmonization {
     \$header_args \
     --na_rep_in NA \
     --na_rep_out NA \
+    --coordinate \$coordinate \
     --palin_mode $palin_mode;
 
+    chr=\$(awk -v RS='\t' '/chromosome/{print NR; exit}' ${chrom}.merged_unsorted.hm)
+    pos=\$(awk -v RS='\t' '/base_pair_location/{print NR; exit}' ${chrom}.merged_unsorted.hm)
+
     head -n1 ${chrom}.merged_unsorted.hm > ${chrom}.merged.hm;
-    tail -n+2 ${chrom}.merged_unsorted.hm | sort -k3,3n -k4,4n >> ${chrom}.merged.hm
+    tail -n+2 ${chrom}.merged_unsorted.hm | sort -n -k\$chr -k\$pos >> ${chrom}.merged.hm
     """
 }

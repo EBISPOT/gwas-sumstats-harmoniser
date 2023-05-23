@@ -5,7 +5,7 @@ class SumStatRecord:
     """ Class to hold a summary statistic record.
     """
     def __init__(self, chrom, pos, other_al, effect_al, beta, oddsr,
-                 oddsr_lower, oddsr_upper, eaf, rsid, data):
+                 oddsr_lower, oddsr_upper, eaf, rsid, data,hm_coordinate_conversion):
 
         # Set raw info
         self.chrom = chrom
@@ -17,7 +17,8 @@ class SumStatRecord:
         self.oddsr = safe_float(oddsr) if oddsr is not None else None
         self.oddsr_lower = safe_float(oddsr_lower) if oddsr_lower is not None else None
         self.oddsr_upper = safe_float(oddsr_upper) if oddsr_upper is not None else None
-        self.rsid = rsid
+        self.rsid = str(rsid) if rsid is not None else None
+        self.lifmethod= str(hm_coordinate_conversion)
 
         # Effect allele frequency is not required if we assume +ve strand
         if eaf:
@@ -73,7 +74,7 @@ class SumStatRecord:
                             to flipping.
         """
         # Flip beta
-        if self.beta != 0:
+        if self.beta and self.beta != 0:
             self.beta = self.beta * -1
         # Flip OR
         if self.oddsr:

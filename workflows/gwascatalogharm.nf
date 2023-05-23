@@ -59,7 +59,7 @@ workflow GWASCATALOGHARM {
         println ("Harmonizing the file ${params.file}")
         files = Channel.fromPath(params.file).map{input_files(it)}
     }
-    
+    //files: GCST, path of ymal, path of GCST
     else if (params.list){
         println ("Harmonizing files in the file ${params.list}")
         files = Channel
@@ -79,14 +79,14 @@ workflow GWASCATALOGHARM {
     //major_direction.out.direction_sum: [GCST, path of sum_count]
     //major_direction.out.hm_input: tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref)
     harm_ch = major_direction.out.hm_input.groupTuple().transpose()
-    main_harm(harm_ch)
+    main_harm(harm_ch,files)
     // out:[GCST009150, forward, path of harmonised.tsv]
     quality_control(main_harm.out.hm,major_direction.out.direction_sum,files,ch_for_direction,major_direction.out.unmapped)
 }
 
 def input_files(Path input)
 {
-    return [input.getName().split('_')[0],input.getName().split('\\.')[0][-2..-1],input]
+    return [input.getName().split('\\.')[0],input+"-meta.yaml",input]
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

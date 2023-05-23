@@ -75,7 +75,7 @@ workflow GWASCATALOGHARM_GWASCATALOG {
     //major_direction.out.hm_input: tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref)
     //ch_count = major_direction.out.hm_input.groupTuple().map{[it[0],it[1].size()]}
     harm_ch = major_direction.out.hm_input.groupTuple().transpose()
-    main_harm(harm_ch)
+    main_harm(harm_ch,ch_files)
     // out:[GCST009150, forward, path of harmonised.tsv]
     quality_control(main_harm.out.hm,major_direction.out.direction_sum,ch_files,ch_direction,major_direction.out.unmapped)
     harmonnized_ch=quality_control.out.qclog
@@ -87,7 +87,7 @@ workflow GWASCATALOGHARM_GWASCATALOG {
 }
 
 def input_list(Path input) {
-    return [input.getName().split('_')[0],input.getName().split('\\.')[0][-2..-1],input,]
+    return [input.getName().split('\\.')[0],input+"-meta.yaml",input]
 }
 
 
