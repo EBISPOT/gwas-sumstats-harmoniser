@@ -30,6 +30,7 @@ def main():
     code_counter = Counter()
     if args.hm_sumstats:
         out_handle = open_gzip(args.hm_sumstats, "wb")
+    out_header = SumStatsTable(sumstats_file=args.sumstats)._set_header_order()
     
     #######YUE################
     tbx=pysam.TabixFile(args.vcf)
@@ -143,7 +144,7 @@ def main():
         #
 
         if args.hm_sumstats:
-            out_header = SumStatsTable(sumstats_file=args.sumstats)._set_header_order()
+            
             out_raw = OrderedDict()
             out_raw["chromosome"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_raw["base_pair_location"] = ss_rec.hm_pos if vcf_rec and ss_rec.is_harmonised else args.na_rep_out

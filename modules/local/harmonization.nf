@@ -21,8 +21,11 @@ process harmonization {
 
     shell:
     """
-    coordinate=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
+    coordinate_system=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
+    if test -z "\$coordinate_system"; then coordinate="1-base"; else coordinate=\$coordinate_system; fi
+
     header_args=\$(utils.py -f $merged -harm_args);
+    
     main_pysam.py \
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
