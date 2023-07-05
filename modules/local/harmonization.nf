@@ -21,6 +21,7 @@ process harmonization {
 
     shell:
     """
+
     coordinate_system=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
     if test -z "\$coordinate_system"; then coordinate="1-base"; else coordinate=\$coordinate_system; fi
 
