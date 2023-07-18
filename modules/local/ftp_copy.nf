@@ -5,7 +5,7 @@ process ftp_copy{
    
 
     input:
-    tuple val(GCST), path(tsv), path(qc_tsv), path (log), path (yaml), val(status)
+    tuple val(GCST), path(qc_tsv), path (log), path (yaml), val(status), path(raw_yaml), path(tsv)
 
     output:
     tuple val(GCST), val(status), env(copy), emit: done
@@ -38,7 +38,6 @@ process ftp_copy{
          copy="copied"
          echo "\$md5_h_tsv  ${GCST}.h.tsv.gz" > \$path/md5sum.txt
          echo "\$md5_h_tbi  ${GCST}.h.tsv.gz.tbi" >> \$path/md5sum.txt
-         rm -v ${params.all_harm_folder}/$tsv
          rm -vr ${launchDir}/$GCST
     else
          copy="failed_copy"
