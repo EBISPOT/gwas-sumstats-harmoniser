@@ -1,7 +1,7 @@
 process map_to_build {
     conda (params.enable_conda ? "$projectDir/environments/pgscatalog_utils/environment.yml" : null)
-    def dockerimg = "ebispot/gwas-sumstats-harmoniser:latest"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://ebispot/gwas-sumstats-harmoniser:latest' : dockerimg }"
+    def dockerimg = "ebispot/gwas-sumstats-harmoniser:v1.0.1"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://ebispot/gwas-sumstats-harmoniser:v1.0.1' : dockerimg }"
 
     input:
     tuple val(GCST), val(from_build), path(tsv)
