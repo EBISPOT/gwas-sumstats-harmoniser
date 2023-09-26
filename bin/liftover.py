@@ -46,7 +46,7 @@ def map_bp_to_build_via_liftover(chromosome, bp, build_map, coordinate):
         data = build_map.convert_coordinate('chr' + str(chromosome), int(bp)-int(coordinate))
         if data is not None:
             if len(data) > 0:
-                return data[0][1]+int(1)
+                return str(data[0][1]+int(1))
     return None
 
 
