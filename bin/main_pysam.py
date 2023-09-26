@@ -30,7 +30,7 @@ def main():
     code_counter = Counter()
     if args.hm_sumstats:
         out_handle = open_gzip(args.hm_sumstats, "wb")
-    out_header = SumStatsTable(sumstats_file=args.sumstats)._set_header_order()
+        out_header = SumStatsTable(sumstats_file=args.sumstats)._set_header_order()
     
     #######YUE################
     tbx=pysam.TabixFile(args.vcf)
