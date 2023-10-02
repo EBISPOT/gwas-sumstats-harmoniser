@@ -37,6 +37,7 @@ process ftp_copy{
          copy="copied"
          echo "\$md5_h_tsv  ${GCST}.h.tsv.gz" > \$path/md5sum.txt
          echo "\$md5_h_tbi  ${GCST}.h.tsv.gz.tbi" >> \$path/md5sum.txt
+         rm -v ${params.all_harm_folder}/$tsv
          rm -vr ${launchDir}/$GCST
     else
          copy="failed_copy"
