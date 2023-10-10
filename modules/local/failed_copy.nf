@@ -7,8 +7,8 @@ process failed_copy {
         "${task.ext.docker}${task.ext.docker_version}" }"
 
     input:
-    tuple val(GCST), path(tsv), path(qc_tsv), path (log), val(status)
-
+    tuple val(GCST), path(raw_yaml), path(tsv), path(qc_tsv), path (log), path (yaml), val(status)
+    
     output:
     tuple val(GCST),val(status), env(copy), emit: done
 
@@ -26,5 +26,6 @@ process failed_copy {
     fi
 
     copy="copied"
+    rm -vr ${launchDir}/$GCST
     """
 }

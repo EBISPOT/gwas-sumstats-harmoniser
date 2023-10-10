@@ -112,7 +112,7 @@ def main():
     argparser.add_argument('-from_build', help='The original build e.g. "36" for NCBI36 or hg18', required=True)
     argparser.add_argument('-to_build', help='The latest (desired) build e.g. "38"', required=True)
     argparser.add_argument('-chroms', help='A list of chromosomes to process', default=DEFAULT_CHROMS)
-    argparser.add_argument('-coordinate', help='index', required=True)
+    argparser.add_argument('-coordinate', help='index', nargs='?', const="1-based", required=True)
     args = argparser.parse_args()
 
     ss = args.f
