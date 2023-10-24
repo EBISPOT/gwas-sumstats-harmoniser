@@ -13,7 +13,23 @@ import glob
 import argparse
 from ast import literal_eval
 
+# Allow very large fields in input file-------------
+import sys
+import csv
 
+maxInt = sys.maxsize
+
+while True:
+    # decrease the maxInt value by factor 10
+    # as long as the OverflowError occurs.
+
+    try:
+        csv.field_size_limit(maxInt)
+        break
+    except OverflowError:
+        maxInt = int(maxInt/10)
+
+# map_to_build----------------------------------------------------
 def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
     vcfs = glob.glob(vcf)
     ssdf = pd.read_table(ss, sep=None, engine='python', dtype=str)
@@ -52,18 +68,15 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
     if build_map:
         ssdf[BP_DSET] = [lft.map_bp_to_build_via_liftover(chromosome=x, bp=str(int(y)), build_map=build_map,coordinate=coordinate[0]) for x, y in zip(ssdf[CHR_DSET], ssdf[BP_DSET])]
     for chrom in chroms:
-        print(chrom)
         df = ssdf.loc[ssdf[CHR_DSET].astype("str") == chrom]
         df = df.dropna(subset=[BP_DSET])
         df[BP_DSET] = df[BP_DSET].astype("str").str.replace("\..*$","")
         outfile = os.path.join("{}.merged".format(chrom))
         if os.path.isfile(outfile):
             print("df to {}".format(outfile))
-            print(df)
             df.to_csv(outfile, sep="\t", mode='a', header=False, index=False, na_rep="NA")
         else:
             print("df to {}".format(outfile))
-            print(df)
             df.to_csv(outfile, sep="\t", mode='w', index=False, na_rep="NA")
     print("liftover complete")
     no_chr_df = ssdf[ssdf[CHR_DSET].isnull()]
