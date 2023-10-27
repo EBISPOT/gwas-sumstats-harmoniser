@@ -16,10 +16,13 @@ process qc {
 
     shell:
     """
+    input_version=\$(grep file_type $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
+
     basic_qc_nf.py \
     -f $all_hm \
     -o harmonised.qc.tsv \
     --log report.txt \
+    -input_version \
     -db ${params.ref}/rsID.sql
 
     chr=\$(awk -v RS='\t' '/chromosome/{print NR; exit}' harmonised.qc.tsv)

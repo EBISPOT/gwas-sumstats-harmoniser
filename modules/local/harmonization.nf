@@ -23,9 +23,9 @@ process harmonization {
     """
 
     coordinate_system=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
-    if test -z "\$coordinate_system"; then coordinate="1-base"; else coordinate=\$coordinate_system; fi
+    input_version=\$(grep file_type $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
 
-    header_args=\$(utils.py -f $merged -harm_args);
+    header_args=\$(utils.py -f $merged -harm_args -input_version \$input_version);
     
     main_pysam.py \
     --sumstats $merged \

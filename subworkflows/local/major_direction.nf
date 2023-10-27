@@ -10,23 +10,21 @@ workflow major_direction{
     files
     
     main:
-    //input: val(GCST), val(from_build), path(tsv), chr
     chroms=chr.flatten().map{it.toString().replaceAll("chr","")}.collect()
+    // input to map to build: val(GCST), val(from_build), path(tsv), chr
     map_to_build(files,chroms)
-    //example: output is [GCST1,[path of 1.merged, path of 2.merged .....]]
+    //map_to_build.out: output is [GCST1,path yaml, [path of 1.merged, path of 2.merged .....]]
     map_to_build.out.mapped
                     .transpose()
-                    .map{tuple(get_chr(it[1]),it[0],it[1])}
+                    .map{tuple(get_chr(it[2]),it[0],it[1],it[2])}
                     .set{map_chr_ch}
+    //map_chr_ch: [chr1,GCST1,path yaml, path 1.merged] ....
     // capture unmapped sites for reporting
-    unmapped = map_to_build.out.mapped.map{it[2]}
-    
-    //example: out of map_to_build [GCST010681,[1,2,...]] tranpose into [[GCST010681,path 1.merged],[GCST010681,path 2.merged]] and then into [chr1,GCST010681,path 1.merged][chr2,GCST010681,path 2.merged].....
+    unmapped = map_to_build.out.mapped.map{it[3]}
     
     Channel.fromPath("${params.ref}/homo_sapiens-chr*.vcf.gz") 
            .map { prepare_reference (it) }
            .set{ ref_chr_ch }
-    // joint is still needed in case not all chr are running
     /* example:
     homo_sapiens-chr1.vcf.gz ->[chr1, path of homo_sapiens-chr1.vcf.gz] (ref_ch_chr)
     */
@@ -35,7 +33,7 @@ workflow major_direction{
     /* example
     [chr1, path of homo_sapiens-chr1.vcf.gz] (ref_chr_ch) + 
     [chr1, GCST1, path of 1.merged] (map_chr_ch)
-    -> [chr1, GCST1, path of 1.merged,path of homo_sapiens-chr1.vcf.gz] (count_ch) 
+    -> [chr1, GCST1, path of yaml, path of 1.merged,path of homo_sapiens-chr1.vcf.gz] (count_ch) 
     */
     
     ten_percent_counts(count_ch)

@@ -33,11 +33,32 @@ def list_headers(csv_file):
     return header_list
 
 def get_harmonisation_mapper_args(csv_file):
+    HARMONISER_ARG_MAP = {
+    CHR_DSET: "--chrom_col",
+    BP_DSET: "--pos_col",
+    EFFECT_DSET: "--effAl_col",
+    OTHER_DSET: "--otherAl_col",
+    RSID: "--rsid_col",
+    BETA_DSET: "--beta_col",
+    OR_DSET: "--or_col",
+    RANGE_L_DSET: "--or_col_lower",
+    RANGE_U_DSET: "--or_col_upper",
+    FREQ_DSET: "--eaf_col",
+    HM_CC_DSET:"--hm_coordinate_conversion"
+}
     arg_list = ["{v} {k}".format(k=k, v=v) for k, v in HARMONISER_ARG_MAP.items() if k in list_headers(csv_file)]
     harm_args = " ".join(arg_list)
     return harm_args
 
 def get_strandcount_mapper_args(csv_file):
+    STRAND_COUNT_ARG_MAP = {
+    CHR_DSET: "--chrom_col",
+    BP_DSET: "--pos_col",
+    EFFECT_DSET: "--effAl_col",
+    OTHER_DSET: "--otherAl_col",
+    RSID: "--rsid_col",
+    HM_CC_DSET:"--hm_coordinate_conversion"
+}
     arg_list = ["{v} {k}".format(k=k, v=v) for k, v in STRAND_COUNT_ARG_MAP.items() if k in list_headers(csv_file)]
     count_args = " ".join(arg_list)
     return count_args
@@ -51,7 +72,16 @@ def main():
     argparser.add_argument('-strand_count_args',
                            help='Return the header mapper arguments for strand count step',
                            action='store_true')
+    argparser.add_argument('-input_version', help='input_version', nargs='?', 
+                           const="GWAS-SSFv1.0", required=True)
     args = argparser.parse_args()
+
+    in_version=args.input_version
+
+    if in_version=="pre-GWAS-SSF":
+        print ("input version is:",in_version)
+        global RSID
+        RSID="variant_id"
 
     ss_file = args.f
     harm_args = args.harm_args

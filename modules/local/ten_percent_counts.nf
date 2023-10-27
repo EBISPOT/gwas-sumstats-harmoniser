@@ -7,7 +7,7 @@ process ten_percent_counts {
         "${task.ext.docker}${task.ext.docker_version}" }"
 
     input:
-    tuple val(chrom), val(GCST), path(merged), path(ref) 
+    tuple val(chrom), val(GCST), path(yaml), path(merged), path(ref) 
 
     output:
     tuple val(GCST), path("ten_percent_${chrom}.sc"), emit: ten_sc
@@ -22,8 +22,9 @@ process ten_percent_counts {
     fi
 
     (head -n 1 $merged; sed '1d' $merged| shuf -n \$n)>ten_percent.${chrom}.merged
+    input_version=\$(grep file_type $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
 
-    header_args=\$(utils.py -f $merged -strand_count_args);
+    header_args=\$(utils.py -f $merged -strand_count_args -input_version \$input_version);
 
     main_pysam.py \
     --sumstats ten_percent.${chrom}.merged \

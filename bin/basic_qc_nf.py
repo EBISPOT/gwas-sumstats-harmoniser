@@ -202,12 +202,19 @@ def main():
     argparser.add_argument('-db', help='The name of the synonyms database. If not provided ensembl rest API will be used', default=None, required=False)
     argparser.add_argument('--print_only', help='only print the lines removed and do not write a new file', action='store_true')
     argparser.add_argument('--log', help='The name of the log file')
+    argparser.add_argument('-input_version', help='input_version', nargs='?', const="GWAS-SSFv1.0", required=True)
     args = argparser.parse_args()
 
     file = args.f
     db = args.db
     filename=args.o
     log_file = args.log
+    in_version=args.input_version
+
+    if in_version=="pre-GWAS-SSF":
+        print ("input version is:",in_version)
+        global RSID
+        RSID="variant_id"
 
     new_filename=filename
 

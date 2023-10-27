@@ -7,7 +7,7 @@ process generate_strand_counts {
         "${task.ext.docker}${task.ext.docker_version}" }"
         
     input:
-    tuple val(GCST), val(chrom), path(merged), path(vcf), val(status)
+    tuple val(GCST), val(chrom), path (yaml), path(merged), path(vcf), val(status)
 
     output:
     tuple val(GCST), val(status), path("full_${chrom}.sc"), emit: all_sc
@@ -17,7 +17,9 @@ process generate_strand_counts {
 
     shell:
     """
-    header_args=\$(utils.py -f $merged -strand_count_args);
+    input_version=\$(grep file_type $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
+    header_args=\$(utils.py -f $merged -strand_count_args -input_version \$input_version);
+    
     main_pysam.py \
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \

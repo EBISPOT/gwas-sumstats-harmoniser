@@ -161,7 +161,7 @@ def main():
             out_raw["rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_raw["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
             # Add other data from summary stat file
-            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","ref_allele","hm_coordinate_conversion"]
+            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","hm_coordinate_conversion"]
             for key in ss_rec.data:
                 if key not in outed:
                     value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
@@ -254,8 +254,9 @@ def parse_args():
                             help=('coordinate system of the input file:\n'
                                   '(a) 1_base '
                                   '(b) 0_base '),
+                            nargs='?',
                             type=str,
-                            default="1-based")
+                            const="1-based")
     mode_group.add_argument('--palin_mode', metavar="[infer|forward|reverse|drop]",
                         help=('Mode to use for palindromic variants:\n'
                               '(a) infer strand from effect-allele freq, '
