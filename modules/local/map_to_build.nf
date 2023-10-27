@@ -16,7 +16,7 @@ process map_to_build {
     shell:
     """
     coordinate=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
-    from_build=\$((grep genome_assembly $yaml | grep -Eo '[0-9][0-9]') || (echo \$(basename $tsv) | grep -Eo 'b[a-zA-Z]*[0-9][0-9]' | grep -Eo '[0-9][0-9]'))
+    from_build=\$((grep genome_assembly $yaml | grep -Eo '[0-9][0-9]') || (echo \$(basename $tsv) | grep -Eo '[bB][a-zA-Z]*[0-9][0-9]' | grep -Eo '[0-9][0-9]'))
     [[ -z "\$from_build" ]] && { echo "Parameter from_build is empty" ; exit 1; }
 
     map_to_build_nf.py \

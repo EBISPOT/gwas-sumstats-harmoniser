@@ -66,7 +66,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
     ssdf[HM_CC_DSET] = "lo"
     build_map = lft.LiftOver(lft.ucsc_release.get(from_build), lft.ucsc_release.get(to_build)) if from_build != to_build else None
     if build_map:
-        ssdf[BP_DSET] = [lft.map_bp_to_build_via_liftover(chromosome=x, bp=str(int(y)), build_map=build_map,coordinate=coordinate[0]) for x, y in zip(ssdf[CHR_DSET], ssdf[BP_DSET])]
+        ssdf[BP_DSET] = [lft.map_bp_to_build_via_liftover(chromosome=x, bp=y, build_map=build_map,coordinate=coordinate[0]) for x, y in zip(ssdf[CHR_DSET], ssdf[BP_DSET])]
     for chrom in chroms:
         df = ssdf.loc[ssdf[CHR_DSET].astype("str") == chrom]
         df = df.dropna(subset=[BP_DSET])
