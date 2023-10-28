@@ -48,8 +48,8 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
             # merge on rsid, update chr and position from vcf ref
             mergedf = ssdf_with_rsid.merge(vcf_df, left_on=RSID, right_on="ID", how="left")
             mapped = mergedf.dropna(subset=["ID"]).drop([CHR_DSET, BP_DSET], axis=1)
-            mapped[CHR_DSET] = mapped["CHR"].astype("str").str.replace("\..*$","")
-            mapped[BP_DSET] = mapped["POS"].astype("str").str.replace("\..*$","")
+            mapped[CHR_DSET] = mapped["CHR"].astype("str").str.replace("\..*$","",regex=True)
+            mapped[BP_DSET] = mapped["POS"].astype("str").str.replace("\..*$","",regex=True)
             mapped = mapped[header]
             mapped[HM_CC_DSET] = "rs"
             outfile = os.path.join("{}.merged".format(chrom))
