@@ -14,7 +14,7 @@ process harmonization {
 
 
     output:
-    tuple val(GCST), val(palin_mode), path("${chrom}.merged.hm"),path("${chrom}.merged.log.tsv.gz"), emit: hm_by_chrom
+    tuple val(GCST), val(palin_mode), path(yaml),path("${chrom}.merged.hm"),path("${chrom}.merged.log.tsv.gz"), emit: hm_by_chrom
 
     when:
     status=="contiune"
@@ -35,7 +35,7 @@ process harmonization {
     \$header_args \
     --na_rep_in NA \
     --na_rep_out NA \
-    --coordinate \$coordinate \
+    --coordinate \$coordinate_system \
     --palin_mode $palin_mode;
 
     chr=\$(awk -v RS='\t' '/chromosome/{print NR; exit}' ${chrom}.merged_unsorted.hm)

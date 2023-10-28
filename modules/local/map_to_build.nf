@@ -27,6 +27,6 @@ process map_to_build {
     -vcf "${params.ref}/homo_sapiens-chr*.parquet" \
     -chroms "${chr}" \
     -coordinate \$coordinate \
-    --input_version \$input_version \
+    -input_version \$input_version \
     """
 }

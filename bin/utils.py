@@ -79,7 +79,6 @@ def main():
     in_version=args.input_version
 
     if in_version=="pre-GWAS-SSF":
-        print ("input version is:",in_version)
         global RSID
         RSID="variant_id"
 

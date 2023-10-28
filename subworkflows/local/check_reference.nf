@@ -12,6 +12,7 @@ workflow chr_check {
     //cross check the common chr can run
     ch=vcf_files.join(tbi_files).join(parquet_files).join(ch_chrom)
 
+    ch.ifEmpty("Please check whether you have vcf.gz, tbi, and parquet files in your refrence").view()
     ch.toList().subscribe { println it + ' is being harmonized' }
 
     emit:

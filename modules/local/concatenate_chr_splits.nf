@@ -7,10 +7,10 @@ process concatenate_chr_splits {
         "${task.ext.docker}${task.ext.docker_version}" }"
 
     input:
-    tuple val(GCST), val(palin_mode), path("*")
+    tuple val(GCST), val(palin_mode), path(yaml),path("*")
 
     output:
-    tuple val(GCST), val(palin_mode), path ('harmonised.tsv'), emit: all_hm
+    tuple val(GCST), val(palin_mode), path(yaml),path ('harmonised.tsv'), emit: all_hm
 
     shell:
     """

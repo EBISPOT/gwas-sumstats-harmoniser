@@ -7,7 +7,7 @@ process qc {
         "${task.ext.docker}${task.ext.docker_version}" }"
 
     input:
-    tuple val(GCST), val(mode), path(all_hm)
+    tuple val(GCST), val(mode), path(yaml), path(all_hm)
 
     output:
     tuple val(GCST), val(mode),path(all_hm), path('harmonised.qc.tsv'), path('report.txt'), emit: qc_ed

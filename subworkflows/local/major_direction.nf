@@ -74,12 +74,12 @@ workflow major_direction{
     // [GCST, ten_percent, forward,contiune] (contiune_branch)
     all_files=summarise_strand_counts.out.all_sum.mix(branch.contiune)
     //hm_input: [GCST,path ten_percent.tsv,forward,countiune],[GCST,path Full.tsv,reverse,countiune]
-    rearrnaged_count_ch=count_ch.map{tuple(it[1],it[0],it[2],it[3])}
+    rearrnaged_count_ch=count_ch.map{tuple(it[1],it[0],it[3],it[4],it[2])}
     // example: [chr1, GCST1, path of 1.merged,path of homo_sapiens-chr1.vcf.gz] (count_ch) 
     // example into: [GCST1,chr1,path of merged, path of vcf]
     all_input=all_files.combine(rearrnaged_count_ch,by:0)
     //example: [GCST,path ten_percent.tsv,forward,countiune,chr,path of merged, path of vcf]
-    hm_input=all_input.map{it[0,2..6]}
+    hm_input=all_input.map{it[0,2..7]}
     direction_sum=all_input.map{it[0..1]}.unique()
 
     emit:
