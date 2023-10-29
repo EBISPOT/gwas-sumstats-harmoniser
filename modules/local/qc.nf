@@ -22,7 +22,7 @@ process qc {
     -f $all_hm \
     -o harmonised.qc.tsv \
     --log report.txt \
-    -input_version \
+    -input_version \$input_version\
     -db ${params.ref}/rsID.sql
 
     chr=\$(awk -v RS='\t' '/chromosome/{print NR; exit}' harmonised.qc.tsv)

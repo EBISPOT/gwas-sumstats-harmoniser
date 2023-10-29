@@ -12,7 +12,11 @@ workflow chr_check {
     //cross check the common chr can run
     ch=vcf_files.join(tbi_files).join(parquet_files).join(ch_chrom)
 
-    ch.ifEmpty("Please check whether you have vcf.gz, tbi, and parquet files in your refrence").view()
+    if ( !ch ) {
+        log.error("ERROR: references are insufficient (please check whether you have vcf.gz, .tbi and .parquet for all your references)")
+        System.exit(1)
+    }
+
     ch.toList().subscribe { println it + ' is being harmonized' }
 
     emit:

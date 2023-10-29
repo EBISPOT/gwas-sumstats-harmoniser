@@ -64,11 +64,17 @@ def main():
         if not ss_rec.hm_code:
             # Get VCF reference variants for this recordls
             coordinate=args.coordinate
-            if int(coordinate[0])==0 and ss_rec.lifmethod=="lo" and len(str(ss_rec.effect_al))+len(str(ss_rec.other_al))>2: 
-                vcf_recs =get_vcf_records_0base(
-                    tbx,
-                    ss_rec.chrom,
-                    ss_rec.pos)
+            if int(coordinate[0])==0 and ss_rec.lifmethod=="lo":
+                if len(str(ss_rec.effect_al))+len(str(ss_rec.other_al))>2: 
+                    vcf_recs =get_vcf_records_0base(
+                        tbx,
+                        ss_rec.chrom,
+                        ss_rec.pos)
+                else:
+                    vcf_recs = get_vcf_records(
+                        tbx,
+                        ss_rec.chrom,
+                        ss_rec.pos)
             else:
                 vcf_recs = get_vcf_records(
                     tbx,

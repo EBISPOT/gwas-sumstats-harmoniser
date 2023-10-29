@@ -42,7 +42,7 @@ def isNumber(value):
 
 
 def map_bp_to_build_via_liftover(chromosome, bp, build_map, coordinate):
-    if isNumber(bp):
+    if isNumber(chromosome) and isNumber(bp):
         data = build_map.convert_coordinate('chr' + str(chromosome), int(bp)-int(coordinate))
         if data is not None:
             if len(data) > 0:
