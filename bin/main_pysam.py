@@ -64,8 +64,14 @@ def main():
         if not ss_rec.hm_code:
             # Get VCF reference variants for this recordls
             coordinate=args.coordinate
-            if int(coordinate[0])==0 and ss_rec.lifmethod=="lo" and len(str(ss_rec.effect_al))+len(str(ss_rec.other_al))>2: 
-                vcf_recs =get_vcf_records_0base(
+            if int(coordinate[0])==0 and ss_rec.lifmethod=="lo":
+                if len(str(ss_rec.effect_al))+len(str(ss_rec.other_al))>2: 
+                    vcf_recs =get_vcf_records_0base(
+                        tbx,
+                        ss_rec.chrom,
+                        ss_rec.pos)
+                else:
+                    vcf_recs = get_vcf_records(
                     tbx,
                     ss_rec.chrom,
                     ss_rec.pos)
@@ -161,7 +167,7 @@ def main():
             out_raw["rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_raw["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
             # Add other data from summary stat file
-            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","ref_allele","hm_coordinate_conversion"]
+            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","hm_coordinate_conversion"]
             for key in ss_rec.data:
                 if key not in outed:
                     value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
