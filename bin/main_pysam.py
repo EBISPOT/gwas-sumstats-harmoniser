@@ -165,7 +165,10 @@ def main():
             out_raw["hm_coordinate_conversion"] = ss_rec.data["hm_coordinate_conversion"]
             out_raw["variant_id"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_raw["rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
+            try:
+                out_raw["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
+            except:
+                out_raw["standard_error"]=args.na_rep_out
             # Add other data from summary stat file
             outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","hm_coordinate_conversion"]
             for key in ss_rec.data:
