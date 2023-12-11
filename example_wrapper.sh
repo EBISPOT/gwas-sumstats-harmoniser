@@ -13,4 +13,4 @@ mkdir -p $folder
 
 cd $folder
 nextflow $nextflow -c $config --inputPath $folder --to_harm_folder $to_harm -resume 
-#further function: --execute local(or LSF)
+#further function: --execute local (or SLURM)
