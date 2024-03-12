@@ -13,7 +13,7 @@ class SumStatRecord:
         self.other_al = other_al
         self.effect_al = effect_al
         self.data = data
-        self.beta = float(beta) if beta is not None else None
+        self.beta = safe_float(beta) if beta is not None else None
         self.oddsr = safe_float(oddsr) if oddsr is not None else None
         self.oddsr_lower = safe_float(oddsr_lower) if oddsr_lower is not None else None
         self.oddsr_upper = safe_float(oddsr_upper) if oddsr_upper is not None else None
@@ -74,8 +74,9 @@ class SumStatRecord:
                             to flipping.
         """
         # Flip beta
-        if self.beta and self.beta != 0:
-            self.beta = self.beta * -1
+        if self.beta:
+            if self.beta != 0:
+                self.beta = self.beta * -1
         # Flip OR
         if self.oddsr:
             self.oddsr = self.oddsr ** -1
