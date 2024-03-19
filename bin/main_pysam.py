@@ -170,7 +170,7 @@ def main():
             except:
                 out_raw["standard_error"]=args.na_rep_out
             # Add other data from summary stat file
-            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","standard_error","rsid","ci_upper","ci_lower","hm_coordinate_conversion"]
+            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","rsid","standard_error","ci_upper","ci_lower","hm_coordinate_conversion"]
             for key in ss_rec.data:
                 if key not in outed:
                     value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
