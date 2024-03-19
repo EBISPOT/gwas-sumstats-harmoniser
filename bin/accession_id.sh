@@ -23,7 +23,8 @@ then
    helpFunction
 fi
 
-id=$(echo $GCST|sed 's/GCST/1/g')
+ida=$(echo $GCST|sed 's/GCST/1/g')
+id=$(($ida-1))
 lower=$((10#$id/1000*1000+1))
 upper=$(((10#$id/1000+1)*1000))
 

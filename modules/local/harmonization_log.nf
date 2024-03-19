@@ -35,19 +35,20 @@ process harmonization_log {
     data_file_name="${GCST}.h.tsv.gz"
     out_yaml="${GCST}.h.tsv.gz-meta.yaml"
     data_file_md5sum=\$(md5sum<${launchDir}/$GCST/final/${GCST}.h.tsv.gz | awk '{print \$1}')
-    date_last_modified=\$(date  +"%Y-%m-%d")
+    date_metadata_last_modified=\$(date  +"%Y-%m-%d")
     harmonisation_reference=\$(tabix -H "${params.ref}/homo_sapiens-${chr}.vcf.gz" | grep reference | cut -f2 -d '=')
 
     gwas_metadata.py \
     -i $raw_yaml \
     -o \$out_yaml \
-    --dataFileName \$data_file_name \
+    -e \
+    --data_file_name \$data_file_name \
     --data_file_md5sum \$data_file_md5sum \
     --is_harmonised True \
     --is_sorted True \
     --genome_assembly GRCh38 \
     --coordinate_system 1-based \
-    --date_last_modified \$date_last_modified \
+    --date_metadata_last_modified \$date_metadata_last_modified \
     --harmonisation_reference \$harmonisation_reference \
     """
 }
