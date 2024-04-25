@@ -1,24 +1,33 @@
-genotyping_technology: 
-  - Genome-wide genotyping array
+# Study meta-data
 gwas_id: GCST1
-samples:
-- sampleSize: 12345
-  sampleAncestry: 
-    - European
-  ancestryMethod:
-    - self-reported
-    - genetically determined
-trait_description: 
+gwas_catalog_api: https://www.ebi.ac.uk/gwas/rest/api/studies/GCST1
+date_metadata_last_modified: 2023-02-09
+
+# Trait Information
+trait_description:
   - breast carcinoma
-minor_allele_freq_lower_limit: 0.001
-data_file_name: 0000123.tsv
+
+# Genotyping Information
+genome_assembly: GRCh37
+genotyping_technology:
+  - Genome-wide genotyping array
+
+# Sample Information
+samples:
+  - sample_ancestry_category:
+      - European
+    sample_size: 281104
+
+# Summary Statistic information
+data_file_name: GCST1.tsv
 file_type: GWAS-SSF v0.1
 data_file_md5sum: 32ce41c3dca4cd9f463a0ce7351966fd
+minor_allele_freq_lower_limit: 0.001
+
+# Harmonization status
 is_harmonised: false
 is_sorted: false
-fileDescription: GWAS summary statistics; author uploaded.
-date_last_modified: 2023-02-09
-genome_assembly: GRCh37
+
 coordinate_system: 1-based
 effectStatistic: beta
 pvalueIsNegLog10: False
