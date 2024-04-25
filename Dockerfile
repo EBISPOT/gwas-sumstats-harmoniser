@@ -1,7 +1,7 @@
 FROM python:3.9-slim-buster
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gcc wget python-dev libmagic-dev tabix \
+    && apt-get install -y --no-install-recommends procps gcc wget python-dev libmagic-dev tabix \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
