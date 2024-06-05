@@ -15,7 +15,8 @@ process map_to_build {
 
     shell:
     """
-    coordinate=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
+    coordinate_system=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
+    if test -z "\$coordinate_system"; then coordinate="1-based"; else coordinate=\$coordinate_system; fi
     from_build=\$((grep genome_assembly $yaml | grep -Eo '[0-9][0-9]') || (echo \$(basename $tsv) | grep -Eo '[bB][a-zA-Z]*[0-9][0-9]' | grep -Eo '[0-9][0-9]'))
     [[ -z "\$from_build" ]] && { echo "Parameter from_build is empty" ; exit 1; }
 
