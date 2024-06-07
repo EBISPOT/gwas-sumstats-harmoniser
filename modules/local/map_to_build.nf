@@ -1,4 +1,5 @@
 process map_to_build {
+    tag "$GCST"
     conda (params.enable_conda ? "${task.ext.conda}" : null)
 
     container "${ workflow.containerEngine == 'singularity' &&
@@ -11,7 +12,7 @@ process map_to_build {
     val chr
 
     output:
-    tuple val(GCST), path ('*.merged'), path('unmapped'), emit:mapped
+    tuple val(GCST), path ('*.merged'), path('unmapped'), path(yaml), emit:mapped
 
     shell:
     """

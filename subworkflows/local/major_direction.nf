@@ -16,7 +16,7 @@ workflow major_direction{
     //example: output is [GCST1,[path of 1.merged, path of 2.merged .....]]
     map_to_build.out.mapped
                     .transpose()
-                    .map{tuple(get_chr(it[1]),it[0],it[1])}
+                    .map{tuple(get_chr(it[1]),it[0],it[1],it[3])}
                     .set{map_chr_ch}
     // capture unmapped sites for reporting
     unmapped = map_to_build.out.mapped.map{it[2]}
