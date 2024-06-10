@@ -28,6 +28,6 @@ process map_to_build {
     -to_build $params.to_build \
     -vcf "${params.ref}/homo_sapiens-chr*.parquet" \
     -chroms "${chr}" \
-    -coordinate \$coordinate
+    --coordinate \$coordinate
     """
 }
