@@ -10,7 +10,7 @@ process harmonization {
     tag "$GCST"
 
     input:
-    tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref), path(yaml)
+    tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(yaml), path(ref)
 
 
     output:

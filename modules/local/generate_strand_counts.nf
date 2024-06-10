@@ -28,6 +28,6 @@ process generate_strand_counts {
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
     \$header_args \
     --strand_counts full_${chrom}.sc
-    -coordinate \$coordinate
+    --coordinate \$coordinate
     """
 }
