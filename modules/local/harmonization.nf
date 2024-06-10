@@ -1,4 +1,5 @@
 process harmonization {
+    tag "$GCST"
 
     conda (params.enable_conda ? "${task.ext.conda}" : null)
 
@@ -10,7 +11,7 @@ process harmonization {
     tag "$GCST"
 
     input:
-    tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref), path(yaml)
+    tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(yaml), path(ref)
 
 
     output:
@@ -23,7 +24,7 @@ process harmonization {
     """
 
     coordinate_system=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
-    if test -z "\$coordinate_system"; then coordinate="1-base"; else coordinate=\$coordinate_system; fi
+    if test -z "\$coordinate_system"; then coordinate="1-based"; else coordinate=\$coordinate_system; fi
 
     header_args=\$(utils.py -f $merged -harm_args);
     

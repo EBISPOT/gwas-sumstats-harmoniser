@@ -1,4 +1,6 @@
 process harmonization_log {
+    tag "$GCST"
+    
     conda (params.enable_conda ? "${task.ext.conda}" : null)
 
     container "${ workflow.containerEngine == 'singularity' &&
