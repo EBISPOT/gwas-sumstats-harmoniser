@@ -19,7 +19,8 @@ workflow quality_control{
     //ch_to_log: val(GCST), val(mode),path(all_hm), path('harmonized.qc.tsv'), path('report.txt'), path (total_sum), path(yaml), path (input)
 
     def to_log=chroms.flatten().last()
-    harmonization_log(to_log,ch_to_log,unmapped)
+    input_log=ch_to_log.combine(unmapped,by:0)
+    harmonization_log(to_log,input_log)
 
     emit:
     qclog=harmonization_log.out.running_result
