@@ -16,10 +16,10 @@ workflow major_direction{
     //example: output is [GCST1,[path of 1.merged, path of 2.merged .....]]
     map_to_build.out.mapped
                     .transpose()
-                    .map{tuple(get_chr(it[1]),it[0],it[1])}
+                    .map{tuple(get_chr(it[1]),it[0],it[1],it[3])}
                     .set{map_chr_ch}
     // capture unmapped sites for reporting
-    unmapped = map_to_build.out.mapped.map{it[2]}
+    unmapped = map_to_build.out.mapped.map{tuple(it[0],it[2])}
     
     //example: out of map_to_build [GCST010681,[1,2,...]] tranpose into [[GCST010681,path 1.merged],[GCST010681,path 2.merged]] and then into [chr1,GCST010681,path 1.merged][chr2,GCST010681,path 2.merged].....
     
@@ -76,12 +76,12 @@ workflow major_direction{
     // [GCST, ten_percent, forward,contiune] (contiune_branch)
     all_files=summarise_strand_counts.out.all_sum.mix(branch.contiune)
     //hm_input: [GCST,path ten_percent.tsv,forward,countiune],[GCST,path Full.tsv,reverse,countiune]
-    rearrnaged_count_ch=count_ch.map{tuple(it[1],it[0],it[2],it[3])}
+    rearrnaged_count_ch=count_ch.map{tuple(it[1],it[0],it[2],it[3],it[4])}
     // example: [chr1, GCST1, path of 1.merged,path of homo_sapiens-chr1.vcf.gz] (count_ch) 
     // example into: [GCST1,chr1,path of merged, path of vcf]
     all_input=all_files.combine(rearrnaged_count_ch,by:0)
     //example: [GCST,path ten_percent.tsv,forward,countiune,chr,path of merged, path of vcf]
-    hm_input=all_input.map{it[0,2..6]}
+    hm_input=all_input.map{it[0,2..7]}
     direction_sum=all_input.map{it[0..1]}.unique()
 
     emit:
