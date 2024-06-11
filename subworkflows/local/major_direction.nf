@@ -19,7 +19,7 @@ workflow major_direction{
                     .map{tuple(get_chr(it[1]),it[0],it[1],it[3])}
                     .set{map_chr_ch}
     // capture unmapped sites for reporting
-    unmapped = map_to_build.out.mapped.map{it[2]}
+    unmapped = map_to_build.out.mapped.map{tuple(it[0],it[2])}
     
     //example: out of map_to_build [GCST010681,[1,2,...]] tranpose into [[GCST010681,path 1.merged,path of yaml],[GCST010681,path 2.merged,path of yaml]] and then into [chr1,GCST010681,path 1.merged,path of yaml][chr2,GCST010681,path 2.merged,path of yaml].....
     
