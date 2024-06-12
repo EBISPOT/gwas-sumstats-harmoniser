@@ -29,8 +29,8 @@ body:
   - type: textarea
     id: issue_description
     attributes:
-      label: "Description of the Issue"
-      description: "Please provide a detailed description of the issue."
+      label: Description of the Issue
+      description: Please provide a detailed description of the issue.
     validations:
       required: true
   - type: markdown
@@ -60,20 +60,10 @@ body:
   - type: textarea
     id: error_message
     attributes:
-      label: "Error Message"
-      description: "Paste the relevant error message and logs here."
+      label: Error Message
+      description: Paste the relevant error message and logs here.
   - type: textarea
     id: command_used
-    attributes:
-      label: Command used and terminal output
-      description: Steps to reproduce the behaviour. Please paste the command you used to launch the pipeline and the output from your terminal.
-      render: console
-      placeholder: |
-        $ nextflow run ...
-
-        Some output where something broke
-  - type: textarea
-    id: input_command
     attributes:
       label: Command used and terminal output
       description: Steps to reproduce the behaviour. Please paste the command you used to launch the pipeline and the output from your terminal.
