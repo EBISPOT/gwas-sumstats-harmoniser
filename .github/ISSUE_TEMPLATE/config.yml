@@ -1,0 +1,4 @@
+contact_links:
+  - name: Github discussions
+    url: https://github.com/EBISPOT/gwas-sumstats-harmoniser/discussions
+    about: Discussion about the GWAS Catalog harmonisation pipeline
