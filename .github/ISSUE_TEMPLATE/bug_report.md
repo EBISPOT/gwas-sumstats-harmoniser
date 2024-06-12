@@ -36,15 +36,13 @@ body:
     validations:
       required: true
 
- - type: markdown
+  - type: markdown
     attributes:
       value: |
         ### Example Error Message Section
-
         ```
         [dc/0c96ad] NOTE: Process NFCORE_GWASCATALOGHARM:GWASCATALOGHARM:major_direction:map_to_build (1) terminated with an error exit status (1) -- Error is ignored`
         ```
-
   - type: markdown
     attributes:
       value: |
