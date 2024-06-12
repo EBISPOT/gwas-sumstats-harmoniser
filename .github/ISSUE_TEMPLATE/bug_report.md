@@ -13,7 +13,6 @@ body:
         Thank you for reporting a bug with our harmonisation pipeline. To help us diagnose and fix the issue, please follow the instructions below to provide the necessary information.
         
         Before you post this issue, [nextflow troubleshooting](https://training.nextflow.io/basic_training/debugging/#execution-error-debugging) to help identify the real error.
-
   - type: textarea
     id: system
     attributes:
@@ -27,7 +26,6 @@ body:
         * Version of `gwas-sumstats-harmoniser` _(eg. v1.1.8, v1.0.8)_
     validations:
       required: true
-
   - type: textarea
     id: issue_description
     attributes:
@@ -35,7 +33,6 @@ body:
       description: "Please provide a detailed description of the issue."
     validations:
       required: true
-
   - type: markdown
     attributes:
       value: |
@@ -60,13 +57,11 @@ body:
         3. **Extract Relevant Error Information:**
            - Copy the last 20 lines of the `.command.err` or `.command.log` file.
            - If available, include any relevant output from the `.command.out` file.
-
   - type: textarea
     id: error_message
     attributes:
       label: "Error Message"
       description: "Paste the relevant error message and logs here."
-  
   - type: textarea
     id: command_used
     attributes:
@@ -77,9 +72,8 @@ body:
         $ nextflow run ...
 
         Some output where something broke
-
   - type: textarea
-    id: input_files
+    id: input_command
     attributes:
       label: Command used and terminal output
       description: Steps to reproduce the behaviour. Please paste the command you used to launch the pipeline and the output from your terminal.
@@ -88,13 +82,11 @@ body:
         $ nextflow run ...
 
         Some output where something broke
-
   - type: textarea
-    id: input_file_rows
+    id: input_file
     attributes:
-      label: "First 10 Rows of the Input File"
-      description: "Please provide the first 10 rows of the input file used in your analysis."
-
+      label: First 10 Rows of the Input File
+      description: Please provide the first 10 rows of the input file used in your analysis.
   - type: textarea
     id: files
     attributes:
