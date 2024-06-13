@@ -1,7 +1,7 @@
 name: Feature request
 description: Suggest an idea for this project
 title: "[FEATURE]:"
-labels: ["development","user_request"]
+labels: ["enhancement","user_request"]
 
 body:
   - type: markdown
@@ -11,7 +11,7 @@ body:
 
         Thank you for using the gwas-sumstats-harmonisation pipeline! We appreciate you taking the time to provide suggestions to help us improve our pipeline. Please fill out the following sections to help us understand your feature request. This will ensure we can address your suggestion as effectively as possible.
 
-  - type: input
+  - type: textarea
     id: problem_description
     attributes:
       label: Is your feature request related to a problem? Please describe.
@@ -25,14 +25,14 @@ body:
       description: A clear and concise description of what you want to happen.
       placeholder: Describe the solution...
 
-  - type: input
+  - type: textarea
     id: benefits
     attributes:
       label: Benefits
       description: Explain how this feature will benefit the project or its users.
       placeholder: Describe the benefits...
 
-  - type: input
+  - type: textarea
     id: potential_risks
     attributes:
       label: Potential Risks
