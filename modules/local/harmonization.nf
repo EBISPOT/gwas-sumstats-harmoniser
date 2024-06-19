@@ -1,5 +1,5 @@
 process harmonization {
-    tag "$GCST"
+    tag "${GCST}_${chrom}"
     conda (params.enable_conda ? "${task.ext.conda}" : null)
 
     container "${ workflow.containerEngine == 'singularity' &&
