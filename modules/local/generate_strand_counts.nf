@@ -1,5 +1,5 @@
 process generate_strand_counts {
-    tag "$GCST"
+    tag "${GCST}_${chrom}"
     
     conda (params.enable_conda ? "${task.ext.conda}" : null)
 
