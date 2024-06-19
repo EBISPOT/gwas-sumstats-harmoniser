@@ -1,4 +1,5 @@
 process ftp_copy{
+    tag "$GCST"
     //conda (params.enable_conda ? "$projectDir/environments/conda_environment.yml" : null)
     //def dockerimg = "ebispot/gwas-sumstats-harmoniser:latest"
     //container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://ebispot/gwas-sumstats-harmoniser:latest' : dockerimg }"
