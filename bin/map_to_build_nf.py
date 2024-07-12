@@ -107,7 +107,7 @@ def listify_string(string):
     return listified
 
 def add_fields_if_missing(df):
-    add_column_to_df(df=df, column=RSID)
+    add_column_to_df(df=df, column=SNP_DSET)
     add_column_to_df(df=df, column=CHR_DSET)
     add_column_to_df(df=df, column=BP_DSET)
 
