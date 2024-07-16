@@ -157,8 +157,8 @@ def main():
             out_raw["other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_raw["beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
             out_raw["odds_ratio"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["ci_lower"] = ss_rec.oddsr_lower is not None if ss_rec.oddsr_lower and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["ci_upper"] = ss_rec.oddsr_upper is not None if ss_rec.oddsr_upper and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["ci_lower"] = ss_rec.oddsr_lower if ss_rec.oddsr_lower is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["ci_upper"] = ss_rec.oddsr_upper if ss_rec.oddsr_upper  is not None and ss_rec.is_harmonised else args.na_rep_out
             out_raw["effect_allele_frequency"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
             if "neg_log_10_p_value" in out_header:
                 out_raw["p_value"] = 10**(float(ss_rec.data["neg_log_10_p_value"])*(-1)) if ss_rec.data["neg_log_10_p_value"] is not None else args.na_rep_out
