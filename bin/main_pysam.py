@@ -113,7 +113,7 @@ def main():
         # Harmonise palindromic alleles
         elif is_palindromic(ss_rec.other_al, ss_rec.effect_al):
 
-            strand_counter['Palindormic variant'] += 1
+            strand_counter['Palindromic variant'] += 1
             if args.hm_sumstats:
                 ss_rec = harmonise_palindromic(ss_rec, vcf_rec)
 
