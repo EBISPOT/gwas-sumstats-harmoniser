@@ -13,7 +13,7 @@ from utils import *
 def aggregate_counts(in_dir,out,threshold):
 
     variant_type_dict = {
-        "Palindormic variant": 0,
+        "Palindromic variant": 0,
         "Forward strand variant": 0,
         "Reverse strand variant": 0,
         "No VCF record found": 0,
