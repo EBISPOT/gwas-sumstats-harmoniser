@@ -1,5 +1,5 @@
 process harmonization {
-    tag "$GCST"
+    tag "${GCST}_${chrom}"
 
     conda (params.enable_conda ? "${task.ext.conda}" : null)
 
@@ -7,8 +7,6 @@ process harmonization {
         !task.ext.singularity_pull_docker_container ?
         "${task.ext.singularity}${task.ext.singularity_version}" :
         "${task.ext.docker}${task.ext.docker_version}" }"
-        
-    tag "$GCST"
 
     input:
     tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(yaml), path(ref)

@@ -11,6 +11,7 @@ workflow move_files{
     failed:it.contains("FAILED_HARMONIZATION")}
     //success_harmonized_file move to FTP
     //failed harmonized file move to Failed folder
+    //har_result_ch.success.view(): [GCST1, yaml,tsv,qc.tsv,running.log,h.tsv.gz-meta.yaml, SUCCESS_HARMONIZATION]
     ftp_copy(har_result_ch.success)
     failed_copy(har_result_ch.failed)
     //return channlel: [GCST,SUCCESS_HARMONIZATION,copied],[GCST,SUCCESS_HARMONIZATION,failed_copied],[GCST,SUCCESS_HARMONIZATION,failed_copy]
