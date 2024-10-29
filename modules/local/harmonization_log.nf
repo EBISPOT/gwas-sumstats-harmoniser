@@ -17,6 +17,12 @@ process harmonization_log {
 
     shell:
     """
+    chr=\$(awk -v RS='\t' '/chromosome/{print NR; exit}' $qc_result)
+    pos=\$(awk -v RS='\t' '/base_pair_location/{print NR; exit}' $qc_result)
+
+    cat $qc_result | bgzip -c > ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
+    tabix -c N -S 1 -f -s \$chr -b \$pos -e \$pos ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
+
     log_script.sh \
     -r "${params.ref}/homo_sapiens-${chr}.vcf.gz" \
     -i $input \

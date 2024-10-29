@@ -23,11 +23,5 @@ process qc {
     -o harmonised.qc.tsv \
     --log report.txt \
     -db ${params.ref}/rsID.sql
-
-    chr=\$(awk -v RS='\t' '/chromosome/{print NR; exit}' harmonised.qc.tsv)
-    pos=\$(awk -v RS='\t' '/base_pair_location/{print NR; exit}' harmonised.qc.tsv)
-
-    cat harmonised.qc.tsv | bgzip -c > ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
-    tabix -c N -S 1 -f -s \$chr -b \$pos -e \$pos ${launchDir}/$GCST/final/${GCST}.h.tsv.gz
     """
 }

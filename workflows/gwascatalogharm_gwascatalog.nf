@@ -11,26 +11,6 @@
     CONFIG FILES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-params.to_harm_folder=null
-if (params.to_harm_folder) {
-if (!params.inputPath & !params.to_harm_folder) {
-    println " ERROR: You didn't set any folder to be harmonized \
-    Please set --to_harm_folder and --inputPath and try again (: "
-    System.exit(1)
-}
-
-if (!params.to_build & !params.chrom) {
-    println "ERROR: You didn't set the target build and chromsomes to be harmnnized"
-    println "Please set --to_build 38 or --chrom ['1','2',...]"
-    System.exit(1)
-}
-}
-
-if (!params.version) {
-    println " ERROR: Please specific the pipeline version you are running (e.g. v1.1.9) \
-    Please set --version and try again (: "
-    System.exit(1)
-}
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
