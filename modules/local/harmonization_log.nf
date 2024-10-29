@@ -13,7 +13,7 @@ process harmonization_log {
     tuple val(GCST), val(mode), path(all_hm), path(qc_result), path(delete_sites), path(count), path(raw_yaml), path(input), path(unmapped)
 
     output:
-    tuple val(chr), val(GCST), path(raw_yaml), path("${GCST}.h.tsv.gz"), path("${GCST}.h.tsv.gz.tbi"), path(qc_result), path ("${GCST}.running.log"), env(result)
+    tuple val(chr), val(GCST), path(raw_yaml), path("${GCST}.h.tsv.gz"), path("${GCST}.h.tsv.gz.tbi"), path ("${GCST}.running.log"), env(result)
 
     shell:
     """

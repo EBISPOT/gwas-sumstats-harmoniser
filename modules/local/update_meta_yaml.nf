@@ -9,10 +9,10 @@ process update_meta_yaml {
         "${task.ext.docker}${task.ext.docker_version}" }"
 
     input:
-    tuple val(chr), val(GCST), path(raw_yaml), path(zip_harm) , path(zip_harm_tbi) , path(qc_result), path (running_log), env(result)
-
+    tuple val(chr), val(GCST), path(raw_yaml), path(zip_harm) , path(zip_harm_tbi), path (running_log), env(result)
+    
     output:
-    tuple val(GCST), path(qc_result), path ("${GCST}.running.log"),  path ("${GCST}.h.tsv.gz-meta.yaml"), env(result), emit: running_result
+    tuple val(GCST), path(zip_harm) , path(zip_harm_tbi), path (running_log), path ("${GCST}.h.tsv.gz-meta.yaml"), env(result), emit: running_result
 
     shell:
     """
