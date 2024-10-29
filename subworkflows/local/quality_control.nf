@@ -24,4 +24,5 @@ workflow quality_control{
 
     emit:
     qclog=update_meta_yaml.out.running_result
+    // qc.log: val(GCST),path(zip_harm),path(zip_harm_tbi),path(running_log),path ("${GCST}.h.tsv.gz-meta.yaml"),env(result)
 }
