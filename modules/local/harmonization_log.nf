@@ -24,7 +24,8 @@ process harmonization_log {
     -d $delete_sites \
     -h $all_hm \
     -u $unmapped \
-    -o ${GCST}.running.log
+    -o ${GCST}.running.log \
+    -p ${params.version}
 
     N=\$(awk -v RS='\t' '/hm_code/{print NR; exit}' $qc_result)
     sed 1d $qc_result| awk -F "\t" '{print \$'"\$N"'}' | creat_log.py >> ${GCST}.running.log

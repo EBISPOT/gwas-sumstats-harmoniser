@@ -25,6 +25,12 @@ if (!params.to_build & !params.chrom) {
     System.exit(1)
 }
 }
+
+if (!params.version) {
+    println " ERROR: Please specific the pipeline version you are running (e.g. v1.1.9) \
+    Please set --version and try again (: "
+    System.exit(1)
+}
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS

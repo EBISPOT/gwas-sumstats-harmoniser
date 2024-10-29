@@ -12,13 +12,16 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 params.harm=null
-if (params.harm) {
-
 if (!params.harm) {
     println " ERROR: You didn't set any files to be harmonized \
     Please set --harm and try again (: "
     System.exit(1)
 }
+
+if (!params.version) {
+    println " ERROR: Please specific the pipeline version you are running (e.g. v1.1.9) \
+    Please set --version and try again (: "
+    System.exit(1)
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,7 +89,7 @@ workflow GWASCATALOGHARM {
 
 def input_files(Path input)
 {
-    return [(input.getName()=~ /GCST\d+/).findAll()[0],input+"-meta.yaml",input]
+    return [input.getName().split('\\.')[0],input+"-meta.yaml",input]
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

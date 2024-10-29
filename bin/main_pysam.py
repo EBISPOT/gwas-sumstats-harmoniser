@@ -41,7 +41,6 @@ def main():
     # Process each row in summary statistics
     for counter, ss_rec in enumerate(yield_sum_stat_records(args.sumstats,
                                                             args.in_sep)):
-
         # If set to only process 1 chrom, skip none matching chroms
         if args.only_chrom and not args.only_chrom == ss_rec.chrom:
             continue
@@ -148,7 +147,7 @@ def main():
         #
         # Write ssrec to output ------------------------------------------------
         #
-
+        print("ss_rec.zscore:",ss_rec.zscore)
         if args.hm_sumstats:
             out_raw = OrderedDict()
             out_raw["chromosome"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
@@ -157,6 +156,7 @@ def main():
             out_raw["other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_raw["beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
             out_raw["odds_ratio"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["zscore"] = ss_rec.zscore if ss_rec.zscore is not None and ss_rec.is_harmonised else args.na_rep_out
             out_raw["ci_lower"] = ss_rec.oddsr_lower if ss_rec.oddsr_lower is not None and ss_rec.is_harmonised else args.na_rep_out
             out_raw["ci_upper"] = ss_rec.oddsr_upper if ss_rec.oddsr_upper is not None and ss_rec.is_harmonised else args.na_rep_out
             out_raw["effect_allele_frequency"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
@@ -174,7 +174,7 @@ def main():
             except:
                 out_raw["standard_error"]=args.na_rep_out
             # Add other data from summary stat file
-            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","rsid","standard_error","ci_upper","ci_lower","hm_coordinate_conversion"]
+            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","rsid","standard_error","ci_upper","ci_lower","hm_coordinate_conversion","zscore"]
             for key in ss_rec.data:
                 if key not in outed:
                     value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
@@ -183,9 +183,7 @@ def main():
             generated_new_header=["hm_code","variant_id","rsid"]
             add_header=[x for x in generated_new_header if x not in out_header]
             new_order=out_header+add_header
-
             out_row = OrderedDict((k, out_raw[k]) for k in new_order)
-
 
             # Write header
             if not header_written:
@@ -301,6 +299,8 @@ def parse_args():
                         help=('Other allele column'), type=str, required=True)
     incols_group.add_argument('--beta_col', metavar="<str>",
                         help=('beta column'), type=str)
+    incols_group.add_argument('--zscore_col', metavar="<str>",
+                        help=('Z-score column'), type=str)
     incols_group.add_argument('--or_col', metavar="<str>",
                         help=('Odds ratio column'), type=str)
     incols_group.add_argument('--or_col_lower', metavar="<str>",
@@ -716,6 +716,7 @@ def yield_sum_stat_records(inf, sep):
                                   row[args.otherAl_col],
                                   row[args.effAl_col],
                                   row.get(args.beta_col, None),
+                                  row.get(args.zscore_col, None),
                                   row.get(args.or_col, None),
                                   row.get(args.or_col_lower, None),
                                   row.get(args.or_col_upper, None),

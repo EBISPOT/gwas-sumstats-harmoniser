@@ -1,0 +1,5 @@
+chromosome	base_pair_location	effect_allele	other_allele	beta	standard_error	effect_allele_frequency	p_value	info	rsid	zscore	odds_ratio
+1	693731	C	T	0.01	0.00806496	0.002779	0.1	ref_rs12238997_A_G	NA	0.02	0.03
+1	935393	G	GCCACGGG	-0.01	0.00806496	0.997221	0.1	ref_rs1469404497_G_GCCACGGG_norsid_flipped	NA	-0.02	-0.03
+1	935475	GCG	G	-0.01	0.00806496	0.997221	0.1	ref_rs1014128468_CGC_C_norsid_flipped	NA	-0.02	-0.03
+22	16052962	T	C	-0.00477642	0.0164749	0.089851	0.77	ref_rs376238049_G_A	NA	0.02	0.03
