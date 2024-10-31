@@ -20,7 +20,7 @@ process summarise_strand_counts {
     shell:
     """ 
     sum_strand_counts_nf.py \
-    -i ${launchDir}/$GCST/all_sc \
+    -i ${launchDir}/$GCST/3_all_sc \
     -o total_strand_count.tsv \
     -t ${params.threshold}
 

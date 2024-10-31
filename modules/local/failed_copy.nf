@@ -17,7 +17,7 @@ process failed_copy {
 
     shell:
     """
-    if [[ $GCST =~ ^GCST[0-9]+$ ]]; then
+    if [[ $GCST =~ ^GCST[0-9]+ ]]; then
          folder=\$(accession_id.sh -n $GCST)
          path=${params.ftp}/\$folder/$GCST/harmonised/
     else
