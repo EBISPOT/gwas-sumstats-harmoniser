@@ -11,6 +11,6 @@ workflow prepare_reference {
     
     // output of make_parquet_refs tuple: [chr, vcf, tbi, parquet]
 
-    get_variation_tables(params.remote_ensembl_variation)
-    make_local_synonyms_table(get_variation_tables.out.var,get_variation_tables.out.syn)
+    // get_variation_tables(params.remote_ensembl_variation)
+    // make_local_synonyms_table(get_variation_tables.out.var,get_variation_tables.out.syn)
 }

@@ -78,7 +78,17 @@ workflow GWASCATALOGHARM {
 
 def input_files(Path input)
 {
-    return [input.getName().split('\\.')[0],input+"-meta.yaml",input]
+    def baseName = input.getName().split("\\.")[0]
+    
+    // Check if input name matches the pattern GCST[0-9]+
+    if (baseName ==~ /GCST\d+/) {
+        // Extract GCST ID using regex find
+        def gcstId = (baseName =~ /GCST\d+/).findAll()[0]
+        return [gcstId, input + "-meta.yaml", input]
+    } else {
+        // Default case
+        return [baseName, input + "-meta.yaml", input]
+    }
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

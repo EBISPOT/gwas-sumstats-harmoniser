@@ -41,6 +41,6 @@ process harmonization {
     pos=\$(awk -v RS='\t' '/base_pair_location/{print NR; exit}' ${chrom}.merged_unsorted.hm)
 
     head -n1 ${chrom}.merged_unsorted.hm > ${chrom}.merged.hm;
-    tail -n+2 ${chrom}.merged_unsorted.hm | sort -n -k\$chr -k\$pos >> ${chrom}.merged.hm
+    tail -n+2 ${chrom}.merged_unsorted.hm | sort -n -k\$chr -k\$pos -T\$PWD >> ${chrom}.merged.hm
     """
 }
