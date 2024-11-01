@@ -66,27 +66,37 @@ workflow NFCORE_GWASCATALOGHARM {
     if (params.reference) {
         println ("Prepare the reference ...")
         PREPARE_REFERENCE()
-    } else if (params.gwascatalog) {
+    } 
+    else if (params.gwascatalog) {
         if (!params.to_harm_folder) {
             println " ERROR: You didn't set any folder to be harmonised \
             Please set --to_harm_folder and try again (: "
             System.exit(1)
-        } else {
+        } 
+        else if (!params.ftp) {
+            println " ERROR: You didn't set any folder to store your final result \
+            Please set --ftp and try again (: "
+            System.exit(1)
+        } 
+        else {
             println ("Harmonizing files in the folder ${params.all_harm_folder}")
             GWASCATALOGHARM_GWASCATALOG()
         }
-    } else if (params.harm) {
+    } 
+    else if (params.harm) {
         if (!params.file && !params.list) { 
             println " ERROR: You didn't set any files to be harmonised \
                 Please set --file for a single input file or \
                 set --list for a list containing all files are waiting to be harmonised \
                 and try again (: "
                 System.exit(1)
-        } else {
+        } 
+        else {
             println ("Start harmonising files")
             GWASCATALOGHARM()
         }
-    } else {
+    } 
+    else {
             println " ERROR: You didn't set any model to run the pipeline \
             Please set --harm and try again (: "
             System.exit(1)
