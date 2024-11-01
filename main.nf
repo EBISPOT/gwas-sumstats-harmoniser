@@ -35,29 +35,30 @@ workflow NFCORE_GWASCATALOGHARM {
     params.gwascatalog = null
     params.harm = null
 
-    if (!params.to_build) {
-    println "ERROR: You didn't set the target build to harmonise to"
-    println "Please set --to_build 38"
-    System.exit(1)
-    }
-
     if (!params.chrom) {
     println "ERROR: You didn't set chromsomes to be harmnnised"
     println "Please set --chrom 22 or --chromlist 22,X,Y or set chrom in ./config/default_params.config "
     System.exit(1)
     }
 
-    if (!params.threshold) {
-    println "ERROR: You didn't set threshold to imput the direction of palindromic variants"
-    println "Please set --threshold 0.99 or set threshold in ./config/default_params.config "
-    System.exit(1)
-    }
-    
-
-    if (!params.version) {
-    println " ERROR: Please specific the pipeline version you are running (e.g. v1.1.9) \
-    Please set --version and try again (: "
-    System.exit(1)
+    if (!params.reference) {
+        if (!params.to_build) {
+            println "ERROR: You didn't set the target build to harmonise to"
+            println "Please set --to_build 38"
+            System.exit(1)
+            }
+        
+        if (!params.threshold) {
+            println "ERROR: You didn't set threshold to imput the direction of palindromic variants"
+            println "Please set --threshold 0.99 or set threshold in ./config/default_params.config "
+            System.exit(1)
+            }
+        
+        if (!params.version) {
+            println " ERROR: Please specific the pipeline version you are running (e.g. v1.1.9) \
+            Please set --version and try again (: "
+            System.exit(1)
+            }   
     }
 
     // check conditinal input parameters

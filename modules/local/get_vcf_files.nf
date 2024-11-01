@@ -1,5 +1,6 @@
 /* download reference */
 process get_vcf_files {
+  tag "${chr}"
   conda (params.enable_conda ? "${task.ext.conda}" : null)
 
   container "${ workflow.containerEngine == 'singularity' &&
@@ -8,7 +9,6 @@ process get_vcf_files {
   "${task.ext.docker}${task.ext.docker_version}" }"
 
   storeDir params.ref
-  errorStrategy = { 'ignore' }
 
   input:
     val chr
