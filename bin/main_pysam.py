@@ -152,7 +152,6 @@ def main():
         #
         # Write ssrec to output ------------------------------------------------
         #
-        print("ss_rec.zscore:",ss_rec.zscore)
         if args.hm_sumstats:
             out_raw = OrderedDict()
             out_raw["chromosome"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
