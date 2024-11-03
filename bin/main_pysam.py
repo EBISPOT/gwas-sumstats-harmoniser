@@ -28,9 +28,14 @@ def main():
     header_written = False
     strand_counter = Counter()
     code_counter = Counter()
+   
     if args.hm_sumstats:
         out_handle = open_gzip(args.hm_sumstats, "wb")
         out_header = SumStatsTable(sumstats_file=args.sumstats)._set_header_order()
+        tag_neg_log_10_p_value=False
+        if "neg_log_10_p_value" in out_header:
+            out_header.remove("neg_log_10_p_value")
+            tag_neg_log_10_p_value=True
     
     #######YUE################
     tbx=pysam.TabixFile(args.vcf)
@@ -161,7 +166,7 @@ def main():
             out_raw["ci_upper"] = ss_rec.oddsr_upper if ss_rec.oddsr_upper is not None and ss_rec.is_harmonised else args.na_rep_out
             out_raw["effect_allele_frequency"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
             # Process the neg_log_10_p_value
-            if "neg_log_10_p_value" in out_header:
+            if tag_neg_log_10_p_value == True:
                 out_raw["p_value"] = 10**(float(ss_rec.data["neg_log_10_p_value"])*(-1)) if ss_rec.data["neg_log_10_p_value"] is not None else args.na_rep_out
             else:
                 out_raw["p_value"]=ss_rec.data["p_value"] if ss_rec.data["p_value"] is not None else args.na_rep_out

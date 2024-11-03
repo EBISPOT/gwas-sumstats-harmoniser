@@ -72,7 +72,7 @@ workflow GWASCATALOGHARM_GWASCATALOG {
     //[GCST009150, SUCCESS_HARMONIZATION, copied]
 }
 
-def input_files(input) {
+def input_list(input) {
     def baseName = input.getName().split("\\.")[0]
 
     // Check if the base name matches the pattern GCST[0-9]+

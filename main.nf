@@ -68,9 +68,9 @@ workflow NFCORE_GWASCATALOGHARM {
         PREPARE_REFERENCE()
     } 
     else if (params.gwascatalog) {
-        if (!params.to_harm_folder) {
+        if (!params.all_harm_folder) {
             println " ERROR: You didn't set any folder to be harmonised \
-            Please set --to_harm_folder and try again (: "
+            Please set --all_harm_folder and try again (: "
             System.exit(1)
         } 
         else if (!params.ftp) {
