@@ -1,8 +1,12 @@
 process ten_percent_counts_sum {
-    conda (params.enable_conda ? "$projectDir/environments/pgscatalog_utils/environment.yml" : null)
-    def dockerimg = "ebispot/gwas-sumstats-harmoniser:latest"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://ebispot/gwas-sumstats-harmoniser:latest' : dockerimg }"
-   
+    tag "$GCST"
+    
+    conda (params.enable_conda ? "${task.ext.conda}" : null)
+
+    container "${ workflow.containerEngine == 'singularity' &&
+        !task.ext.singularity_pull_docker_container ?
+        "${task.ext.singularity}${task.ext.singularity_version}" :
+        "${task.ext.docker}${task.ext.docker_version}" }"
 
     input:
     val GCST
@@ -13,7 +17,7 @@ process ten_percent_counts_sum {
     shell:
     """
     sum_strand_counts_10percent_nf.py \
-    -i ${launchDir}/$GCST/ten_sc \
+    -i ${launchDir}/$GCST/2_ten_sc \
     -o ten_percent_total_strand_count.tsv \
     -t ${params.threshold} 
 

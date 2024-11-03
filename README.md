@@ -1,5 +1,7 @@
 # gwas-sumstats-harmoniser
 
+👋 Welcome to our first release of the [documentation](https://ebispot.github.io/gwas-sumstats-harmoniser-documentation/) for gwas-sumstat-harmoniser!👋
+
 GWAS Summary Statistics Data Harmonisation pipeline aims to bring the variants to the desired genome assembly and then harmonises variants to match variants in reference data.
 
 The harmonisation process is the following:
@@ -32,12 +34,14 @@ This repository is stored in the Nextflow home directory, that is by default the
 
 The resource bundle is a collection of standard files for harmonising GWAS summary statistics data. We support the Ensembl variants VCF reference (hg38, dbSNP 151) and synonyms table . These files can be directly downloaded from our [FTP](https://ftp.ebi.ac.uk/pub/databases/gwas/harmonisation_resources/) server.
 
+**OR**
+
 Users can also prepare your own reference:
 ```
 nextflow run  EBISPOT/gwas-sumstats-harmoniser \
 --reference \
 --ref 'full path to store reference' \
--profile cluster,singularity/conda (running on the cluster) or -profile standard,docker/conda  (running locally)
+-profile executor,singularity/conda (running on the cluster) or -profile standard,docker/conda  (running locally)
 ```
 Default reference were originally downloaded from 
 ```
@@ -52,8 +56,25 @@ If you want to only run specific chromsomes, `--chrom 22` or `--chromlist 22,X,Y
 ### 3.1 General users
 
 Step1: Prepare input file:
-* Files are correctly formatted using the validator.
-* The name must follow the convention <any identifier>_<genome assembly number>.tsv e.g. my_summary_stats_37.tsv (37 denotes the genome assembly of the data in the file is hg19 or GRCh37)
+* Sumstats are correctly formatted using the validator.
+* Yaml file containing `genome_assembly` and `coordinate_system`
+```
+# Study meta-data
+date_metadata_last_modified: 2023-02-09
+
+# Genotyping Information
+genome_assembly: GRCh37
+coordinate_system: 1-based
+
+# Summary Statistic information
+data_file_name: gwas_sumstat_name.tsv
+file_type: GWAS-SSF v0.1
+data_file_md5sum: 32ce41c3dca4cd9f463a0ce7351966fd
+
+# Harmonization status
+is_harmonised: false
+is_sorted: false
+``` 
 
 Step2: Run the pipeline.
   
@@ -64,7 +85,7 @@ nextflow run  EBISPOT/gwas-sumstats-harmoniser \
 --ref 'full path to store reference' \
 --harm \
 --file Full_path_of_the_file_to_be_harmonised or --list path_of_list.txt \
--profile cluster,singularity/conda or -profile standard,docker/conda
+-profile executor,singularity/conda or -profile standard,docker/conda
 ```
 Harmonising a batch of files in list.txt file, which is a txt file that each row is a full path of tsv files to be harmonised. 
 
@@ -77,7 +98,7 @@ We constructed a customized pipeline for GWAS catalog daily running. This pipeli
 nextflow run  EBISPOT/gwas-sumstats-harmoniser \
 --ref 'full path to store reference' \
 --gwascatalog \
--profile cluster,singularity/
+-profile executor,singularity/
 ```
 
 ### 3.3. Other options:
@@ -106,4 +127,13 @@ Conda environments are stored on the file system. By default Nextflow instructs 
 [Nextflow’s documentation](https://www.nextflow.io/docs/latest/executor.html).
  
 # 4. Harmonisation steps:
-More information about the harmonisation process refers to [GWAS catalog documents](https://www.ebi.ac.uk/gwas/docs/methods/summary-statistics)
+More information about the harmonisation process refers to [GWAS catalog documents](https://www.ebi.ac.uk/gwas/docs/methods/summary-statistics) and [our documentation](https://ebispot.github.io/gwas-sumstats-harmoniser-documentation/)
+
+# 5. Contact us:
+🫶 We'd love to hear from you!
+
+* To provide feedback or ask a question, contact the GWAS Catalog team on gwas-info@ebi.ac.uk.
+* If you believe you’ve encountered a bug, please don’t hesitate to report it in our [GitHub repository](https://github.com/EBISPOT/gwas-sumstats-harmoniser/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+).
+* If you encounter any issues while running the pipeline, feel free to join the discussion in the [gwas-sumstats-harmoniser Discussions](https://github.com/EBISPOT/gwas-sumstats-harmoniser/discussions)!
+
+

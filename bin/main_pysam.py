@@ -15,6 +15,7 @@ import argparse
 from collections import OrderedDict, Counter
 from lib.SumStatRecord import SumStatRecord
 from lib.VCFRecord import VCFRecord
+from gwas_sumstats_tools.interfaces.data_table import SumStatsTable
 
 def main():
     """ Implements main logic.
@@ -27,17 +28,24 @@ def main():
     header_written = False
     strand_counter = Counter()
     code_counter = Counter()
+   
     if args.hm_sumstats:
         out_handle = open_gzip(args.hm_sumstats, "wb")
+        out_header = SumStatsTable(sumstats_file=args.sumstats)._set_header_order()
+        tag_neg_log_10_p_value=False
+        if "neg_log_10_p_value" in out_header:
+            out_header.remove("neg_log_10_p_value")
+            tag_neg_log_10_p_value=True
     
     #######YUE################
     tbx=pysam.TabixFile(args.vcf)
     #######YUE################
+
+    
     
     # Process each row in summary statistics
     for counter, ss_rec in enumerate(yield_sum_stat_records(args.sumstats,
                                                             args.in_sep)):
-
         # If set to only process 1 chrom, skip none matching chroms
         if args.only_chrom and not args.only_chrom == ss_rec.chrom:
             continue
@@ -58,12 +66,24 @@ def main():
 
         # Skip rows that have code 14 (fail validation)
         if not ss_rec.hm_code:
-
-            # Get VCF reference variants for this record
-            vcf_recs = get_vcf_records(
+            # Get VCF reference variants for this recordls
+            coordinate=args.coordinate
+            if int(coordinate[0])==0 and ss_rec.lifmethod=="lo":
+                if len(str(ss_rec.effect_al))+len(str(ss_rec.other_al))>2: 
+                    vcf_recs =get_vcf_records_0base(
                         tbx,
                         ss_rec.chrom,
                         ss_rec.pos)
+                else:
+                    vcf_recs = get_vcf_records(
+                    tbx,
+                    ss_rec.chrom,
+                    ss_rec.pos)
+            else:
+                vcf_recs = get_vcf_records(
+                    tbx,
+                    ss_rec.chrom,
+                    ss_rec.pos)
             # Extract the VCF record that matches the summary stat record
             vcf_rec, ret_code = exract_matching_record_from_vcf_records(
                 ss_rec, vcf_recs)
@@ -132,27 +152,43 @@ def main():
         #
         # Write ssrec to output ------------------------------------------------
         #
-
+        print("ss_rec.zscore:",ss_rec.zscore)
         if args.hm_sumstats:
-
-            # Add harmonised other allele, effect allele, eaf, beta, or to output
-            out_row = OrderedDict()
-            out_row["hm_varid"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_chrom"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_pos"] = ss_rec.hm_pos if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_effect_allele"] = ss_rec.hm_effect_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_OR"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_OR_lowerCI"] = ss_rec.oddsr_lower is not None if ss_rec.oddsr_lower and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_OR_upperCI"] = ss_rec.oddsr_upper is not None if ss_rec.oddsr_upper and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_eaf"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_row["hm_code"] = ss_rec.hm_code
+            out_raw = OrderedDict()
+            out_raw["chromosome"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["base_pair_location"] = ss_rec.hm_pos if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["effect_allele"] = ss_rec.hm_effect_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["odds_ratio"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["z_score"] = ss_rec.zscore if ss_rec.zscore is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["ci_lower"] = ss_rec.oddsr_lower if ss_rec.oddsr_lower is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["ci_upper"] = ss_rec.oddsr_upper if ss_rec.oddsr_upper is not None and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["effect_allele_frequency"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
+            # Process the neg_log_10_p_value
+            if tag_neg_log_10_p_value == True:
+                out_raw["p_value"] = 10**(float(ss_rec.data["neg_log_10_p_value"])*(-1)) if ss_rec.data["neg_log_10_p_value"] is not None else args.na_rep_out
+            else:
+                out_raw["p_value"]=ss_rec.data["p_value"] if ss_rec.data["p_value"] is not None else args.na_rep_out
+            out_raw["hm_code"] = ss_rec.hm_code
+            out_raw["hm_coordinate_conversion"] = ss_rec.data["hm_coordinate_conversion"]
+            out_raw["variant_id"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            out_raw["rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
+            try:
+                out_raw["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
+            except:
+                out_raw["standard_error"]=args.na_rep_out
             # Add other data from summary stat file
+            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","rsid","standard_error","ci_upper","ci_lower","hm_coordinate_conversion","z_score"]
             for key in ss_rec.data:
-                value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
-                out_row[key] = str(value)
+                if key not in outed:
+                    value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
+                    out_raw[key] = str(value)
+
+            generated_new_header=["hm_code","variant_id","rsid"]
+            add_header=[x for x in generated_new_header if x not in out_header]
+            new_order=out_header+add_header
+            out_row = OrderedDict((k, out_raw[k]) for k in new_order)
 
             # Write header
             if not header_written:
@@ -163,6 +199,7 @@ def main():
             # Write row
             outline = args.out_sep.join([str(x) for x in out_row.values()]) + "\n"
             out_handle.write(outline.encode("utf-8"))
+            
 
     # Close output handle
     if args.hm_sumstats:
@@ -229,6 +266,13 @@ def parse_args():
 
     # Harmonisation mode
     mode_group = parser.add_argument_group(title='Harmonisation mode')
+    mode_group.add_argument('--coordinate',
+                            help=('coordinate system of the input file:\n'
+                                  '(a) 1_base '
+                                  '(b) 0_base '),
+                            nargs='?',
+                            type=str,
+                            default="1-based")
     mode_group.add_argument('--palin_mode', metavar="[infer|forward|reverse|drop]",
                         help=('Mode to use for palindromic variants:\n'
                               '(a) infer strand from effect-allele freq, '
@@ -260,6 +304,8 @@ def parse_args():
                         help=('Other allele column'), type=str, required=True)
     incols_group.add_argument('--beta_col', metavar="<str>",
                         help=('beta column'), type=str)
+    incols_group.add_argument('--zscore_col', metavar="<str>",
+                        help=('Z-score column'), type=str)
     incols_group.add_argument('--or_col', metavar="<str>",
                         help=('Odds ratio column'), type=str)
     incols_group.add_argument('--or_col_lower', metavar="<str>",
@@ -270,6 +316,8 @@ def parse_args():
                         help=('Effect allele frequency column'), type=str)
     incols_group.add_argument('--rsid_col', metavar="<str>",
                         help=('rsID column in the summary stat file'), type=str)
+    incols_group.add_argument('--hm_coordinate_conversion', metavar="<str>",
+                        help=('liftover method column'), type=str, required=True)
 
     # Global other args
     other_group = parser.add_argument_group(title='Other args')
@@ -636,6 +684,22 @@ def get_vcf_records(tbx, chrom, pos):
     #######YUE################
     return [VCFRecord(line) for line in response]
 
+def get_vcf_records_0base(tbx, chrom, pos):
+    """ Uses tabix to query VCF file. Parses info from record.
+    Args:
+        in_vcf (str): vcf file
+        chrom (str): chromosome
+        pos (int): base pair position
+    Returns:
+        list of VCFRecords
+    """
+    #######YUE################
+    result=tbx.fetch(chrom, int(pos)-2, int(pos))
+    # each records returned by fetch is str, it needs to be change into list for VCF records to process
+    response=[list(n.split("\t")) for n in result]
+    #######YUE################
+    return [VCFRecord(line) for line in response]
+
 def yield_sum_stat_records(inf, sep):
     """ Load lines from summary stat file and convert to SumStatRecord class.
     Args:
@@ -657,12 +721,14 @@ def yield_sum_stat_records(inf, sep):
                                   row[args.otherAl_col],
                                   row[args.effAl_col],
                                   row.get(args.beta_col, None),
+                                  row.get(args.zscore_col, None),
                                   row.get(args.or_col, None),
                                   row.get(args.or_col_lower, None),
                                   row.get(args.or_col_upper, None),
                                   row.get(args.eaf_col, None),
                                   row.get(args.rsid_col, None),
-                                  row)
+                                  row,
+                                  row[args.hm_coordinate_conversion])
         yield ss_record
 
 def parse_sum_stats(inf, sep):

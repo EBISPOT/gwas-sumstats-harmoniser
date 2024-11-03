@@ -1,9 +1,9 @@
 include {qc} from '../../modules/local/qc'
 include {harmonization_log} from '../../modules/local/harmonization_log'
+include {update_meta_yaml} from '../../modules/local/update_meta_yaml'
 
 /*-------- module from nf-core -----------------*/
 //include {bgzip} from '../../modules/nf-core/modules/tabix/bgzip/main'
-//include {tabix} from '../../modules/nf-core/modules/tabix/tabix/main'
 
 workflow quality_control{
     take:
@@ -16,12 +16,13 @@ workflow quality_control{
     main:
     qc(ch_tsv)
     ch_to_log=qc.out.qc_ed.combine(ch_direction,by:0).combine(inputs,by:0)
-    ch_to_log.view()
-    //ch_to_log: val(GCST), val(mode),path(all_hm), path('harmonized.qc.tsv'), path('report.txt'), path (total_sum), val(build), path (input)
-
+    //ch_to_log: val(GCST), val(mode),path(all_hm), path('harmonized.qc.tsv'), path('report.txt'), path (total_sum), path(yaml), path (input)
+    input_log=ch_to_log.combine(unmapped,by:0)
     def to_log=chroms.flatten().last()
-    harmonization_log(to_log,ch_to_log,unmapped)
+    harmonization_log(to_log,input_log)
+    update_meta_yaml(harmonization_log.out)
 
     emit:
-    qclog=harmonization_log.out.running_result
+    qclog=update_meta_yaml.out.running_result
+    // qc.log: val(GCST),path(zip_harm),path(zip_harm_tbi),path(running_log),path ("${GCST}.h.tsv.gz-meta.yaml"),env(result)
 }

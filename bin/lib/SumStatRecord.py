@@ -4,8 +4,8 @@ import sys
 class SumStatRecord:
     """ Class to hold a summary statistic record.
     """
-    def __init__(self, chrom, pos, other_al, effect_al, beta, oddsr,
-                 oddsr_lower, oddsr_upper, eaf, rsid, data):
+    def __init__(self, chrom, pos, other_al, effect_al, beta, zscore, oddsr, 
+                 oddsr_lower, oddsr_upper, eaf, rsid, data, hm_coordinate_conversion):
 
         # Set raw info
         self.chrom = chrom
@@ -13,11 +13,13 @@ class SumStatRecord:
         self.other_al = other_al
         self.effect_al = effect_al
         self.data = data
-        self.beta = float(beta) if beta is not None else None
+        self.beta = safe_float(beta) if beta is not None else None
         self.oddsr = safe_float(oddsr) if oddsr is not None else None
+        self.zscore = safe_float(zscore) if zscore is not None else None
         self.oddsr_lower = safe_float(oddsr_lower) if oddsr_lower is not None else None
         self.oddsr_upper = safe_float(oddsr_upper) if oddsr_upper is not None else None
-        self.rsid = rsid
+        self.rsid = str(rsid) if rsid is not None else None
+        self.lifmethod= str(hm_coordinate_conversion)
 
         # Effect allele frequency is not required if we assume +ve strand
         if eaf:
@@ -73,8 +75,15 @@ class SumStatRecord:
                             to flipping.
         """
         # Flip beta
-        if self.beta != 0:
-            self.beta = self.beta * -1
+        if self.beta:
+            if self.beta != 0:
+                self.beta = self.beta * -1
+
+        # Flip Z-score
+        if self.zscore:
+            if self.zscore != 0:
+                self.zscore = self.zscore * -1
+
         # Flip OR
         if self.oddsr:
             self.oddsr = self.oddsr ** -1
@@ -91,6 +100,7 @@ class SumStatRecord:
         # Flip eaf
         if self.eaf:
             self.eaf = 1 - self.eaf
+        #print(f"pos:{self.pos},beta:{self.beta}, OR:{self.oddsr},zscore:{self.zscore},eaf:{self.eaf}")
 
     def alleles(self):
         """
@@ -106,6 +116,7 @@ class SumStatRecord:
                           "  other allele : " + str(self.other_al),
                           "  effect allele: " + str(self.effect_al),
                           "  beta         : " + str(self.beta),
+                          "  Z-score        : " + str(self.zscore),
                           "  odds ratio   : " + str(self.oddsr),
                           "  EAF          : " + str(self.eaf)
                           ])

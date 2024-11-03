@@ -1,8 +1,12 @@
 process summarise_strand_counts {
-    conda (params.enable_conda ? "$projectDir/environments/pgscatalog_utils/environment.yml" : null)
-    def dockerimg = "ebispot/gwas-sumstats-harmoniser:latest"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://ebispot/gwas-sumstats-harmoniser:latest' : dockerimg }"
-   
+    tag "$GCST"
+    
+    conda (params.enable_conda ? "${task.ext.conda}" : null)
+
+    container "${ workflow.containerEngine == 'singularity' &&
+        !task.ext.singularity_pull_docker_container ?
+        "${task.ext.singularity}${task.ext.singularity_version}" :
+        "${task.ext.docker}${task.ext.docker_version}" }"
 
     input:
     tuple val(GCST), val(status)
@@ -16,7 +20,7 @@ process summarise_strand_counts {
     shell:
     """ 
     sum_strand_counts_nf.py \
-    -i ${launchDir}/$GCST/all_sc \
+    -i ${launchDir}/$GCST/3_all_sc \
     -o total_strand_count.tsv \
     -t ${params.threshold}
 

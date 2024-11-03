@@ -1,10 +1,15 @@
 process generate_strand_counts {
-    conda (params.enable_conda ? "$projectDir/environments/conda_environment.yml" : null)
-    def dockerimg = "ebispot/gwas-sumstats-harmoniser:latest"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://ebispot/gwas-sumstats-harmoniser:latest' : dockerimg }"
-   
+    tag "${GCST}_${chrom}"
+
+    conda (params.enable_conda ? "${task.ext.conda}" : null)
+
+    container "${ workflow.containerEngine == 'singularity' &&
+        !task.ext.singularity_pull_docker_container ?
+        "${task.ext.singularity}${task.ext.singularity_version}" :
+        "${task.ext.docker}${task.ext.docker_version}" }"
+        
     input:
-    tuple val(GCST), val(chrom), path(merged), path(vcf), val(status)
+    tuple val(GCST), val(chrom), path(merged), path(yaml), path(ref), val(status)
 
     output:
     tuple val(GCST), val(status), path("full_${chrom}.sc"), emit: all_sc
@@ -14,14 +19,16 @@ process generate_strand_counts {
 
     shell:
     """
+    header_args=\$(utils.py -f $merged -strand_count_args);
+
+    coordinate_system=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
+    if test -z "\$coordinate_system"; then coordinate="1-based"; else coordinate=\$coordinate_system; fi
+
     main_pysam.py \
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
-    --chrom_col chromosome \
-    --pos_col base_pair_location \
-    --effAl_col effect_allele \
-    --otherAl_col other_allele \
-    --rsid_col variant_id \
-    --strand_counts full_${chrom}.sc
+    \$header_args \
+    --strand_counts full_${chrom}.sc \
+    --coordinate \$coordinate
     """
 }

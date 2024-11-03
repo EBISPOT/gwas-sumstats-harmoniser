@@ -1,11 +1,14 @@
 /* download reference */
 process get_vcf_files {
-  conda (params.enable_conda ? "$projectDir/environments/conda_environment.yml" : null)
-  def dockerimg = "ebispot/gwas-sumstats-harmoniser:latest"
-  container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'docker://ebispot/gwas-sumstats-harmoniser:latest' : dockerimg }"
-        
+  tag "${chr}"
+  conda (params.enable_conda ? "${task.ext.conda}" : null)
+
+  container "${ workflow.containerEngine == 'singularity' &&
+  !task.ext.singularity_pull_docker_container ?
+  "${task.ext.singularity}${task.ext.singularity_version}" :
+  "${task.ext.docker}${task.ext.docker_version}" }"
+
   storeDir params.ref
-  errorStrategy = { 'ignore' }
 
   input:
     val chr
@@ -16,9 +19,18 @@ process get_vcf_files {
   
   shell:
   """
-  mkdir -p $params.ref
-  wget -P $params.ref ${params.remote_vcf_location}/homo_sapiens-${chr}.vcf.gz
-  tabix -f -p vcf ${params.ref}/homo_sapiens-${chr}.vcf.gz
+  # Check if the directory exists; if not, create it
+  [[ -d $params.ref ]] || mkdir -p $params.ref
+
+  # Check if the VCF file already exists; if not, download it
+  if [[ ! -f $params.ref/homo_sapiens-${chr}.vcf.gz ]]; then
+    wget -P $params.ref ${params.remote_vcf_location}/homo_sapiens-${chr}.vcf.gz
+  fi
+
+  # Check if the index file exists; if not, create it
+  if [[ ! -f $params.ref/homo_sapiens-${chr}.vcf.gz.tbi ]]; then
+    tabix -f -p vcf $params.ref/homo_sapiens-${chr}.vcf.gz
+  fi
 
   vcf2parquet_nf.py \
     -f ${params.ref}/homo_sapiens-${chr}.vcf.gz \

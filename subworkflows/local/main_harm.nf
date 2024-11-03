@@ -4,8 +4,12 @@ include {concatenate_chr_splits} from '../../modules/local/concatenate_chr_split
 workflow main_harm {
     take:
     hm_input
+    files
+    //files: [GCST,path yaml, path tsv]
 
     main:
+    //yaml_path_ch=files.map{it[0,1]}
+    //harm_input=hm_input.combine(yaml_path_ch,by:0)
     harmonization(hm_input)
     //hm_by_chrom: [GCST009150, forward, path of hm, path of log]
     //hm_input.map{it[6]}.dump(tag:'bar')

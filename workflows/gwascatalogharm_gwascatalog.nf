@@ -11,20 +11,6 @@
     CONFIG FILES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-params.to_harm_folder=null
-if (params.to_harm_folder) {
-if (!params.inputPath & !params.to_harm_folder) {
-    println " ERROR: You didn't set any folder to be harmonized \
-    Please set --to_harm_folder and --inputPath and try again (: "
-    System.exit(1)
-}
-
-if (!params.to_build & !params.chrom) {
-    println "ERROR: You didn't set the target build and chromsomes to be harmnnized"
-    println "Please set --to_build 38 or --chrom ['1','2',...]"
-    System.exit(1)
-}
-}
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
@@ -75,19 +61,30 @@ workflow GWASCATALOGHARM_GWASCATALOG {
     //major_direction.out.hm_input: tuple val(GCST), val(palin_mode), val(status), val(chrom), path(merged), path(ref)
     //ch_count = major_direction.out.hm_input.groupTuple().map{[it[0],it[1].size()]}
     harm_ch = major_direction.out.hm_input.groupTuple().transpose()
-    main_harm(harm_ch)
+    main_harm(harm_ch,ch_files)
     // out:[GCST009150, forward, path of harmonised.tsv]
     quality_control(main_harm.out.hm,major_direction.out.direction_sum,ch_files,ch_direction,major_direction.out.unmapped)
     harmonnized_ch=quality_control.out.qclog
     all_files_ch=ch_files.join(harmonnized_ch,remainder: true)
-    //example:[GCST90029037, 37, path *.tsv, path qc.tsv, path GCST90029037.running.log, SUCCESS_HARMONIZATION]
+    //example:[GCST90029037,raw_yaml, path input.tsv, path h.tsv.gz, path h.tsv.gz.tbi path GCST90029037.running.log, path h.tsv.gz-meta.yaml, SUCCESS_HARMONIZATION]
 
     move_files(all_files_ch)
     //[GCST009150, SUCCESS_HARMONIZATION, copied]
 }
 
-def input_list(Path input) {
-    return [input.getName().split('_')[0],input.getName().split('\\.')[0][-2..-1],input,]
+def input_list(input) {
+    def baseName = input.getName().split("\\.")[0]
+
+    // Check if the base name matches the pattern GCST[0-9]+
+    def matcher = (baseName=~ /GCST\d+/).findAll()
+    if (matcher) {
+        // Extract GCST ID using regex find
+        def gcstId = matcher[0]  // Get the first match
+        return [gcstId, input+"-meta.yaml", input]
+    } else {
+        // Default case
+        return [baseName, input+"-meta.yaml", input]
+    }
 }
 
 
