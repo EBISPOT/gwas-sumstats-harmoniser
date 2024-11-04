@@ -48,7 +48,7 @@ for i in range(0,len(success.index)):
     count=success.iloc[i,0]
     per=success.iloc[i,1]
     print(key,count,"{0:.2%}".format(per),code_table[key],sep="\t")
-print("\n################################################################\n\n")
+print("\n################################################################\n")
 
 # Failed harmonized variants
 print("\n6. Failed harmonisation\n")
@@ -73,7 +73,7 @@ print("hm_code","Number","Percentage","Explanation",sep="\t")
 for key, count in hm_code_fail_dict.items():
     per = count/all
     print(key,count,"{0:.2%}".format(per),code_table[key],sep="\t")
-print("\n################################################################\n\n")
+print("\n################################################################\n")
 
 
 print("\n7. Overview\n")

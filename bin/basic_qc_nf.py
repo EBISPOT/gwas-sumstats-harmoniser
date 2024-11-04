@@ -30,31 +30,6 @@ formatter = logging.Formatter('%(message)s')
 #   - if chr and bp not ints: remove row
 # 5) set chr 'x' and 'y' to 23 and 24
 
-
-"""
-class sqlClient():
-    def __init__(self, database):
-        self.database = database
-        self.conn = self.create_conn()
-        self.cur = self.conn.cursor()
-
-    def create_conn(self):
-        try:
-            conn = sqlite3.connect(self.database)
-            conn.row_factory = sqlite3.Row
-            return conn
-        except NameError as e:
-            print(e)
-        return None
-
-    def get_synonyms(self, rsid):
-        data = []
-        for row in self.cur.execute("select name from variation_synonym where variation_id in (select variation_id from variation_synonym where name =?)", (rsid,)):
-            data.append(row[0])
-        return data
-"""
-
-
 hm_header_transformations = {
 
     # variant id
@@ -150,40 +125,6 @@ def drop_last_element_from_filename(filename):
     filename_parts = filename.split('-')
     return '-'.join(filename_parts[:-1])
 
-
-"""
- def resolve_invalid_rsids(row, header, ensembl_client=None, sql_client=None):
-    hm_rsid_idx = header.index('hm_rsid')
-    snp_idx = header.index(RSID)
-    # if possible, set variant_id to harmonised rsid
-    if row[hm_rsid_idx].startswith('rs'):
-        # check that if rsID already present is not synonym of that found in vcf
-        if row[snp_idx].startswith('rs') and row[snp_idx] != row[hm_rsid_idx]:
-            synonyms = []
-            if ensembl_client:
-                rs_info = ensembl_client.get_rsid(row[snp_idx])
-                if rs_info != "NA":
-                    try:
-                        synonyms = rs_info["synonyms"]
-                        synonyms.append(rs_info["name"])
-                    except TypeError:
-                        row[snp_idx] = 'NA'
-            elif sql_client:
-                synonyms = sql_client.get_synonyms(row[snp_idx])
-            print(synonyms)
-            if row[hm_rsid_idx] in synonyms:
-                row[snp_idx] = row[hm_rsid_idx]
-            else:
-                row[snp_idx] = 'NA'
-        else:
-            row[snp_idx] = row[hm_rsid_idx]
-    # if variant_id is doesn't begin 'rs' 
-    if not row[snp_idx].startswith('rs'):
-        row[snp_idx] = 'NA'
-    return row
-"""
-
-
 def get_csv_reader(csv_file):
     dialect = csv.Sniffer().sniff(csv_file.readline())
     csv_file.seek(0)
@@ -237,9 +178,6 @@ def main():
             else:
                 # First try to replace an invalid variant_id with the hm_rsid
                 # Checks for blanks, integers and floats:
-                # sql_client = sqlClient(db) if db else None
-                # ensembl_client = EnsemblRestClient() if not db else None
-                # row = resolve_invalid_rsids(row, header, ensembl_client, sql_client)
                 row = blanks_to_NA(row)
                 row = map_chr_values_to_numbers(row, header)
                 unharmonisable = remove_row_if_unharmonisable(row, header)
