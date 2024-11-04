@@ -31,7 +31,7 @@ formatter = logging.Formatter('%(message)s')
 # 5) set chr 'x' and 'y' to 23 and 24
 
 
-
+"""
 class sqlClient():
     def __init__(self, database):
         self.database = database
@@ -52,7 +52,7 @@ class sqlClient():
         for row in self.cur.execute("select name from variation_synonym where variation_id in (select variation_id from variation_synonym where name =?)", (rsid,)):
             data.append(row[0])
         return data
-
+"""
 
 
 hm_header_transformations = {
@@ -237,9 +237,9 @@ def main():
             else:
                 # First try to replace an invalid variant_id with the hm_rsid
                 # Checks for blanks, integers and floats:
-                #sql_client = sqlClient(db) if db else None
-                #ensembl_client = EnsemblRestClient() if not db else None
-                #row = resolve_invalid_rsids(row, header, ensembl_client, sql_client)
+                # sql_client = sqlClient(db) if db else None
+                # ensembl_client = EnsemblRestClient() if not db else None
+                # row = resolve_invalid_rsids(row, header, ensembl_client, sql_client)
                 row = blanks_to_NA(row)
                 row = map_chr_values_to_numbers(row, header)
                 unharmonisable = remove_row_if_unharmonisable(row, header)

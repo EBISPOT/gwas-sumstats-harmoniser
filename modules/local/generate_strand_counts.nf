@@ -27,7 +27,7 @@ process generate_strand_counts {
     --sumstats $merged \
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
     \$header_args \
-    --strand_counts full_${chrom}.sc
+    --strand_counts full_${chrom}.sc \
     --coordinate \$coordinate
     """
 }
