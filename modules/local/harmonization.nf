@@ -1,5 +1,6 @@
 process harmonization {
     tag "${GCST}_${chrom}"
+
     conda (params.enable_conda ? "${task.ext.conda}" : null)
 
     container "${ workflow.containerEngine == 'singularity' &&
@@ -21,7 +22,7 @@ process harmonization {
     """
 
     coordinate_system=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
-    if test -z "\$coordinate_system"; then coordinate="1_base"; else coordinate=\$coordinate_system; fi
+    if test -z "\$coordinate_system"; then coordinate="1-based"; else coordinate=\$coordinate_system; fi
 
     header_args=\$(utils.py -f $merged -harm_args);
     
@@ -40,6 +41,6 @@ process harmonization {
     pos=\$(awk -v RS='\t' '/base_pair_location/{print NR; exit}' ${chrom}.merged_unsorted.hm)
 
     head -n1 ${chrom}.merged_unsorted.hm > ${chrom}.merged.hm;
-    tail -n+2 ${chrom}.merged_unsorted.hm | sort -n -k\$chr -k\$pos >> ${chrom}.merged.hm
+    tail -n+2 ${chrom}.merged_unsorted.hm | sort -n -k\$chr -k\$pos -T\$PWD >> ${chrom}.merged.hm
     """
 }

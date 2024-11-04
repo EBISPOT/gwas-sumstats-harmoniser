@@ -1,6 +1,6 @@
 process generate_strand_counts {
     tag "${GCST}_${chrom}"
-    
+
     conda (params.enable_conda ? "${task.ext.conda}" : null)
 
     container "${ workflow.containerEngine == 'singularity' &&
@@ -20,8 +20,9 @@ process generate_strand_counts {
     shell:
     """
     header_args=\$(utils.py -f $merged -strand_count_args);
+
     coordinate_system=\$(grep coordinate_system $yaml | awk -F ":" '{print \$2}' | tr -d "[:blank:]" )
-    if test -z "\$coordinate_system"; then coordinate="1-base"; else coordinate=\$coordinate_system; fi
+    if test -z "\$coordinate_system"; then coordinate="1-based"; else coordinate=\$coordinate_system; fi
 
     main_pysam.py \
     --sumstats $merged \
