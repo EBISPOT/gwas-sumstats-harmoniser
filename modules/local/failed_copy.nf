@@ -7,7 +7,7 @@ process failed_copy {
         "${task.ext.docker}${task.ext.docker_version}" }"
 
     input:
-    tuple val(GCST), path(raw_yaml), path(tsv), path(qc_tsv), path (log), path (yaml), val(status)
+    tuple val(GCST), path(raw_yaml), path(tsv), path(htsv), path(tbi), path(running_log), path(yaml), val(status)
     
     output:
     tuple val(GCST),val(status), env(copy), emit: done
@@ -17,12 +17,21 @@ process failed_copy {
 
     shell:
     """
+    if [[ $GCST =~ ^GCST[0-9]+ ]]; then
+         folder=\$(accession_id.sh -n $GCST)
+         path=${params.ftp}/\$folder/$GCST/harmonised/
+    else
+         path=${params.ftp}/$GCST
+     fi
 
-    log_file=${launchDir}/$GCST/final/${GCST}.running.log
-    
-    if [[ -f \$log_file ]]
+    if [ ! -d \$path ] 
     then
-       cp ${launchDir}/$GCST/final/${GCST}.running.log ${params.failed}/
+       mkdir -p \$path
+    fi
+    
+    if [[ -f $running_log ]]
+    then
+       cp $running_log ${params.ftp}/
     fi
 
     copy="copied"

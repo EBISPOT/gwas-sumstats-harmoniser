@@ -1,7 +1,5 @@
-chromosome	base_pair_location	effect_allele	other_allele	beta	standard_error	effect_allele_frequency	p_value	info	rsid
-1	693730	A	G	-0.016619	0.00806496	0.997221	0.1	ref_rs12238997	NA
-1	935393	GCCACGGG	G	-0.016619	0.00806496	0.997221	0.1	ref_rs1469404497	NA
-1	935393	G	GCCACGGG	-0.016619	0.00806496	0.997221	0.1	ref_rs1469404497	rs1469404497
-1	935474	CGC	C	-0.016619	0.00806496	0.997221	0.1	ref_rs1014128468	NA
-1	935474	CGC	C	-0.016619	0.00806496	0.997221	0.1	ref_rs1014128468	rs1014128468
-22	16052961	T	C	-0.00477642	0.0164749	0.089851	0.77	ref_rs376238049	NA
+chromosome	base_pair_location	effect_allele	other_allele	beta	standard_error	effect_allele_frequency	p_value	info	rsid	z_score	odds_ratio	ci_lower	ci_upper
+1	693730	G	A	0.1	0.2	0.3	0.4	ref_rs12238997_forward_noflip	NA	0.5	0.7	0.6	0.8
+1	935393	CCCGTGGC	C	0.1	0.2	0.3	0.4	ref_rs1469404497_reverse_noflip	rs1469404497	0.5	0.7	0.6	0.8
+1	935474	CGC	C	-0.1	0.2	0.7	0.4	ref_rs1014128468_forward_flipped	NA	-0.5	1.4	1.25	1.67
+22	16052961	C	T	-0.1	0.2	0.7	0.4	ref_rs376238049_reverse_flipped	rs376238049	-0.5	1.4	1.25	1.67

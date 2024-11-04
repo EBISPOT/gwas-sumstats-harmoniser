@@ -13,10 +13,11 @@ process harmonization_log {
     tuple val(GCST), val(mode), path(all_hm), path(qc_result), path(delete_sites), path(count), path(raw_yaml), path(input), path(unmapped)
 
     output:
-    tuple val(GCST), path(qc_result), path ("${GCST}.running.log"),  path ("${GCST}.h.tsv.gz-meta.yaml"), env(result), emit: running_result
+    tuple val(chr), val(GCST), path(raw_yaml), path("${GCST}.h.tsv.gz"), path("${GCST}.h.tsv.gz.tbi"), path ("${GCST}.running.log"), env(result)
 
     shell:
     """
+    # Generating running log
     log_script.sh \
     -r "${params.ref}/homo_sapiens-${chr}.vcf.gz" \
     -i $input \
@@ -24,32 +25,20 @@ process harmonization_log {
     -d $delete_sites \
     -h $all_hm \
     -u $unmapped \
-    -o ${GCST}.running.log
+    -o ${GCST}.running.log \
+    -p ${params.version}
 
     N=\$(awk -v RS='\t' '/hm_code/{print NR; exit}' $qc_result)
     sed 1d $qc_result| awk -F "\t" '{print \$'"\$N"'}' | creat_log.py >> ${GCST}.running.log
     
+    # extract harmonise result
     result=\$(grep Result ${GCST}.running.log | cut -f2)
 
-    # metadata file
+    # Prepare the gzip data
+    chr=\$(awk -v RS='\t' '/chromosome/{print NR; exit}' $qc_result)
+    pos=\$(awk -v RS='\t' '/base_pair_location/{print NR; exit}' $qc_result)
 
-    data_file_name="${GCST}.h.tsv.gz"
-    out_yaml="${GCST}.h.tsv.gz-meta.yaml"
-    data_file_md5sum=\$(md5sum<${launchDir}/$GCST/final/${GCST}.h.tsv.gz | awk '{print \$1}')
-    date_metadata_last_modified=\$(date  +"%Y-%m-%d")
-    harmonisation_reference=\$(tabix -H "${params.ref}/homo_sapiens-${chr}.vcf.gz" | grep reference | cut -f2 -d '=')
-
-    gwas_metadata.py \
-    -i $raw_yaml \
-    -o \$out_yaml \
-    -e \
-    --data_file_name \$data_file_name \
-    --data_file_md5sum \$data_file_md5sum \
-    --is_harmonised True \
-    --is_sorted True \
-    --genome_assembly GRCh38 \
-    --coordinate_system 1-based \
-    --date_metadata_last_modified \$date_metadata_last_modified \
-    --harmonisation_reference \$harmonisation_reference \
+    cat $qc_result | bgzip -c > ${GCST}.h.tsv.gz
+    tabix -c N -S 1 -f -s \$chr -b \$pos -e \$pos ${GCST}.h.tsv.gz
     """
 }

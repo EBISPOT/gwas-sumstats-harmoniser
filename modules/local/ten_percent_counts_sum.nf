@@ -17,7 +17,7 @@ process ten_percent_counts_sum {
     shell:
     """
     sum_strand_counts_10percent_nf.py \
-    -i ${launchDir}/$GCST/ten_sc \
+    -i ${launchDir}/$GCST/2_ten_sc \
     -o ten_percent_total_strand_count.tsv \
     -t ${params.threshold} 
 
