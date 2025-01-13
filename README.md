@@ -137,6 +137,4 @@ More information about the harmonisation process refers to [GWAS catalog documen
 * If you encounter any issues while running the pipeline, feel free to join the discussion in the [gwas-sumstats-harmoniser Discussions](https://github.com/EBISPOT/gwas-sumstats-harmoniser/discussions)!
 
 # 6. Citation:
-If you use the NHGRI-EBI GWAS Catalog tool in your research, please use the following citation:
-
->Maria Cerezo, Elliot Sollis, Yue Ji, Elizabeth Lewis, Ala Abid, Karatuğ Ozan Bircan, Peggy Hall, James Hayhurst, Sajo John, Abayomi Mosaku, Santhi Ramachandran, Amy Foreman, Arwa Ibrahim, James McLaughlin, Zoë Pendlington, Ray Stefancsik, Samuel A Lambert, Aoife McMahon, Joannella Morales, Thomas Keane, Michael Inouye, Helen Parkinson, Laura W Harris, The NHGRI-EBI GWAS Catalog: standards for reusability, sustainability and diversity, Nucleic Acids Research, 2024;, gkae1070, https://doi.org/10.1093/nar/gkae1070
+If you use the NHGRI-EBI GWAS Catalog tool in your research,  please refer to the "[How to Cite the NHGRI-EBI GWAS Catalog, Data, or Diagrams](https://www.ebi.ac.uk/gwas/docs/about#:~:text=How%20to%20cite%20the%20NHGRI%2DEBI%20GWAS%20Catalog%2C%20data%20therein%20or%20diagram%3A)" section on our website for proper citation guidelines.
