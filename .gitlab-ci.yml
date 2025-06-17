@@ -20,7 +20,7 @@ build:
    - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt docker.io
   # Conditionally use build cache from 'latest'
    - |
-      if [[ "$CI_COMMIT_BRANCH" != "PRE_GWAS-SSF" ]]; then
+      if [ "$CI_COMMIT_BRANCH" != "PRE_GWAS-SSF" ]; then
         echo "Using build cache from :latest"
         docker pull $CI_REGISTRY_IMAGE:latest || true
         CACHE_FROM="--cache-from $CI_REGISTRY_IMAGE:latest"
@@ -44,7 +44,6 @@ build_release:
    - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt
    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
    - |
-      TAG_SOURCE_BRANCH=$(git for-each-ref --format='%(refname:short)' refs/remotes/origin/* | grep PRE_GWAS-SSF || true)
       if git log -1 --pretty=%D | grep -qi "PRE_GWAS-SSF"; then
         echo "Skipping :latest tag for internal release from PRE_GWAS-SSF"
       else
