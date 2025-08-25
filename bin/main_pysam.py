@@ -6,241 +6,143 @@
 #
 # Harmonise GWAS summary statistics against a reference VCF
 
-#######YUE################
-import pysam
-#######YUE################
 import sys
 import gzip
 import argparse
 from collections import OrderedDict, Counter
+from multiprocessing import Pool, Manager, cpu_count
+from cyvcf2 import VCF
+from itertools import islice
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
+import duckdb
+
+from gwas_sumstats_tools.interfaces.data_table import SumStatsTable
 from lib.SumStatRecord import SumStatRecord
 from lib.VCFRecord import VCFRecord
-from gwas_sumstats_tools.interfaces.data_table import SumStatsTable
+from lib.Allele_utils import (
+    is_palindromic, compatible_alleles_forward_strand, 
+    compatible_alleles_reverse_strand, af_to_maf, afs_concordant
+)
+from lib.VCF_utils import (
+    extract_matching_record_from_vcf_records,
+    get_vcf_records_0base, get_vcf_records
+)
+from lib.File_utils import (write_line_harmonise_output,
+    convert_arg_separator, cpu_by_chromosome, get_code_table,
+    init_duckdb_table, chunked_iterable
+)
+
+# ===== Globals for workers =====
+args = None
+tbx = None
+header_order = None
+
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(1),
+       retry=retry_if_exception_type(duckdb.IOException), reraise=True)
+def safe_executemany(con, sql, batch):
+    con.executemany(sql, batch)
+
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(1),
+       retry=retry_if_exception_type(duckdb.IOException), reraise=True)
+def safe_commit(con):
+    con.execute("COMMIT")
+
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(1),
+       retry=retry_if_exception_type(duckdb.IOException), reraise=True)
+def safe_copy(con, table_name, out_path, delimiter, compressed):
+    copy_opts = "FORMAT CSV, HEADER, DELIMITER ?"
+    if compressed:
+        copy_opts += ", COMPRESSION 'gzip'"
+    con.execute(f'COPY {table_name} TO ? ({copy_opts})', [out_path, delimiter])
 
 def main():
-    """ Implements main logic.
-    """
-
+    # Prepare data 
     # Get args
-    global args
+    global args, header_order
     args = parse_args()
-    # Intitate handles and counters
-    header_written = False
     strand_counter = Counter()
     code_counter = Counter()
-   
-    if args.hm_sumstats:
-        out_handle = open_gzip(args.hm_sumstats, "wb")
-        out_header = SumStatsTable(sumstats_file=args.sumstats)._set_header_order()
-        tag_neg_log_10_p_value=False
-        if "neg_log_10_p_value" in out_header:
-            out_header.remove("neg_log_10_p_value")
-            tag_neg_log_10_p_value=True
-    
-    #######YUE################
-    tbx=pysam.TabixFile(args.vcf)
-    #######YUE################
 
-    
-    
-    # Process each row in summary statistics
-    for counter, ss_rec in enumerate(yield_sum_stat_records(args.sumstats,
-                                                            args.in_sep)):
-        # If set to only process 1 chrom, skip none matching chroms
-        if args.only_chrom and not args.only_chrom == ss_rec.chrom:
-            continue
+    procs = cpu_by_chromosome(args.chrom)
 
-        # Validate summary stat record
-        ret_code = ss_rec.validate_ssrec()
-        if ret_code:
-            ss_rec.hm_code = ret_code
-            strand_counter['Invalid variant for harmonisation'] += 1
-
-        # # DEBUG print progress
-        # if counter % 1000 == 0:
-        #     print(counter + 1)
-
-        #
-        # Load and filter VCF records ------------------------------------------
-        #
-
-        # Skip rows that have code 14 (fail validation)
-        if not ss_rec.hm_code:
-            # Get VCF reference variants for this recordls
-            coordinate=args.coordinate
-            if int(coordinate[0])==0 and ss_rec.lifmethod=="lo":
-                if len(str(ss_rec.effect_al))+len(str(ss_rec.other_al))>2: 
-                    vcf_recs =get_vcf_records_0base(
-                        tbx,
-                        ss_rec.chrom,
-                        ss_rec.pos)
-                else:
-                    vcf_recs = get_vcf_records(
-                    tbx,
-                    ss_rec.chrom,
-                    ss_rec.pos)
-            else:
-                vcf_recs = get_vcf_records(
-                    tbx,
-                    ss_rec.chrom,
-                    ss_rec.pos)
-            # Extract the VCF record that matches the summary stat record
-            vcf_rec, ret_code = exract_matching_record_from_vcf_records(
-                ss_rec, vcf_recs)
-
-            # Set return code when vcf_rec was not found
-            if ret_code:
-                ss_rec.hm_code = ret_code
-
-            # If vcf record was found, extract some required values
-            if vcf_rec:
-                # Get alt allele
-                vcf_alt = vcf_rec.alt_als[0]
-                # Set variant information from VCF file
-                ss_rec.hm_rsid = vcf_rec.id
-                ss_rec.hm_chrom = vcf_rec.chrom
-                ss_rec.hm_pos = vcf_rec.pos
-                ss_rec.hm_other_al = vcf_rec.ref_al
-                ss_rec.hm_effect_al = vcf_alt
-
-        else:
-            vcf_rec = None
-
-        #
-        # Harmonise variants ---------------------------------------------------
-        #
-
-        # Skip if harmonisation code exists (no VCF record exists or code 14)
-        if ss_rec.hm_code:
-            strand_counter['No VCF record found'] += 1
-
-        # Harmonise palindromic alleles
-        elif is_palindromic(ss_rec.other_al, ss_rec.effect_al):
-
-            strand_counter['Palindromic variant'] += 1
-            if args.hm_sumstats:
-                ss_rec = harmonise_palindromic(ss_rec, vcf_rec)
-
-        # Harmonise opposite strand alleles
-        elif compatible_alleles_reverse_strand(ss_rec.other_al,
-                                               ss_rec.effect_al,
-                                               vcf_rec.ref_al,
-                                               vcf_alt):
-
-            strand_counter['Reverse strand variant'] += 1
-            if args.hm_sumstats:
-                ss_rec = harmonise_reverse_strand(ss_rec, vcf_rec)
-
-        # Harmonise same forward alleles
-        elif compatible_alleles_forward_strand(ss_rec.other_al,
-                                               ss_rec.effect_al,
-                                               vcf_rec.ref_al,
-                                               vcf_alt):
-
-            strand_counter['Forward strand variant'] += 1
-            if args.hm_sumstats:
-                ss_rec = harmonise_forward_strand(ss_rec, vcf_rec)
-
-        # Should never reach this 'else' statement
-        else:
-            sys.exit("Error: Alleles were not palindromic, opposite strand, or "
-                     "same strand!")
-
-        # Add harmonisation code to counter
-        code_counter[ss_rec.hm_code] += 1
-
-        #
-        # Write ssrec to output ------------------------------------------------
-        #
-        if args.hm_sumstats:
-            out_raw = OrderedDict()
-            out_raw["chromosome"] = ss_rec.hm_chrom if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["base_pair_location"] = ss_rec.hm_pos if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["effect_allele"] = ss_rec.hm_effect_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["other_allele"] = ss_rec.hm_other_al.str() if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["beta"] = ss_rec.beta if ss_rec.beta is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["odds_ratio"] = ss_rec.oddsr if ss_rec.oddsr is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["z_score"] = ss_rec.zscore if ss_rec.zscore is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["ci_lower"] = ss_rec.oddsr_lower if ss_rec.oddsr_lower is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["ci_upper"] = ss_rec.oddsr_upper if ss_rec.oddsr_upper is not None and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["effect_allele_frequency"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
-            # Process the neg_log_10_p_value
-            if tag_neg_log_10_p_value == True:
-                out_raw["p_value"] = 10**(float(ss_rec.data["neg_log_10_p_value"])*(-1)) if ss_rec.data["neg_log_10_p_value"] is not None else args.na_rep_out
-            else:
-                out_raw["p_value"]=ss_rec.data["p_value"] if ss_rec.data["p_value"] is not None else args.na_rep_out
-            out_raw["hm_code"] = ss_rec.hm_code
-            out_raw["hm_coordinate_conversion"] = ss_rec.data["hm_coordinate_conversion"]
-            out_raw["variant_id"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            out_raw["rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
-            try:
-                out_raw["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
-            except:
-                out_raw["standard_error"]=args.na_rep_out
-            # Add other data from summary stat file
-            outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","rsid","standard_error","ci_upper","ci_lower","hm_coordinate_conversion","z_score"]
-            for key in ss_rec.data:
-                if key not in outed:
-                    value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
-                    out_raw[key] = str(value)
-
-            generated_new_header=["hm_code","variant_id","rsid"]
-            add_header=[x for x in generated_new_header if x not in out_header]
-            new_order=out_header+add_header
-            out_row = OrderedDict((k, out_raw[k]) for k in new_order)
-
-            # Write header
-            if not header_written:
-                outline = args.out_sep.join([str(x) for x in out_row.keys()]) + "\n"
-                out_handle.write(outline.encode("utf-8"))
-                header_written = True
-
-            # Write row
-            outline = args.out_sep.join([str(x) for x in out_row.values()]) + "\n"
-            out_handle.write(outline.encode("utf-8"))
-            
-
-    # Close output handle
-    if args.hm_sumstats:
-        out_handle.close()
-
-    # Write strand_count stats to file
+    # === Strand counts path ===
     if args.strand_counts:
+        with Pool(processes=procs,
+                  initializer=_init_worker,
+                  initargs=(args.vcf, args, None),
+                  maxtasksperchild=200) as pool:
+            for result in pool.imap_unordered(strand_count_worker,
+                                              chunked_iterable(yield_sum_stat_records(args.sumstats, args.in_sep), 5000),
+                                              chunksize=4):
+                strand_counter.update(result)
+
+        # write to file
         with open_gzip(args.strand_counts, rw='wb') as out_h:
             for key in sorted(strand_counter.keys()):
-                out_h.write('{0}\t{1}\n'.format(key, strand_counter[key]).encode('utf-8'))
+                out_h.write(f"{key}\t{strand_counter[key]}\n".encode("utf-8"))
+        return
+    
+    if args.hm_sumstats:
+        # Build header order ONCE
+        out_header = SumStatsTable(sumstats_file=args.sumstats)._set_header_order()
+        
+        # remove neg_log_10_p_value if you want p_value output
+        tag_neg = False
+        if "neg_log_10_p_value" in out_header:
+            out_header.remove("neg_log_10_p_value")
+            tag_neg = True
 
-    # Write outcome code stats to file
-    code_table = {
-        1:  'Palindromic; Infer strand; Forward strand; Correct orientation; Already harmonised',
-        2:  'Palindromic; Infer strand; Forward strand; Flipped orientation; Requires harmonisation',
-        3:  'Palindromic; Infer strand; Reverse strand; Correct orientation; Already harmonised',
-        4:  'Palindromic; Infer strand; Reverse strand; Flipped orientation; Requires harmonisation',
-        5:  'Palindromic; Assume forward strand; Correct orientation; Already harmonised',
-        6:  'Palindromic; Assume forward strand; Flipped orientation; Requires harmonisation',
-        7:  'Palindromic; Assume reverse strand; Correct orientation; Already harmonised',
-        8:  'Palindromic; Assume reverse strand; Flipped orientation; Requires harmonisation',
-        9:  'Palindromic; Drop palindromic; Will not harmonise',
-        10: 'Forward strand; Correct orientation; Already harmonised',
-        11: 'Forward strand; Flipped orientation; Requires harmonisation',
-        12: 'Reverse strand; Correct orientation; Already harmonised',
-        13: 'Reverse strand; Flipped orientation; Requires harmonisation',
-        14: 'Required fields are not known; Cannot harmonise',
-        15: 'No matching variants in reference VCF; Cannot harmonise',
-        16: 'Multiple matching variants in reference VCF (ambiguous); Cannot harmonise',
-        17: 'Palindromic; Infer strand; EAF or reference VCF AF not known; Cannot harmonise',
-        18: 'Palindromic; Infer strand; EAF < --maf_palin_threshold; Will not harmonise' }
-    if args.hm_statfile:
-        with open_gzip(args.hm_statfile, 'wb') as out_h:
-            out_h.write('hm_code\tcount\tdescription\n'.encode('utf-8'))
-            for key in sorted(code_counter.keys()):
-                out_h.write('{0}\t{1}\t{2}\n'.format(key,
-                                                     code_counter[key],
-                                                     code_table[key]).encode('utf-8') )
-   
-    return 0
+        # add generated columns if missing
+        for col in ["hm_code", "variant_id", "rsid"]:
+            if col not in out_header:
+                out_header.append(col)
+        
+        # write header
+        # ---- Step 2: "write the header" by creating the table ----
+        # Use :memory: to keep it in RAM. Change to "hm_stage.duckdb" to persist as a DB file.
+        # Need to make sure the memory is 5x the size of the input file, otherwise, it needs tmp file
+        args._tag_neg_cached = tag_neg
+        header_order = out_header
 
+        con, insert_sql = init_duckdb_table(header_order, table_name="hm_stage", database=":memory:")
+        con.execute("PRAGMA disable_progress_bar")
+        con.execute("BEGIN")
 
+        BATCH_SIZE = 20000
+        batch = []
+
+        with Pool(processes=procs,
+                  initializer=_init_worker,
+                  initargs=(args.vcf, args, header_order),
+                  maxtasksperchild=200) as pool:
+            for rows, local_code_counter in pool.imap_unordered(
+                harmonise_worker,
+                chunked_iterable(yield_sum_stat_records(args.sumstats, args.in_sep), 5000),
+                chunksize=4
+            ):
+                code_counter.update(local_code_counter)
+                batch.extend(rows)
+                if len(batch) >= BATCH_SIZE:
+                    safe_executemany(con, insert_sql, batch) 
+                    batch.clear()
+
+        if batch:
+            safe_executemany(con, insert_sql, batch)
+        safe_commit(con)
+
+        delimiter = args.out_sep if args.out_sep is not None else '\t'
+        compressed = str(args.hm_sumstats).endswith(".gz")
+        safe_commit(con)
+        safe_copy(con, "hm_stage", args.hm_sumstats, delimiter, compressed)
+        con.close()
+
+        if args.hm_statfile:
+            code_table = get_code_table()
+            with open_gzip(args.hm_statfile, 'wb') as out_h:
+                out_h.write('hm_code\tcount\tdescription\n'.encode('utf-8'))
+                for key in sorted(code_counter.keys()):
+                    desc = code_table.get(key, "Unknown code")
+                    out_h.write(f"{key}\t{code_counter[key]}\t{desc}\n".encode('utf-8'))
 def parse_args():
     """ Parse command line args using argparse.
     """
@@ -269,6 +171,7 @@ def parse_args():
                             help=('coordinate system of the input file:\n'
                                   '(a) 1_base '
                                   '(b) 0_base '),
+                            choices=['1-based', '0-based'],
                             nargs='?',
                             type=str,
                             default="1-based")
@@ -322,6 +225,8 @@ def parse_args():
     other_group = parser.add_argument_group(title='Other args')
     other_group.add_argument('--only_chrom', metavar="<str>",
                         help=('Only process this chromosome'), type=str)
+    other_group.add_argument('--chrom', metavar="<str>",
+                        help=('The chromosome processed in the step'), type=str)
     other_group.add_argument('--in_sep', metavar="<str>",
                         help=('Input file column separator [tab|space|comma|other] (default: tab)'),
                         type=str, default='tab')
@@ -380,63 +285,175 @@ def parse_args():
 
     return args
 
-def convert_arg_separator(s):
-    ''' Converts [tab|space|comma|other] to a variable
-    '''
-    if s == 'tab':
-        return '\t'
-    elif s == 'space':
-        return ' '
-    elif s == 'comma':
-        return ','
+def _init_worker(vcf_path, _args, _header_order):
+    global tbx, args, header_order
+    tbx = VCF(vcf_path)          # open per process (fast, thread-safe in process)
+    args = _args                 # pass parsed args (must be picklable)
+    header_order = _header_order  # pass header order (must be picklable)
+
+def extract_vcf_record(ss_rec, coordinate):
+    if int(coordinate[0])==0 and ss_rec.lifmethod=="lo":
+        if len(str(ss_rec.effect_al))+len(str(ss_rec.other_al))>2: 
+            vcf_recs =get_vcf_records_0base(
+                tbx,
+                ss_rec.chrom,
+                ss_rec.pos)
+        else:
+            vcf_recs = get_vcf_records(
+                tbx,
+                ss_rec.chrom,
+                ss_rec.pos)
     else:
-        return s
+        vcf_recs = get_vcf_records(
+            tbx,
+            ss_rec.chrom,
+            ss_rec.pos)
+    
+    # Extract the VCF record that matches the summary stat record
+    vcf_rec, ret_code = extract_matching_record_from_vcf_records(
+                ss_rec, vcf_recs)
+    
+    return vcf_rec, ret_code
 
-def exract_matching_record_from_vcf_records(ss_rec, vcf_recs):
-    ''' Extracts the vcf record that matches the summary stat record.
-    Args:
-        ss_rec (SumStatRecord): object containing summary statistic record
-        vcf_recs (list of VCFRecords): list containing vcf records
-    Returns:
-        tuple(
-            a single VCFRecord or None,
-            output code
-            )
-    '''
+def strand_count_process(ss_rec, strand_counter):
+    # If set to only process 1 chrom, skip none matching chroms
+    if args.only_chrom and not args.only_chrom == ss_rec.chrom:
+        return strand_counter
 
-    # Discard if there are no records
-    if len(vcf_recs) == 0:
-        return (None, 15)
+    # Validate summary stat record
+    ret_code = ss_rec.validate_ssrec()
+    if ret_code:
+        ss_rec.hm_code = ret_code
+        strand_counter['Invalid variant for harmonisation'] += 1
 
-    # Remove alt alleles that don't match sum stat alleles
-    for i in range(len(vcf_recs)):
-        non_matching_alts = find_non_matching_alleles(ss_rec, vcf_recs[i])
-        for alt in non_matching_alts:
-            vcf_recs[i] = vcf_recs[i].remove_alt_al(alt)
+    # Skip rows that have code 14 (fail validation)
+    if not ss_rec.hm_code:
+        # Get VCF reference variants for this recordls
+        vcf_rec, ret_code = extract_vcf_record(ss_rec, args.coordinate)
 
-    # Remove records that don't have any matching alt alleles
-    vcf_recs = [vcf_rec for vcf_rec in vcf_recs if vcf_rec.n_alts() > 0]
+        # Set return code when vcf_rec was not found
+        if ret_code:
+            ss_rec.hm_code = ret_code
 
-    # If there are multiple matching records, resolve using rsid
-    if len(vcf_recs) > 1:
-        vcf_recs = [vcf_rec for vcf_rec in vcf_recs if vcf_rec.id == ss_rec.rsid]
+        # If vcf record was found, extract some required values
+        if vcf_rec:
+            # Get alt allele
+            vcf_alt = vcf_rec.alt_als[0]
 
-    # Discard ss_rec if there are no valid vcf_recs
-    if len(vcf_recs) == 0:
-        return (None, 15)
+    else:
+        vcf_rec = None
 
-    # Discard ss_rec if there are multiple records
-    if len(vcf_recs) > 1:
-        return (None, 16)
+   
+    # Skip if harmonisation code exists (no VCF record exists or code 14)
+    if ss_rec.hm_code:
+        strand_counter['No VCF record found'] += 1
 
-    # Given that there is now 1 record, use that
-    vcf_rec = vcf_recs[0]
+    # palindromic alleles
+    elif is_palindromic(ss_rec.other_al, ss_rec.effect_al):
+        strand_counter['Palindromic variant'] += 1
 
-    # Discard ssrec if there are multiple matching alleles
-    if vcf_rec.n_alts() > 1:
-        return (None, 16)
+        # Harmonise opposite strand alleles
+    elif compatible_alleles_reverse_strand(ss_rec.other_al,
+                                               ss_rec.effect_al,
+                                               vcf_rec.ref_al,
+                                               vcf_alt):
 
-    return (vcf_rec, None)
+        strand_counter['Reverse strand variant'] += 1
+
+        # Harmonise same forward alleles
+    elif compatible_alleles_forward_strand(ss_rec.other_al,
+                                               ss_rec.effect_al,
+                                               vcf_rec.ref_al,
+                                               vcf_alt):
+
+        strand_counter['Forward strand variant'] += 1
+
+        # Should never reach this 'else' statement
+    else:
+            sys.exit("Error: Alleles were not palindromic, opposite strand, or "
+                     "same strand!")
+    
+    return strand_counter
+
+def harmonise_process(ss_rec):
+    # If set to only process 1 chrom, skip none matching chroms
+    if args.only_chrom and not args.only_chrom == ss_rec.chrom:
+        vcf_rec = None
+        return ss_rec, vcf_rec
+
+    # Validate summary stat record
+    ret_code = ss_rec.validate_ssrec()
+    if ret_code:
+        ss_rec.hm_code = ret_code
+
+    vcf_rec = None
+    # Skip rows that have code 14 (fail validation)
+    if not ss_rec.hm_code:
+        # Extract the VCF record that matches the summary stat record
+        vcf_rec, ret_code = extract_vcf_record(ss_rec, args.coordinate)
+
+        # Set return code when vcf_rec was not found
+        if ret_code:
+            ss_rec.hm_code = ret_code
+
+        # If vcf record was found, extract some required values
+        if vcf_rec:
+            # Get alt allele
+            vcf_alt = vcf_rec.alt_als[0]
+            # Set variant information from VCF file
+            ss_rec.hm_rsid = vcf_rec.id
+            ss_rec.hm_chrom = vcf_rec.chrom
+            ss_rec.hm_pos = vcf_rec.pos
+            ss_rec.hm_other_al = vcf_rec.ref_al
+            ss_rec.hm_effect_al = vcf_alt
+
+    # Skip if harmonisation code exists (no VCF record exists or code 14)
+    if ss_rec.hm_code:
+        ss_rec.is_harmonised = False
+        return ss_rec, vcf_rec
+
+    # Harmonise palindromic alleles
+    elif is_palindromic(ss_rec.other_al, ss_rec.effect_al):
+        ss_rec = harmonise_palindromic(ss_rec, vcf_rec)
+
+    # Harmonise opposite strand alleles
+    elif compatible_alleles_reverse_strand(ss_rec.other_al,
+                                               ss_rec.effect_al,
+                                               vcf_rec.ref_al,
+                                               vcf_alt):
+        ss_rec = harmonise_reverse_strand(ss_rec, vcf_rec)
+
+    # Harmonise same forward alleles
+    elif compatible_alleles_forward_strand(ss_rec.other_al,
+                                               ss_rec.effect_al,
+                                               vcf_rec.ref_al,
+                                               vcf_alt):
+        
+        ss_rec = harmonise_forward_strand(ss_rec, vcf_rec)
+
+    # Should never reach this 'else' statement
+    else:
+        sys.exit("Error: Alleles were not palindromic, opposite strand, or "
+                     "same strand!")
+    return ss_rec, vcf_rec
+
+def harmonise_worker(chunk):
+    local_rows = []
+    local_code_counter = Counter()
+    for ss_rec in chunk:
+        ss_rec, vcf_rec = harmonise_process(ss_rec)
+        if ss_rec and ss_rec.hm_code is not None:
+            local_code_counter[ss_rec.hm_code] += 1
+        out_line_dict = write_line_harmonise_output(ss_rec, vcf_rec, args._tag_neg_cached, header_order)
+        row = [out_line_dict.get(col) for col in header_order]
+        local_rows.append(row)
+    return local_rows, local_code_counter
+
+def strand_count_worker(chunk):
+    local_counter = Counter()
+    for ss_rec in chunk:
+        local_counter = strand_count_process(ss_rec, local_counter)
+    return local_counter
 
 def harmonise_palindromic(ss_rec, vcf_rec):
     ''' Harmonises palindromic variant
@@ -578,127 +595,6 @@ def harmonise_forward_strand(ss_rec, vcf_rec):
         ss_rec.hm_code = 10
         return ss_rec
 
-def afs_concordant(af1, af2):
-    """ Checks whether the allele frequencies of two palindromic variants are
-        concordant. Concordant if both are either >0.5 or both are <0.5.
-    Args:
-        af1, af2 (float): Allele frequencies from two datasets
-    Returns:
-        Bool: True if concordant
-    """
-    assert isinstance(af1, float) and isinstance(af2, float)
-    if (af1 >= 0.5 and af2 >= 0.5) or (af1 < 0.5 and af2 < 0.5):
-        return True
-    else:
-        return False
-
-def is_palindromic(A1, A2):
-    """ Checks if two alleles are palindromic.
-    Args:
-        A1, A2 (Seq): Alleles (i.e. other and effect alleles)
-    """
-    return A1.str() == A2.revcomp().str()
-
-def find_non_matching_alleles(sumstat_rec, vcf_rec):
-    """ For each vcfrec ref-alt pair check whether it matches either the
-        forward or reverse complement of the sumstat alleles.
-    Args:
-        sumstat_rec (SumStatRecord)
-        vcf_rec (VCFRecord)
-    Returns:
-        list of alt alleles to remove
-    """
-    alts_to_remove = []
-    for ref, alt in vcf_rec.yeild_alleles():
-        if not compatible_alleles_either_strand(sumstat_rec.other_al,
-                                                sumstat_rec.effect_al,
-                                                ref,
-                                                alt):
-            alts_to_remove.append(alt)
-    return alts_to_remove
-
-def compatible_alleles_either_strand(A1, A2, B1, B2):
-    """ Checks whether alleles are compatible, either on the forward or reverse
-        strand
-    Args:
-        A1, A2 (Seq): Alleles from one source
-        B1, B2 (Seq): Alleles from another source
-    Returns:
-        Boolean
-    """
-    return (compatible_alleles_forward_strand(A1, A2, B1, B2) or
-            compatible_alleles_reverse_strand(A1, A2, B1, B2))
-
-def compatible_alleles_forward_strand(A1, A2, B1, B2):
-    """ Checks whether alleles are compatible on the forward strand
-    Args:
-        A1, A2 (Seq): Alleles from one source
-        B1, B2 (Seq): Alleles from another source
-    Returns:
-        Boolean
-    """
-    return set([A1.str(), A2.str()]) == set([B1.str(), B2.str()])
-
-def compatible_alleles_reverse_strand(A1, A2, B1, B2):
-    """ Checks whether alleles are compatible on the forward strand
-    Args:
-        A1, A2 (Seq): Alleles from one source
-        B1, B2 (Seq): Alleles from another source
-    Returns:
-        Boolean
-    """
-    return set([A1.str(), A2.str()]) == set([B1.revcomp().str(), B2.revcomp().str()])
-
-def af_to_maf(af):
-    """ Converts an allele frequency to a minor allele frequency
-    Args:
-        af (float or str)
-    Returns:
-        float
-    """
-    # Sometimes AF == ".", in these cases, set to 0
-    try:
-        af = float(af)
-    except ValueError:
-        af = 0.0
-
-    if af <= 0.5:
-        return af
-    else:
-        return 1 - af
-
-def get_vcf_records(tbx, chrom, pos):
-    """ Uses tabix to query VCF file. Parses info from record.
-    Args:
-        in_vcf (str): vcf file
-        chrom (str): chromosome
-        pos (int): base pair position
-    Returns:
-        list of VCFRecords
-    """
-    #######YUE################
-    result=tbx.fetch(chrom, int(pos)-1, int(pos))
-    # each records returned by fetch is str, it needs to be change into list for VCF records to process
-    response=[list(n.split("\t")) for n in result]
-    #######YUE################
-    return [VCFRecord(line) for line in response]
-
-def get_vcf_records_0base(tbx, chrom, pos):
-    """ Uses tabix to query VCF file. Parses info from record.
-    Args:
-        in_vcf (str): vcf file
-        chrom (str): chromosome
-        pos (int): base pair position
-    Returns:
-        list of VCFRecords
-    """
-    #######YUE################
-    result=tbx.fetch(chrom, int(pos)-2, int(pos))
-    # each records returned by fetch is str, it needs to be change into list for VCF records to process
-    response=[list(n.split("\t")) for n in result]
-    #######YUE################
-    return [VCFRecord(line) for line in response]
-
 def yield_sum_stat_records(inf, sep):
     """ Load lines from summary stat file and convert to SumStatRecord class.
     Args:
@@ -730,6 +626,16 @@ def yield_sum_stat_records(inf, sep):
                                   row[args.hm_coordinate_conversion])
         yield ss_record
 
+def str2bool(v):
+    """ Parses argpare boolean input
+    """
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 def parse_sum_stats(inf, sep):
     """ Yields a line at a time from the summary statistics file.
     Args:
@@ -756,24 +662,6 @@ def parse_sum_stats(inf, sep):
             # Check we have the correct number of elements
             assert len(values) == len(header), 'Error: column length ({0}) does not match header length ({1})'.format(len(values), len(header))
             yield OrderedDict(zip(header, values))
-
-def open_gzip(inf, rw="rb"):
-    """ Returns handle using gzip if gz file extension.
-    """
-    if inf.split(".")[-1] == "gz":
-        return gzip.open(inf, rw)
-    else:
-        return open(inf, rw)
-
-def str2bool(v):
-    """ Parses argpare boolean input
-    """
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 if __name__ == '__main__':
 
