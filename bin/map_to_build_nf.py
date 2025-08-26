@@ -91,13 +91,16 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
     print("ssdf with rsid empty?: {}".format(ssdf_with_rsid.empty))
 
     # if there are records with rsids
+    # Initialize an empty DataFrame for merged results 
+    merged_vcf = pd.DataFrame()
     if not ssdf_with_rsid.empty:
         # registers a data frame as a virtual table (view) in a DuckDB connection
         con.register("ssdf_rsid", ssdf_with_rsid)
 
         # Read the reference VCF files and create a union of them
-        vcf_union = ", ".join([f"read_parquet('{f}')" for f in vcfs])
-        vcf_view = f"(SELECT * FROM {vcf_union})"
+        files_sql = "[" + ", ".join(f"'{f}'" for f in vcfs) + "]"
+        vcf_view = f"(SELECT * FROM read_parquet({files_sql}, union_by_name=true))"
+
 
          # Step 3: Join once across all VCFs
         merged_vcf = con.execute(f"""
@@ -128,51 +131,47 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
                                      """).df()
         con.close()
 
-        print("finished rsid mapping")
-        # liftover the snps without rsids and those with unrecognised rsids 
-        print("liftover remaining variants")
-        ssdf = pd.concat([ssdf_with_rsid, ssdf_without_rsid])
-        ssdf[HM_CC_DSET] = "lo"
+    print("finished rsid mapping")
+    # liftover the snps without rsids and those with unrecognised rsids 
+    print("liftover remaining variants")
+    ssdf = pd.concat([ssdf_with_rsid, ssdf_without_rsid])
+    ssdf[HM_CC_DSET] = "lo"
 
-        build_map = None
-        if from_build != to_build:
-            build_map = lft.LiftOver(lft.ucsc_release.get(from_build), lft.ucsc_release.get(to_build))
+    build_map = None
+    if from_build != to_build:
+        build_map = lft.LiftOver(lft.ucsc_release.get(from_build), lft.ucsc_release.get(to_build))
         
-        @lru_cache(maxsize=100000)
-        def cached_liftover(chrom, bp):
-            try:
-                return lft.map_bp_to_build_via_liftover(chromosome=chrom, bp=bp, build_map=build_map, coordinate=coordinate[0])
-            except:
-                return None
-
-        # liftover the unmapped variants by chr and position
-        if build_map:
-            ssdf[BP_DSET] = [
-                cached_liftover(str(chrom), str(bp)) if pd.notnull(chrom) and pd.notnull(bp) else None
-                for chrom, bp in zip(ssdf[CHR_DSET], ssdf[BP_DSET])
-                ]
-        print("liftover complete")
-
-        # merge "rs" and "lo" result to write the output
-        combined_df = pd.concat([merged_vcf, ssdf], ignore_index=True)
-        combined_df[CHR_DSET] = combined_df["CHR"].astype("str").str.replace("\..*$","",regex=True)
-        combined_df[BP_DSET] = combined_df["POS"].astype("str").str.replace("\..*$","",regex=True)
-
-        # 1. Write variants missing CHR or BP to "unmapped"
-        unmapped_df = combined_df[combined_df[CHR_DSET].isnull() | combined_df[BP_DSET].isnull()].copy()
-        if not unmapped_df.empty:
-            unmapped_df[HM_CC_DSET] = "NA"
-            unmapped_outfile = os.path.join("unmapped")
-            unmapped_df.to_csv(unmapped_outfile, sep="\t", index=False, na_rep="NA")
-        
-        # 2. Write valid variants per chromosome
-        valid_df = combined_df.dropna(subset=[CHR_DSET, BP_DSET])
-        chrom_set = set(normalized_chroms)
-        for chrom, group_df in valid_df.groupby(CHR_DSET, sort=False):
-            if chrom in chrom_set:
-                chrom_str = str(chrom).split(".")[0]
-                out_path = os.path.join("{}.merged".format(chrom))
-                group_df.to_csv(out_path, sep="\t", index=False, na_rep="NA", mode='a')
+    @lru_cache(maxsize=100000)
+    def cached_liftover(chrom, bp):
+        try:
+            return lft.map_bp_to_build_via_liftover(chromosome=chrom, bp=bp, build_map=build_map, coordinate=coordinate[0])
+        except:
+            return None
+    # liftover the unmapped variants by chr and position
+    if build_map:
+        ssdf[BP_DSET] = [
+            cached_liftover(str(chrom), str(bp)) if pd.notnull(chrom) and pd.notnull(bp) else None
+            for chrom, bp in zip(ssdf[CHR_DSET], ssdf[BP_DSET])
+            ]
+    print("liftover complete")
+    # merge "rs" and "lo" result to write the output
+    combined_df = pd.concat([merged_vcf, ssdf], ignore_index=True)
+    combined_df[CHR_DSET] = combined_df[CHR_DSET].astype("str").str.replace("\..*$","",regex=True)
+    combined_df[BP_DSET] = combined_df[BP_DSET].astype("str").str.replace("\..*$","",regex=True)
+    
+    # 1. Write variants missing CHR or BP to "unmapped"
+    unmapped_df = combined_df[combined_df[CHR_DSET].isnull() | combined_df[BP_DSET].isnull()].copy()
+    unmapped_outfile = os.path.join("unmapped")
+    unmapped_df.to_csv(unmapped_outfile, sep="\t", index=False, na_rep="NA")
+    
+    # 2. Write valid variants per chromosome
+    valid_df = combined_df.dropna(subset=[CHR_DSET, BP_DSET])
+    chrom_set = set(normalized_chroms)
+    for chrom, group_df in valid_df.groupby(CHR_DSET, sort=False):
+        if chrom in chrom_set:
+            chrom_str = str(chrom).split(".")[0]
+            out_path = os.path.join("{}.merged".format(chrom_str))
+            group_df.to_csv(out_path, sep="\t", index=False, na_rep="NA", mode='a')
 
 def listify_string(string):
     """
