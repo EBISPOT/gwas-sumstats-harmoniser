@@ -91,7 +91,7 @@ def main():
         con.execute("PRAGMA disable_progress_bar")
         con.execute("BEGIN")
 
-        BATCH_SIZE = 20000
+        BATCH_SIZE = 100000 #50k–200k
         batch = []
 
         with Pool(processes=procs,
