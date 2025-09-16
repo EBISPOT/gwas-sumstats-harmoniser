@@ -18,9 +18,17 @@ build:
   script:
    - echo "$DOCKER_HUB_PASSWORD" > dhpw.txt
    - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt docker.io
-   - docker pull $CI_REGISTRY_IMAGE:latest
+   - docker pull $CI_REGISTRY_IMAGE:latest || true
    - docker build --cache-from $CI_REGISTRY_IMAGE:latest -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+   - |
+     if [[ "$CI_COMMIT_REF_NAME" == "master" ]]; then
+        docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
+        docker push $CI_REGISTRY_IMAGE:latest
+     elif [[ "$CI_COMMIT_REF_NAME" == "dev" ]]; then
+        docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:test
+        docker push $CI_REGISTRY_IMAGE:test
+      fi
   only:
    - master
    - dev
