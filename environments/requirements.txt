@@ -35,3 +35,4 @@ urllib3==1.25.9
 wrapt==1.12.1
 zipp==3.1.0
 gwas_sumstats_tools
+duckdb==0.7.1
