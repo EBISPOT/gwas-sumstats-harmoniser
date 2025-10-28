@@ -21,6 +21,7 @@
 #
 #   ./scripts/local_smoke_test.sh PRE_GWAS-SSF docker_tag
 #       -> tests ref "PRE_GWAS-SSF" using container tag "docker_tag"
+#       -> docker_tag: "latest", "pre-gwas-ssf-test", "test"
 #
 # Notes:
 #   The argument you pass is forwarded to `nextflow run ... -r <REF>`,
@@ -134,8 +135,6 @@ echo "===================================================="
 
 NF_CMD=( nextflow -c "$TMP_CONFIG" \
     run EBISPOT/gwas-sumstats-harmoniser \
-    -r "$PIPELINE_REF" \
-    -dsl2 \
     -profile test,singularity \
     -with-trace trace.txt \
     )

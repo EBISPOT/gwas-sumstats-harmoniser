@@ -31,21 +31,11 @@ build:
         CACHE_FROM=""
       fi
 
-    # build with commit SHA tag (immutable image)
-    - docker build $CACHE_FROM -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" .
+    # build the image but tag it directly as pre-gwas-ssf-test
+    - docker build $CACHE_FROM -t "$CI_REGISTRY_IMAGE:pre-gwas-ssf-test" .
 
-    # push the SHA tag
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
-
-    # EXTRA TAG for this branch only
-    - |
-      if [ "$CI_COMMIT_BRANCH" = "PRE_GWAS-SSF" ]; then
-        echo "This is PRE_GWAS-SSF branch -> pushing pre-gwas-ssf-test tag"
-        docker tag  "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" "$CI_REGISTRY_IMAGE:pre-gwas-ssf-test"
-        docker push "$CI_REGISTRY_IMAGE:pre-gwas-ssf-test"
-      else
-        echo "Not PRE_GWAS-SSF -> skipping pre-gwas-ssf-test tag"
-      fi
+    # push ONLY the rolling tag
+    - docker push "$CI_REGISTRY_IMAGE:pre-gwas-ssf-test"
 
   only:
     - PRE_GWAS-SSF
