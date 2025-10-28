@@ -69,7 +69,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
       END AS {CHR_DSET},
       *
     EXCLUDE {CHR_DSET}
-    FROM read_csv_auto('{ss}', SAMPLE_SIZE=10000)
+    FROM read_csv_auto('{ss}', SAMPLE_SIZE=-1, nullstr=['NA', 'NaN', '', 'nan', '#NA'])
     ) mapped
     WHERE {CHR_DSET} IN ({chrom_filter})
     """
