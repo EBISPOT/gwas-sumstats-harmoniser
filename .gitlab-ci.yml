@@ -16,24 +16,39 @@ variables:
 build:
   stage: build
   script:
-   - echo "$DOCKER_HUB_PASSWORD" > dhpw.txt
-   - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt docker.io
-  # Conditionally use build cache from 'latest'
-   - |
+    # login
+    - echo "$DOCKER_HUB_PASSWORD" > dhpw.txt
+    - docker login -u "${DOCKER_HUB_USER}" --password-stdin < dhpw.txt docker.io
+
+    # cache logic
+    - |
       if [ "$CI_COMMIT_BRANCH" != "PRE_GWAS-SSF" ]; then
         echo "Using build cache from :latest"
         docker pull "$CI_REGISTRY_IMAGE:latest" || true
         CACHE_FROM="--cache-from $CI_REGISTRY_IMAGE:latest"
       else
-        echo  "Skipping :latest cache on PRE_GWAS-SSF"
+        echo "Skipping :latest cache on PRE_GWAS-SSF"
         CACHE_FROM=""
       fi
-   - docker build $CACHE_FROM -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" .
-   - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+
+    # build with commit SHA tag (immutable image)
+    - docker build $CACHE_FROM -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" .
+
+    # push the SHA tag
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+
+    # EXTRA TAG for this branch only
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "PRE_GWAS-SSF" ]; then
+        echo "This is PRE_GWAS-SSF branch -> pushing pre-gwas-ssf-test tag"
+        docker tag  "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" "$CI_REGISTRY_IMAGE:pre-gwas-ssf-test"
+        docker push "$CI_REGISTRY_IMAGE:pre-gwas-ssf-test"
+      else
+        echo "Not PRE_GWAS-SSF -> skipping pre-gwas-ssf-test tag"
+      fi
+
   only:
-   - master
-   - dev
-   - PRE_GWAS-SSF
+    - PRE_GWAS-SSF
 
 build_release:
   variables:
