@@ -13,14 +13,16 @@ RUN apt-get update \
         liblzma-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Workdir first
+WORKDIR /app
+
 # Copy requirements first to leverage Docker layer caching
-COPY requirements.txt /tmp/requirements.txt
+COPY environments/requirements.txt /app/requirements.txt
 
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r /tmp/requirements.txt
+    && pip install --no-cache-dir -r /app/requirements.txt
     # (optional) && pip check
 
 # then copy code
 COPY . /app
-WORKDIR /app
 ENV PATH="/app:${PATH}"
