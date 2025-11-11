@@ -168,6 +168,8 @@ def main():
             if tag_neg_log_10_p_value == True:
                 out_raw["p_value"] = 10**(float(ss_rec.data["neg_log_10_p_value"])*(-1)) if ss_rec.data["neg_log_10_p_value"] is not None else args.na_rep_out
             else:
+                # [AFTER - CORRECT]
+                #out_raw["p_value"]=ss_rec.data[PVAL_DSET] if ss_rec.data[PVAL_DSET] is not None else args.na_rep_out
                 out_raw["p_value"]=ss_rec.data["p_value"] if ss_rec.data["p_value"] is not None else args.na_rep_out
             out_raw["hm_code"] = ss_rec.hm_code
             out_raw["hm_coordinate_conversion"] = ss_rec.data["hm_coordinate_conversion"]
