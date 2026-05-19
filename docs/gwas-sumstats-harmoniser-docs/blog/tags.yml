@@ -1,0 +1,14 @@
+Sumstats:
+  label: Sumstata
+  permalink: /Sumstats
+  description: GWAS summary statistic data
+
+Harmonisation:
+  label: Harmonisation
+  permalink: /Harmonisation
+  description: Harmonisation
+
+GWAS Catalog:
+  label: GWASCatalog
+  permalink: /GWAS-Catalog
+  description: GWAS Catalog
