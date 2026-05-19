@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkgwas_harmoniser_documentation=self.webpackChunkgwas_harmoniser_documentation||[]).push([[804],{4801:s=>{s.exports=JSON.parse('{"tags":[{"label":"Sumstata","permalink":"/gwas-sumstats-harmoniser/blog/tags/Sumstats","description":"GWAS summary statistic data","count":1}]}')}}]);

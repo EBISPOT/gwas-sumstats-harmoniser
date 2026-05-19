@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xsl" href="atom.xsl"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://ebispot.github.io/gwas-sumstats-harmoniser/blog</id>
+    <title>gwas-sumstats-harmoniser Blog</title>
+    <updated>2024-10-18T00:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://ebispot.github.io/gwas-sumstats-harmoniser/blog"/>
+    <subtitle>gwas-sumstats-harmoniser Blog</subtitle>
+    <icon>https://ebispot.github.io/gwas-sumstats-harmoniser/img/GWAS_Catalog_banner_logo_34x40.png</icon>
+    <entry>
+        <title type="html"><![CDATA[Welcome]]></title>
+        <id>https://ebispot.github.io/gwas-sumstats-harmoniser/blog/welcome</id>
+        <link href="https://ebispot.github.io/gwas-sumstats-harmoniser/blog/welcome"/>
+        <updated>2024-10-18T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[👋 Welcome to our first release of the documentation for gwas-sumstat-harmoniser!]]></summary>
+        <content type="html"><![CDATA[<p>👋 Welcome to our first release of the documentation for <code>gwas-sumstat-harmoniser</code>!</p>
+<p>The harmonization pipeline, <code>gwas-sumstats-harmoniser</code>, was initially developed by the <a href="https://github.com/opentargets/genetics-sumstat-harmoniser" target="_blank" rel="noopener noreferrer">Open Targets team</a> to:</p>
+<ol>
+<li>Determine the orientation of variants,</li>
+<li>Resolve RSIDs from locations and alleles, and</li>
+<li>Align the variants to the reference strand</li>
+</ol>
+<p>Building on this foundation, the GWAS Catalog team developed our first pipeline for harmonizing GWAS summary statistic data, which includes mapping variants from various genome builds to GRCh38 and incorporating a QC step. They packaged the entire pipeline using Snakemake to enable automated data harmonization for all GWAS summary statistics in the GWAS Catalog.</p>
+<p>Starting from 2022, the GWAS Catalog was looking for potentials of increasing the harmonisation efficiency</p>
+<p>In 2023, the GWAS Catalog released the standard format on reporting the GWAS summary staitsic data, and we modified our pipeline and output corrospondingly.</p>
+<p>With an increasing number of users interested in our pipeline, we have decided to create formal documentation to record as many details as possible about our pipeline, hoping it will benefit a wider audience. We are committed to keeping our GitHub repository publicly available. We welcome all questions and suggestions to improve both our pipeline and its documentation.</p>]]></content>
+        <author>
+            <name>Yue Ji</name>
+            <uri>https://github.com/jiyue1214</uri>
+        </author>
+        <category label="Sumstata" term="Sumstata"/>
+    </entry>
+</feed>

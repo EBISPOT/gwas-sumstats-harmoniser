@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkgwas_harmoniser_documentation=self.webpackChunkgwas_harmoniser_documentation||[]).push([[7472],{5513:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"Welcome","permalink":"/gwas-sumstats-harmoniser/blog/welcome","unlisted":false,"date":"2024-10-18T00:00:00.000Z"}]}')}}]);
