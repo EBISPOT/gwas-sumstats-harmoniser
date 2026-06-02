@@ -4,10 +4,42 @@
         <title>gwas-sumstats-harmoniser Blog</title>
         <link>https://ebispot.github.io/gwas-sumstats-harmoniser/blog</link>
         <description>gwas-sumstats-harmoniser Blog</description>
-        <lastBuildDate>Fri, 18 Oct 2024 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 02 Jun 2026 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[Upgraded to Python 3.13]]></title>
+            <link>https://ebispot.github.io/gwas-sumstats-harmoniser/blog/python-313-upgrade</link>
+            <guid>https://ebispot.github.io/gwas-sumstats-harmoniser/blog/python-313-upgrade</guid>
+            <pubDate>Tue, 02 Jun 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[The pipeline runtime has been upgraded from Python 3.9 to Python 3.13, aligning it with gwas-sumstats-tools and bringing in a substantially refreshed dependency stack.]]></description>
+            <content:encoded><![CDATA[<p>The pipeline runtime has been upgraded from <strong>Python 3.9 to Python 3.13</strong>, aligning it with <code>gwas-sumstats-tools</code> and bringing in a substantially refreshed dependency stack.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="why-upgrade">Why upgrade?<a href="https://ebispot.github.io/gwas-sumstats-harmoniser/blog/python-313-upgrade#why-upgrade" class="hash-link" aria-label="Direct link to Why upgrade?" title="Direct link to Why upgrade?">​</a></h2>
+<p>Python 3.9 reached end-of-life in October 2025 and no longer receives security or bug-fix patches. At the same time, <code>gwas-sumstats-tools</code> — the first-party package that handles summary-statistic validation and formatting — was updated to require Python ≥ 3.13. Keeping the harmoniser on 3.9 would have created an incompatibility with the latest published version of that package.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="what-changed">What changed?<a href="https://ebispot.github.io/gwas-sumstats-harmoniser/blog/python-313-upgrade#what-changed" class="hash-link" aria-label="Direct link to What changed?" title="Direct link to What changed?">​</a></h2>
+<ul>
+<li><strong>Docker base image</strong> updated from <code>python:3.9-slim-bookworm</code> to <code>python:3.13-slim-bookworm</code>.</li>
+<li><strong>Conda environment</strong> updated to <code>python=3.13</code>.</li>
+<li><strong>All dependencies</strong> regenerated from a clean Python 3.13 environment. Key upgrades include:</li>
+</ul>
+<table><thead><tr><th>Package</th><th>Old version</th><th>New version</th></tr></thead><tbody><tr><td><code>pysam</code></td><td>0.18.0</td><td>0.24.0</td></tr><tr><td><code>duckdb</code></td><td>0.9.2</td><td>1.5.3</td></tr><tr><td><code>pyarrow</code></td><td>14.0.2</td><td>24.0.0</td></tr><tr><td><code>pandas</code></td><td>2.1.4</td><td>2.3.3</td></tr><tr><td><code>numpy</code></td><td>1.26.4</td><td>2.4.6</td></tr></tbody></table>
+<ul>
+<li>12 stale transitive packages removed (<code>appdirs</code>, <code>attrs</code>, <code>chardet</code>, <code>docutils</code>, and others no longer in the resolution graph).</li>
+<li>New packages added by the updated <code>gwas-sumstats-tools</code> (<code>pandera</code>, <code>pydantic</code>, <code>typer</code>, <code>petl</code>, <code>ruamel.yaml</code>, etc.).</li>
+</ul>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="what-do-i-need-to-do">What do I need to do?<a href="https://ebispot.github.io/gwas-sumstats-harmoniser/blog/python-313-upgrade#what-do-i-need-to-do" class="hash-link" aria-label="Direct link to What do I need to do?" title="Direct link to What do I need to do?">​</a></h2>
+<p>If you run the pipeline via <strong>Docker or Singularity</strong> (recommended), no action is required — the updated image will be pulled automatically.</p>
+<p>If you use the <strong>Conda profile</strong>, recreate your environment from the updated <code>environments/conda_environment.yml</code>:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">conda env remove -n gwas_harm</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">conda env create -f environments/conda_environment.yml</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">conda activate gwas_harm</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="notes">Notes<a href="https://ebispot.github.io/gwas-sumstats-harmoniser/blog/python-313-upgrade#notes" class="hash-link" aria-label="Direct link to Notes" title="Direct link to Notes">​</a></h2>
+<ul>
+<li><code>datrie 0.8.3</code> has no pre-built wheel for Python 3.13 and is compiled from source at install time. This is handled automatically by <code>build-essential</code> in the Docker image and adds a small amount of build time.</li>
+<li>Python 3.13 removes several long-deprecated standard-library modules. If you encounter import errors in third-party dependencies, please open an issue on <a href="https://github.com/EBISPOT/gwas-sumstats-harmoniser/issues" target="_blank" rel="noopener noreferrer">GitHub</a>.</li>
+</ul>]]></content:encoded>
+            <category>dependencies</category>
+            <category>python</category>
+        </item>
         <item>
             <title><![CDATA[Welcome]]></title>
             <link>https://ebispot.github.io/gwas-sumstats-harmoniser/blog/welcome</link>
