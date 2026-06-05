@@ -1,5 +1,6 @@
 from lib.Seq import Seq
 import sys
+from common_constants import is_missing_value
 
 class SumStatRecord:
     """ Class to hold a summary statistic record.
@@ -13,16 +14,16 @@ class SumStatRecord:
         self.other_al = other_al
         self.effect_al = effect_al
         self.data = data
-        self.beta = safe_float(beta) if beta is not None else None
-        self.oddsr = safe_float(oddsr) if oddsr is not None else None
-        self.zscore = safe_float(zscore) if zscore is not None else None
-        self.oddsr_lower = safe_float(oddsr_lower) if oddsr_lower is not None else None
-        self.oddsr_upper = safe_float(oddsr_upper) if oddsr_upper is not None else None
-        self.rsid = str(rsid) if rsid is not None else None
+        self.beta = safe_float(beta) if not is_missing_value(beta) else None
+        self.oddsr = safe_float(oddsr) if not is_missing_value(oddsr) else None
+        self.zscore = safe_float(zscore) if not is_missing_value(zscore) else None
+        self.oddsr_lower = safe_float(oddsr_lower) if not is_missing_value(oddsr_lower) else None
+        self.oddsr_upper = safe_float(oddsr_upper) if not is_missing_value(oddsr_upper) else None
+        self.rsid = str(rsid) if not is_missing_value(rsid) else None
         self.lifmethod= str(hm_coordinate_conversion)
 
         # Effect allele frequency is not required if we assume +ve strand
-        if eaf:
+        if not is_missing_value(eaf):
             self.eaf = float(eaf)
             assert 0<= self.eaf <= 1
         else:

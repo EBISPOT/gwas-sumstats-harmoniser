@@ -32,8 +32,8 @@ process harmonization {
     --hm_sumstats ${chrom}.merged_unsorted.hm \
     --hm_statfile ${chrom}.merged.log.tsv.gz \
     \$header_args \
-    --na_rep_in NA \
-    --na_rep_out NA \
+    --na_rep_in '#NA' \
+    --na_rep_out '#NA' \
     --coordinate \$coordinate \
     --palin_mode $palin_mode;
 

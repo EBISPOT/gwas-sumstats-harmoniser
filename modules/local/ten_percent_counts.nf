@@ -34,6 +34,8 @@ process ten_percent_counts {
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
     \$header_args \
     --strand_counts ten_percent_${chrom}.sc \
+    --na_rep_in '#NA' \
+    --na_rep_out '#NA' \
     --coordinate \$coordinate
     """
 }

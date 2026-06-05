@@ -3,6 +3,7 @@
 
 import requests
 import time
+from common_constants import MISSING_VALUE
 
 class EnsemblRestClient(object):
     def __init__(self, server='http://rest.ensembl.org', reqs_per_sec=15):
@@ -23,7 +24,7 @@ class EnsemblRestClient(object):
             if content:
                 data = content.json()
             else:
-                data = 'NA'
+                data = MISSING_VALUE
             self.req_count += 1
 
         except requests.exceptions.HTTPError as ehe:
@@ -75,7 +76,7 @@ class EnsemblRestClient(object):
             if len(mappings) > 0:
                 if "mapped" in mappings and "start" in mappings["mapped"]:
                     return map_build["mappings"][0]["mapped"]["start"]
-        return 'NA'
+        return MISSING_VALUE
 
     def resolve_rsid(self, chromosome, bp):
         rsid_request = self.perform_rest_action(
@@ -88,7 +89,7 @@ class EnsemblRestClient(object):
     def retrieve_rsid(rsid_request):
         if len(rsid_request) > 0 and "id" in rsid_request[0]:
             return rsid_request[0]["id"]
-        return 'id:NA'
+        return MISSING_VALUE
 
     def check_orientation_with_rest(self, rsid):
         variation_request = self.perform_rest_action(

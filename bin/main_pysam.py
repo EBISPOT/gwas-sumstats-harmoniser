@@ -13,6 +13,7 @@ import sys
 import gzip
 import argparse
 from collections import OrderedDict, Counter
+from common_constants import MISSING_VALUE, is_missing_value
 from lib.SumStatRecord import SumStatRecord
 from lib.VCFRecord import VCFRecord
 from gwas_sumstats_tools.interfaces.data_table import SumStatsTable
@@ -166,22 +167,22 @@ def main():
             out_raw["effect_allele_frequency"] = ss_rec.eaf if ss_rec.eaf is not None and ss_rec.is_harmonised else args.na_rep_out
             # Process the neg_log_10_p_value
             if tag_neg_log_10_p_value == True:
-                out_raw["p_value"] = 10**(float(ss_rec.data["neg_log_10_p_value"])*(-1)) if ss_rec.data["neg_log_10_p_value"] is not None else args.na_rep_out
+                out_raw["p_value"] = 10**(float(ss_rec.data["neg_log_10_p_value"])*(-1)) if not is_missing_value(ss_rec.data["neg_log_10_p_value"]) else args.na_rep_out
             else:
-                out_raw["p_value"]=ss_rec.data["p_value"] if ss_rec.data["p_value"] is not None else args.na_rep_out
+                out_raw["p_value"]=ss_rec.data["p_value"] if not is_missing_value(ss_rec.data["p_value"]) else args.na_rep_out
             out_raw["hm_code"] = ss_rec.hm_code
             out_raw["hm_coordinate_conversion"] = ss_rec.data["hm_coordinate_conversion"]
             out_raw["variant_id"] = vcf_rec.hgvs()[0] if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             out_raw["rsid"] = ss_rec.hm_rsid if vcf_rec and ss_rec.is_harmonised else args.na_rep_out
             try:
-                out_raw["standard_error"]=ss_rec.data["standard_error"] if ss_rec.data["standard_error"] is not None else args.na_rep_out
+                out_raw["standard_error"]=ss_rec.data["standard_error"] if not is_missing_value(ss_rec.data["standard_error"]) else args.na_rep_out
             except:
                 out_raw["standard_error"]=args.na_rep_out
             # Add other data from summary stat file
             outed=["chromosome","base_pair_location","p_value","effect_allele","other_allele","effect_allele_frequency","beta","odds_ratio","rsid","standard_error","ci_upper","ci_lower","hm_coordinate_conversion","z_score"]
             for key in ss_rec.data:
                 if key not in outed:
-                    value = ss_rec.data[key] if ss_rec.data[key] else args.na_rep_out
+                    value = ss_rec.data[key] if not is_missing_value(ss_rec.data[key]) else args.na_rep_out
                     out_raw[key] = str(value)
 
             generated_new_header=["hm_code","variant_id","rsid"]
@@ -329,11 +330,11 @@ def parse_args():
                         help=('Output file column separator [tab|space|comma|other] (default: tab)'),
                         type=str, default='tab')
     other_group.add_argument('--na_rep_in', metavar="<str>",
-                        help=('How NA  are represented in the input file (default: "")'),
-                        type=str, default="")
+                        help=('How NA  are represented in the input file (default: "#NA")'),
+                        type=str, default=MISSING_VALUE)
     other_group.add_argument('--na_rep_out', metavar="<str>",
-                        help=('How to represent NA values in output (default: "")'),
-                        type=str, default="")
+                        help=('How to represent NA values in output (default: "#NA")'),
+                        type=str, default=MISSING_VALUE)
     other_group.add_argument('--chrom_map', metavar="<str>",
                         help=('Map summary stat chromosome names, e.g. `--chrom_map 23=X 24=Y`'),
                         type=str, nargs='+')
@@ -741,7 +742,7 @@ def parse_sum_stats(inf, sep):
     """
     with open_gzip(inf, "rb") as in_handle:
         # Get header
-        header = in_handle.readline().decode("utf-8").rstrip().split(sep)
+        header = in_handle.readline().decode("utf-8").rstrip("\r\n").split(sep)
         # Assert that all column arguments are contained in header
         for arg, value in args.__dict__.items():
             if '_col' in arg and value:
@@ -749,9 +750,9 @@ def parse_sum_stats(inf, sep):
                 'Error: --{0} {1} not found in input header'.format(arg, value)
         # Iterate over lines
         for line in in_handle:
-            values = line.decode("utf-8").rstrip().split(sep)
-            # Replace any na_rep_in values with None
-            values = [value if value != args.na_rep_in else None
+            values = line.decode("utf-8").rstrip("\r\n").split(sep)
+            # Replace recognised missing-value tokens with None.
+            values = [None if is_missing_value(value, [args.na_rep_in]) else value
                       for value in values]
             # Check we have the correct number of elements
             assert len(values) == len(header), 'Error: column length ({0}) does not match header length ({1})'.format(len(values), len(header))

@@ -83,3 +83,32 @@ STRAND_COUNT_ARG_MAP = {
 }
 
 DEFAULT_CHROMS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y', 'MT']
+
+MISSING_VALUE = '#NA'
+MISSING_VALUE_TOKENS = (MISSING_VALUE, 'NA', 'NaN', 'nan', '', ' ', '.', '-', 'none', 'null', 'nil')
+
+
+def missing_value_tokens(extra_tokens=None):
+    tokens = set(MISSING_VALUE_TOKENS)
+    if extra_tokens:
+        tokens.update(token for token in extra_tokens if token is not None)
+    return tokens
+
+
+def is_missing_value(value, extra_tokens=None):
+    if value is None:
+        return True
+    try:
+        if value != value:
+            return True
+    except TypeError:
+        pass
+    if isinstance(value, str):
+        tokens = missing_value_tokens(extra_tokens)
+        stripped_tokens = {token.strip().lower() for token in tokens if isinstance(token, str)}
+        return value in tokens or value.strip().lower() in stripped_tokens
+    return False
+
+
+def normalise_missing_value(value, extra_tokens=None):
+    return MISSING_VALUE if is_missing_value(value, extra_tokens) else value

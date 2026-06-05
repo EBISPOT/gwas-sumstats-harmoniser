@@ -57,6 +57,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
     normalized_chroms = [normalize_chrom(c) for c in chroms]
     chrom_filter = ",".join(f"'{c}'" for c in normalized_chroms)
     
+    nullstr = ", ".join(repr(token) for token in missing_value_tokens())
     query = f"""
     SELECT *
     FROM (
@@ -69,7 +70,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
       END AS {CHR_DSET},
       *
     EXCLUDE {CHR_DSET}
-    FROM read_csv_auto('{ss}', SAMPLE_SIZE=-1, nullstr=['NA', 'NaN', '', 'nan', '#NA'])
+    FROM read_csv_auto('{ss}', SAMPLE_SIZE=-1, nullstr=[{nullstr}])
     ) mapped
     WHERE {CHR_DSET} IN ({chrom_filter})
     """
@@ -156,13 +157,13 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
     print("liftover complete")
     # merge "rs" and "lo" result to write the output
     combined_df = pd.concat([merged_vcf, ssdf], ignore_index=True)
-    combined_df[CHR_DSET] = combined_df[CHR_DSET].astype("str").str.replace("\..*$","",regex=True)
-    combined_df[BP_DSET] = combined_df[BP_DSET].astype("str").str.replace("\..*$","",regex=True)
+    combined_df[CHR_DSET] = combined_df[CHR_DSET].astype("str").str.replace(r"\..*$","",regex=True)
+    combined_df[BP_DSET] = combined_df[BP_DSET].astype("str").str.replace(r"\..*$","",regex=True)
     
     # 1. Write variants missing CHR or BP to "unmapped"
     unmapped_df = combined_df[combined_df[CHR_DSET].isnull() | combined_df[BP_DSET].isnull()].copy()
     unmapped_outfile = os.path.join("unmapped")
-    unmapped_df.to_csv(unmapped_outfile, sep="\t", index=False, na_rep="NA")
+    unmapped_df.to_csv(unmapped_outfile, sep="\t", index=False, na_rep=MISSING_VALUE)
     
     # 2. Write valid variants per chromosome
     valid_df = combined_df.dropna(subset=[CHR_DSET, BP_DSET])
@@ -172,7 +173,7 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
         if chrom in chrom_set:
             chrom_str = str(chrom).split(".")[0]
             out_path = os.path.join("{}.merged".format(chrom_str))
-            group_df.to_csv(out_path, sep="\t", index=False, na_rep="NA", mode='a')
+            group_df.to_csv(out_path, sep="\t", index=False, na_rep=MISSING_VALUE, mode='a')
     """
     # Write output files for each chroms (nextflow check the number of output == nchr hope to run)
     for chrom in normalized_chroms:
@@ -180,10 +181,10 @@ def merge_ss_vcf(ss, vcf, from_build, to_build, chroms, coordinate):
         out_path = os.path.join("{}.merged".format(chrom_str))
         chrom_df = valid_df[valid_df[CHR_DSET] == chrom]
         if not chrom_df.empty:
-            chrom_df.to_csv(out_path, sep="\t", index=False, na_rep="NA", mode='a')
+            chrom_df.to_csv(out_path, sep="\t", index=False, na_rep=MISSING_VALUE, mode='a')
         else:
             # create an empty file if no variants for this chromosome
-            valid_df.head(0).to_csv(out_path, sep="\t", index=False)
+            valid_df.head(0).to_csv(out_path, sep="\t", index=False, na_rep=MISSING_VALUE)
 
 def listify_string(string):
     """
@@ -210,7 +211,7 @@ def add_fields_if_missing(df):
     add_column_to_df(df=df, column=CHR_DSET)
     add_column_to_df(df=df, column=BP_DSET)
 
-def add_column_to_df(df, column, value='NA'):
+def add_column_to_df(df, column, value=MISSING_VALUE):
     if column not in df.columns:
         df[column] = value
 

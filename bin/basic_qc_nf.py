@@ -53,7 +53,7 @@ hm_header_transformations = {
 
 
 REQUIRED_HEADERS = [RSID, PVAL_DSET, CHR_DSET, BP_DSET]
-BLANK_SET = {'', ' ', '-', '.', 'na', None, 'none', 'nan', 'nil'}
+BLANK_SET = set(MISSING_VALUE_TOKENS)
 
 # hm codes to drop
 HM_CODE_FILTER = {9,14,15,16,17,18}
@@ -75,16 +75,8 @@ def required_elements(row, header):
     return [row[i] for i in get_header_indices(header)]
       
 
-def lowercase_list(lst):
-    return [x.lower() for x in lst]
-
-
 def remove_row_if_required_is_blank(row, header):
-    blanks = BLANK_SET & set(required_elements(lowercase_list(row), header))
-    if blanks:
-        return True
-    else:
-        return False
+    return any(is_missing_value(value) for value in required_elements(row, header))
 
 def remove_row_if_unharmonisable(row, header):
     if row[header.index(HM_CODE)] in HM_CODE_FILTER:
@@ -94,8 +86,8 @@ def remove_row_if_unharmonisable(row, header):
 
 def blanks_to_NA(row):
     for n, i in enumerate(row):
-        if i.lower() in BLANK_SET:
-            row[n] = 'NA'
+        if is_missing_value(i):
+            row[n] = MISSING_VALUE
     return row
             
 
