@@ -12,7 +12,13 @@ REPO_ROOT = os.path.dirname(os.path.dirname(__file__))
 BIN_DIR = os.path.join(REPO_ROOT, "bin")
 sys.path.insert(0, BIN_DIR)
 
-from common_constants import MISSING_VALUE, is_missing_value, normalise_missing_value
+from common_constants import (
+    MISSING_VALUE,
+    is_missing_value,
+    missing_value_tokens,
+    missing_value_tokens_exact,
+    normalise_missing_value,
+)
 
 
 def import_main_pysam_with_stubs():
@@ -38,6 +44,17 @@ def import_main_pysam_with_stubs():
 
 
 class MissingValueHelpersTest(unittest.TestCase):
+    def test_missing_value_tokens_include_exact_and_normalised_spellings(self):
+        exact_tokens = missing_value_tokens_exact([" CustomNA "])
+        expanded_tokens = missing_value_tokens([" CustomNA "])
+
+        self.assertIn("NA", exact_tokens)
+        self.assertNotIn("na", exact_tokens)
+        self.assertIn("NA", expanded_tokens)
+        self.assertIn("na", expanded_tokens)
+        self.assertIn("#na", expanded_tokens)
+        self.assertIn("customna", expanded_tokens)
+
     def test_recognises_standard_and_legacy_missing_tokens(self):
         missing_values = [MISSING_VALUE, "NA", "NaN", "nan", "", " ", "  ", ".", "-", "none", "null", "nil", None, math.nan]
 

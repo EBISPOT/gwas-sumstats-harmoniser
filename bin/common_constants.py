@@ -88,10 +88,16 @@ MISSING_VALUE = '#NA'
 MISSING_VALUE_TOKENS = (MISSING_VALUE, 'NA', 'NaN', 'nan', '', ' ', '.', '-', 'none', 'null', 'nil')
 
 
-def missing_value_tokens(extra_tokens=None):
+def missing_value_tokens_exact(extra_tokens=None):
     tokens = set(MISSING_VALUE_TOKENS)
     if extra_tokens:
         tokens.update(token for token in extra_tokens if token is not None)
+    return tokens
+
+
+def missing_value_tokens(extra_tokens=None):
+    tokens = missing_value_tokens_exact(extra_tokens)
+    tokens.update(token.strip().lower() for token in list(tokens) if isinstance(token, str))
     return tokens
 
 
@@ -105,8 +111,7 @@ def is_missing_value(value, extra_tokens=None):
         pass
     if isinstance(value, str):
         tokens = missing_value_tokens(extra_tokens)
-        stripped_tokens = {token.strip().lower() for token in tokens if isinstance(token, str)}
-        return value in tokens or value.strip().lower() in stripped_tokens
+        return value in tokens or value.strip().lower() in tokens
     return False
 
 
