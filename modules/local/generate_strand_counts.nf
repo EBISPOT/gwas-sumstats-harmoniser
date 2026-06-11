@@ -29,6 +29,8 @@ process generate_strand_counts {
     --vcf ${params.ref}/homo_sapiens-${chrom}.vcf.gz \
     \$header_args \
     --strand_counts full_${chrom}.sc \
+    --na_rep_in '#NA' \
+    --na_rep_out '#NA' \
     --coordinate \$coordinate
     """
 }
