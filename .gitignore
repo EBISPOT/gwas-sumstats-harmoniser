@@ -5,3 +5,19 @@ logs
 .venv
 __pycache__
 *.pyc
+
+
+# Documentation build and dependencies
+docs/gwas-sumstats-harmoniser-docs/node_modules/
+docs/gwas-sumstats-harmoniser-docs/build/
+docs/gwas-sumstats-harmoniser-docs/.docusaurus/
+
+# macOS metadata
+.DS_Store
+
+# AI tooling
+.claude/
+.cursor/
+.agent/
+.aider/
+.continue/

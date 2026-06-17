@@ -1,0 +1,99 @@
+---
+sidebar_position: 2
+---
+# Preparing Input Files
+
+export const Highlight = ({children, color}) => (
+  <span
+    style={{
+      backgroundColor: color,
+      borderRadius: '2px',
+      color: '#fff',
+      padding: '0.2rem',
+    }}>
+    {children}
+  </span>
+);
+
+To harmonise GWAS summary statistics data, the pipeline requires two input files for each dataset:
+
+1. GWAS Summary Statistic File - TSV input
+2. Metadata YAML File - YAML input
+
+### GWAS Summary Statistic File
+####  Data requirement
+The pipeline requires a tab-separated values (TSV) file with a standardised header and the following minimum required columns:
+
+* rsid (or chr and pos): Variant identifier or chromosome and position.
+* effect allele: The allele with the reported effect.
+* other allele: The non-effect allele.
+* p-value: The statistical significance of the variant.
+
+This is the minimum requirement to run the pipeline. However, if you have beta, odds_ratio, hazard_ratio, z_score or effect_allele_frequency, these should also be given as standard headers to ensure they are recognised by the pipeline. Please refer to [GWAS Catalog website](https://www.ebi.ac.uk/gwas/docs/summary-statistics-format) for more information about standard headers.
+
+Ensure that required columns do not have missing values, while non-required fields with pandas-recognised missing value markers (e.g., NA, NaN, None) will be processed without issue.
+
+<details>
+    <summary>Sumstats input file example: <code>gwas_sumstat_name.tsv</code></summary>
+    ```tsv
+    chromosome  base_pair_location  effect_allele  other_allele  p_value  rsid         
+    1           693730              A              G             0.1      NA           
+    1           935393              GCCACGGG       G             0.1      NA           
+    1           935474              CGC            C             0.1      rs1014128468 
+    22          16052961            T              C             0.77     NA           
+    ```
+</details>
+#### Preparing the sumstats data:
+The process for preparing your input data depends on the number of summary statistics (sumstats) files you need to harmonise and the level of modifications required.
+
+* For a few sumstats in TSV format with minimal changes: You can manually edit the column headers using a text editor like `vi`. For example: `vi sumstat.tsv`
+
+* For a few sumstats requiring significant modifications: We recommend using our online formatter tool, [`SSF-morph`](https://ebispot.github.io/gwas-sumstats-tools-ssf-morph/), to prepare your input files. This tool simplifies the reformatting process and ensures compatibility with the pipeline.
+
+* For a large number of sumstats already in TSV format: You can customize the header recognition directly in the pipeline code. This allows you to quickly adapt the pipeline to recognise different header formats without manually editing each file.
+
+<details>
+    <summary>Customise your header recognition</summary>
+    ``` python title="./bin/common_constants.py"
+    CHR_DSET = 'chromosome' # Replace 'chromosome' with your header for chromosome
+    BP_DSET = 'base_pair_location' # Replace 'base_pair_location' with your header for base pair location
+    EFFECT_DSET = 'effect_allele' # Replace 'effect_allele' with your header for effect allele
+    OTHER_DSET = 'other_allele' # Replace 'other_allele' with your header for other allele
+    PVAL_DSET = 'p_value' # Replace 'p_value' with your header for p value
+    ```
+</details>
+
+* For a large number of sumstats requiring significant reformatting: Use our  [`gwas-sumstats-tools`](https://github.com/EBISPOT/gwas-sumstats-tools) to batch format the data. With a single configuration file, you can efficiently process multiple files, reducing manual effort.
+
+### YAML Configuration File
+
+#### Data requirement
+The pipeline requires a YAML file for each sumstat, containing essential metadata. 
+
+<details>
+    <summary>YAML input file example: <code>gwas_sumstat_name.tsv-meta.yaml</code></summary>
+    ```YAML
+    # Study meta-data
+    date_metadata_last_modified: 2023-02-09
+    
+    # Genotyping Information
+    genome_assembly: GRCh37
+    coordinate_system: 1-based
+    
+    # Summary Statistic information
+    data_file_name: gwas_sumstat_name.tsv
+    file_type: GWAS-SSF v0.1
+    data_file_md5sum: 32ce41c3dca4cd9f463a0ce7351966fd
+    
+    # Harmonization status
+    is_harmonised: false
+    is_sorted: false
+    ```
+</details>
+
+While all fields in the YAML file are required for the pipeline to run, **only** the <Highlight color="#25c2a0"> genome_assembly</Highlight> and <Highlight color="#25c2a0">coordinate_system</Highlight> fields must be accurate for proper harmonisation.
+
+#### Preparing the YAML data:
+You can copy the example YAML file above to create your own. Make sure to adjust the `genome_assembly` and `coordinate_system` fields based on your dataset.
+* The default value for `coordinate_system` is `1-based`.
+* There is **no default** value for `genome_assembly`, so you must specify it according to your data.

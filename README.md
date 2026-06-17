@@ -1,6 +1,6 @@
 # gwas-sumstats-harmoniser
 
-👋 Welcome to our first release of the [documentation](https://ebispot.github.io/gwas-sumstats-harmoniser-documentation/) for gwas-sumstat-harmoniser!👋
+👋 Welcome to our first release of the [documentation](https://ebispot.github.io/gwas-sumstats-harmoniser) for gwas-sumstat-harmoniser!👋
 
 GWAS Summary Statistics Data Harmonisation pipeline aims to bring the variants to the desired genome assembly and then harmonises variants to match variants in reference data.
 

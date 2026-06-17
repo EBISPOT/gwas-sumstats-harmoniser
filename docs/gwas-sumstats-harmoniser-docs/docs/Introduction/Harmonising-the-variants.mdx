@@ -1,0 +1,29 @@
+---
+sidebar_position: 4
+---
+# Harmonising the variants
+
+Each variant is harmonised by aligning it with a reference dataset—specifically, the Ensembl VCF reference. This process ensures allele consistency and corrects the orientation of alleles to match the forward strand. Proper harmonization is critical for ensuring that all variants are aligned correctly and ready for downstream analysis.
+
+The pipeline matches each variant against the Ensembl VCF reference using its chromosome, base pair location, and alleles (effect and other alleles). Depending on the comparison, the following actions are taken:
+
+### 1. Keeping the record as-is
+* If the variant is already correctly oriented according to the reference (i.e., both effect and other alleles match the reference forward strand), no changes are made, and the variant is kept as-is.
+
+### 2. Orientating to the reference strand
+* If the alleles are oriented to the reverse strand, the pipeline reverse complements both the effect and other alleles to align them with the forward strand of the reference. This ensures that the variant is reported in the correct orientation.
+
+### 3. Flipping the effect and other alleles
+* If the effect and other alleles are flipped compared to the reference, the pipeline swaps the alleles to match the reference. This adjustment involves switching the effect allele and other allele to align with the reference data. In addition to flipping the alleles, related metrics such as beta, odds ratio (OR), z-score, confidence interval (CI) for the OR, and effect allele frequency (EAF) are adjusted to reflect the change in allelic direction.
+
+For flipped variants:
+```math
+\begin{aligned}
+\beta &= - \beta_{\text{original}} \\
+\text{odds\_ratio} &= \frac{1}{OR_{\text{original}}} \\
+\text{ci\_upper} &= \frac{1}{\text{ci\_lower}_{\text{original}}} \\
+\text{ci\_lower} &= \frac{1}{\text{ci\_upper}_{\text{original}}} \\
+\text{effect\_allele\_frequency} &= 1 - EAF_{\text{original}} \\
+\end{aligned}
+```
+This approach ensures that all relevant statistics are consistent with the effect allele.
